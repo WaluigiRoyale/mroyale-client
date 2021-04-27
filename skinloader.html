@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Mario Royale - Skin Loader</title>
+	<style type="text/css">
+		#openButton{
+			position: absolute;
+			top:0px;
+			left: 0px;
+		}
+		#show-skin-canvas{
+			position: absolute;
+			top: 30px;
+			left: 0px;
+			border: initial;
+			border-style: solid;
+		}
+		#spastic-quote{
+			position: fixed;
+			top: -10px;
+			left: 100px;
+		}
+		#x32skin{
+			position: fixed;
+			top: -10px;
+			left: 300px;
+		}
+	</style>
+</head>
+<body>
+	<button id="openButton" onclick="document.querySelector('.inputFile').click();">Select Skin</button>
+	<input id="openInput" class="inputFile" type="file" style="display: none;">
+	<p id="spastic-quote"></p>
+	<p id="x32skin">32x32 skins are unsupported.</p>
+
+	<canvas id="show-skin-canvas" tabindex="0" oncontextmenu="return false;">Your browser is unsupported.</canvas>
+	<script src="js/skinloader.js?v=4.0.0"></script>
+</body>
+</html>
