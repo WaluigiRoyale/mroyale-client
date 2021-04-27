@@ -1561,7 +1561,7 @@ function genSelectSkin(screen, skinIdx) {
 function genAddSkinButton(screen) {
     for (var i=0; i<SKINCOUNT; i++) {
         if (DEV_SKINS.includes(i) && (!(screen instanceof ProfileScreen) || !(
-           ["taliondiscord",
+           ["taliondiscord", // ew
             "damonj17",
             "ddmil@marioroyale:~$",
             "pixelcraftian",
