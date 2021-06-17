@@ -1,8 +1,9 @@
+
 <html>
     <head>
-        <title>Infringe Royale Editor</title>
+        <title>Mario Royale Editor</title>
         <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
-        <link rel='icon' href='img/home/icon.png'>
+        <link rel='icon' href='https://raw.githubusercontent.com/mroyale/assets/master/img/home/icon.ico'>
         <link rel='stylesheet' type='text/css' href='css/editor.css'>
     </head>
     
@@ -24,19 +25,19 @@
         <div class="ek-info">
           <b>This EK is provided as is for anyone interested in it.</b><br>
           You can download and open any of the existing levels from the site like this:<br>
-          <a>http://www.infernoplus.com/royale/game/world-1</a><br>
-          <a>http://www.infernoplus.com/royale/game/world-l1</a><br>
-          <a>http://www.infernoplus.com/royale/game/world-p</a><br>
+          <a href="http://marioroyale.tk/game/world-1">http://marioroyale.tk/game/world-1</a><br>
+          <a href="http://marioroyale.tk/game/world-l1">http://marioroyale.tk/game/world-l1</a><br>
+          <a href="http://marioroyale.tk/game/world-p">http://marioroyale.tk/game/world-p</a><br>
           <br>
-          A fairly blank map is provided for you to start from if you wish to try and make a map:<br>
-          <a>http://www.infernoplus.com/royale/game/blank</a><br><br>
+          You can press the "New Empty Level" button to create a blank level<br>
+          <strike><a>http://www.infernoplus.com/royale/game/blank</a><br><br></strike>
           This EK is intended for those somewhat knowledgeable of programming/modding.<br>
           All values listed as 'byte' or 'bit' are in unsigned decimal format.<br>
           Which means a byte is a value from 0 to 255 and so on.<br><br>
           All zones should have a height of 16. This is a general style rule for the game.<br>
-          If you plan to try and make a map, please study my maps carefully!<br><br>
-          If you manage to make a level that looks solid, tweet it at me.<br>
-          I will only be adding the best ones. Remember to save often and good luck!<br><br>
+          If you plan to try and make a map, please study the existing maps carefully!<br><br>
+          If you manage to make a level that looks solid, you can share it in <a href="https://discord.gg/kV72ezsQwt">our Discord server</a>!<br>
+          We will only be adding the best ones. Remember to save often and good luck!<br><br>
           Oh and please don't directly recreate any levels from <i>other games</i>.<br>
           Make your creations your own.
         </div>
@@ -112,8 +113,12 @@
               <input id='editor-tool-zone-id' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
-              <div class='tool-var'>Initial Position</div><div class='tool-type'>shor2</div>
-              <input id='editor-tool-zone-initial' type='text' class="tool-val"/>
+              <div class='tool-var'>Initial Position X</div><div class='tool-type'>short</div>
+              <input id='editor-tool-zone-initial-x' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Initial Position Y</div><div class='tool-type'>short</div>
+              <input id='editor-tool-zone-initial-y' type='text' class="tool-val"/>
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
@@ -212,21 +217,14 @@
           <div id='editor-tool-object' class='tool-container' style='display: none'>
             <div class='tool-box'>
               <div class='tool-var'>Type</div><div class='tool-type'>byte</div>
-              <input id='editor-tool-object-type' type='text' class="tool-val"/>
-            </div>
-            <div class='tool-box'>
-              <div class='tool-var'>Name</div><div class='tool-type'>string</div>
-              <div id='editor-tool-object-name' class="tool-val-im"></div>
+              <select id='editor-tool-object-type' class="tool-val"></select>
             </div>
             <div class='tool-box'>
               <div class='tool-var'>Position</div><div class='tool-type'>shor2</div>
               <div id='editor-tool-object-pos' class="tool-val-im"></div>
             </div>
             <div class='tool-div'></div>
-            <div class='tool-box'>
-              <div class='tool-var'>Params</div><div class='tool-type'>string[]</div>
-              <input id='editor-tool-object-param' type='text' class="tool-val"/>
-            </div>
+            <div class='tool-box' id='editor-tool-object-params'></div>
             <div class='tool-div'></div>
             <div class='tool-box'>
               <div class="tool-val-im">Left click selects, middle click creates new, wasd keys to move, delete to delete.</div>
@@ -336,11 +334,10 @@
       </div>
       
       <!-- Libs -->
-      <script src='js/lib/jquery/jquery-3.1.1.min.js'></script>
+      <script src='js/lib/jquery/jquery-3.1.1.min.js?v=3.9.0'></script>
       
       <!-- Core -->
-      <script src='js/defs.js?v=2.1.2'></script>
-      <script src='js/editor.js?v=2.1.2'></script>
+      <script src='js/editor.min.js?v=3.9.0'></script>
 
     </body>
 </html>
