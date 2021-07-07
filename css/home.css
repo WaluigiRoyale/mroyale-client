@@ -231,18 +231,19 @@ body {
 }
 
 .name {
+  font-family: SmbWeb;
 }
 
 .name-input {
   font-family: SmbWeb;
   font-size: 64px;
-  color: #fff;
+  color: white;
   text-align: center;
-  background: 0 0;
+  
+  background: transparent;
   border: none;
-  border-bottom: 5px dashed #fff;
+  border-bottom: 5px dashed #FFFFFF;
   margin-bottom: 8px;
-  width: 100%
 }
 
 .name-input::placeholder {
@@ -279,6 +280,7 @@ body {
 }
 
 .team {
+  font-family: SmbWeb;
 }
 
 .team-input {
