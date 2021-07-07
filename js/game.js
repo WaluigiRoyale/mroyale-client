@@ -1521,10 +1521,10 @@
         this.kills = data.kills || 0;
         this.wins = data.wins || 0;
         this.deaths = data.deaths || 0;
-        var wins = Cookies.get("epic_gamer_moments");
-        var deaths = Cookies.get("sad_gamer_moments");
-        var kills = Cookies.get("heated_gamer_moments");
-        var coins = Cookies.get("dosh");
+        var winsX = Cookies.get("epic_gamer_moments");
+        var deathsX = Cookies.get("sad_gamer_moments");
+        var killsX = Cookies.get("heated_gamer_moments");
+        var coinsX = Cookies.get("dosh");
         this.nickname = data.nickname;
         this.squad = data.squad;
         this.skin = data.skin;
@@ -1542,11 +1542,14 @@
             this.updateStatus(true);
             app.statusUpdater = setInterval(this.updateStatus, 1000);
         }
-        if(coins !== undefined || kills !== undefined || deaths !== undefined || wins !== undefined) {
-            app.menu.main.winElement.innerText = "wins x" + wins + " deaths x" + deaths + " kills x" + kills + " coins x" + coins;
-        } else {
-            app.menu.main.winElement.innerText = "wins x" + "0" + " deaths x" + "0" + " kills x" + "0" + " coins x" + "0";
-        }
+
+        if(winsX !== undefined) wins = winsX; else wins = "0";
+        if(coinsX !== undefined) coins = coinsX; else coins = "0";
+        if(deathsX !== undefined) deaths = deathsX; else deaths = "0";
+        if(killsX !== undefined) kills = killsX; else kills = "0";
+
+
+        app.menu.main.winElement.innerText = "wins x" + wins + " deaths x" + deaths + " kills x" + kills + " coins x" + coins;
 
     }
     ;
@@ -10100,7 +10103,7 @@
     }
     ;
     function getPlayerDisplayName(player) {
-        return (player.isDev ? "【𝐃𝐄𝐕】" : "") + (player.isGuest ? "【G】" : "") + player.name;
+        return (player.isDev ? "[DEV]" : "") + (player.isGuest ? "[G]" : "") + player.name;
     }
     App.prototype.enrichPlayers = function(id) {
         this.players.map(x=>{
