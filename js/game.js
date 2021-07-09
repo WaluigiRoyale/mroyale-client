@@ -8666,11 +8666,18 @@
                 txtWidth = context.measureText(txt).width;
                 context.fillText(txt, (canvasWidth / 2) - (txtWidth / 2), 0x20);
                 txt = this.game.remain + (this.game.touchMode ? '' : " PLAYERS REMAIN");
+                if(this.game.remain == "1" && app.net.gameMode == 1) {
+                    this.game.out.push(NET018.encode());
+                }
                 txtWidth = context.measureText(txt).width;
                 context.fillText(txt, canvasWidth - txtWidth - 0x8, 0x20);
             } else if (this.game instanceof LobbyGame) {
                 var pc = app.players.length;
-                txt = this.game.touchMode ? pc : "P:" + pc + "/" + app.maxPlayers + " V:" + (pc < app.minPlayers ? "<" + app.minPlayers + "P" : Math.floor(100 * app.votes / pc) + "/" + Math.floor(100 * app.voteRateToStart) + "%") + " T:" + app.ticks;
+                if(app.net.gameMode == 1 && pc <2) {
+                    txt = this.game.touchMode ? pc : "P:" + "<2P" + "/" + app.maxPlayers + " V:" + (pc < app.minPlayers ? "<" + app.minPlayers + "P" : Math.floor(100 * app.votes / pc) + "/" + Math.floor(100 * app.voteRateToStart) + "%") + " T:" + "0";
+                } else {
+                    txt = this.game.touchMode ? pc : "P:" + pc + "/" + app.maxPlayers + " V:" + (pc < app.minPlayers ? "<" + app.minPlayers + "P" : Math.floor(100 * app.votes / pc) + "/" + Math.floor(100 * app.voteRateToStart) + "%") + " T:" + app.ticks;
+                }
                 txtWidth = context.measureText(txt).width;
                 context.fillText(txt, canvasWidth - txtWidth - 0x8, 0x20);
             }
