@@ -1521,10 +1521,6 @@
         this.kills = data.kills || 0;
         this.wins = data.wins || 0;
         this.deaths = data.deaths || 0;
-        var winsX = Cookies.get("epic_gamer_moments");
-        var deathsX = Cookies.get("sad_gamer_moments");
-        var killsX = Cookies.get("heated_gamer_moments");
-        var coinsX = Cookies.get("dosh");
         this.nickname = data.nickname;
         this.squad = data.squad;
         this.skin = data.skin;
@@ -1543,13 +1539,7 @@
             app.statusUpdater = setInterval(this.updateStatus, 1000);
         }
 
-        if(winsX !== undefined) wins = winsX; else wins = "0";
-        if(coinsX !== undefined) coins = coinsX; else coins = "0";
-        if(deathsX !== undefined) deaths = deathsX; else deaths = "0";
-        if(killsX !== undefined) kills = killsX; else kills = "0";
-
-
-        app.menu.main.winElement.innerText = "wins x" + wins + " deaths x" + deaths + " kills x" + kills + " coins x" + coins;
+        app.menu.main.winElement.innerText = "wins x" + this.wins + " deaths x" + this.deaths + " kills x" + this.kills + " coins x" + this.coins;
 
     }
     ;
@@ -1649,7 +1639,7 @@
                 if (GUEST_SKINS.length && !GUEST_SKINS.includes(i))
                     continue;
             }
-            if (DEV_SKINS.includes(i) && (!(screen instanceof ProfileScreen) || !(["taliondiscord", "damonj17", "ddmil@marioroyale:~$", "pixelcraftian", "igor", "minus", "cyuubi", "gyorokpeter", "zizzydizzymc", "nuts & milk", "jupitersky", "nethowarrior", "real novex", "nightyoshi370"].includes(app.net.username.toLowerCase())))) {
+            if (DEV_SKINS.includes(i) && (!(screen instanceof ProfileScreen) || !(["terminalkade", "dimension", "casini loogi", "arcadegamer1929"].includes(app.net.username.toLowerCase())))) {
                 continue;
             }
             var elem = document.createElement("div");
@@ -3938,10 +3928,6 @@
         if (this.game.getPlayer() === this) {
             this.game.stopGameTimer();
             this.game.out.push(NET011.encode());
-            var deaths = Cookies.get("sad_gamer_moments");
-            !app.net.isPrivate && Cookies.set("sad_gamer_moments", deaths ? parseInt(deaths) + 0x1 : 0x1, {
-                'expires': 0x16d
-            });
         }
     }
     ;
@@ -8667,6 +8653,7 @@
                 context.fillText(txt, (canvasWidth / 2) - (txtWidth / 2), 0x20);
                 txt = this.game.remain + (this.game.touchMode ? '' : " PLAYERS REMAIN");
                 if(this.game.remain == "1" && app.net.gameMode == 1) {
+                    this.game.stopGameTimer();
                     this.game.out.push(NET018.encode());
                 }
                 txtWidth = context.measureText(txt).width;
@@ -9311,10 +9298,6 @@
     ;
     Game.prototype.doNET017 = function(_0x17186e) {
         this.playersKilled++;
-        kills = Cookies.get("heated_gamer_moments");
-        !app.net.isPrivate && Cookies.set("heated_gamer_moments", kills ? parseInt(kills) + 0x1 : 0x1, {
-            'expires': 0x16d
-        });
     }
     ;
     Game.prototype.doNET018 = function(data) {
@@ -9334,9 +9317,6 @@
                 if (player) {
                     player.axe(data.result);
                     this.victory = data.result;
-                    0x1 === data.result && (data = Cookies.get("epic_gamer_moments"), !app.net.isPrivate && Cookies.set("epic_gamer_moments", data ? parseInt(data) + 0x1 : 0x1, {
-                        'expires': 0x16d
-                    }));
                     var that = this;
                     setTimeout(function() {
                         document.getElementById('return').style.display = "block";
@@ -9363,10 +9343,6 @@
         var pl = this.getPlayer();
         var zn = this.getZone(pl.level, pl.zone);
         zn.effects.push(new RisingLabelEffect(pl.pos,"coins: " + data.coins));
-        var coins = Cookies.get("dosh");
-        !app.net.isPrivate && (this.coinsCollected+=data.coins,Cookies.set("dosh", coins ? parseInt(coins) + data.coins : data.coins, {
-            'expires': 0x16d
-        }))
     }
     ;
     Game.prototype.doNET030 = function(data) {
@@ -9763,21 +9739,12 @@
         if (visual) {
             if (jackpot) {
                 this.play("gold.mp3", 1, 0x0);
-                var coins = Cookies.get("dosh");
-                !app.net.isPrivate && (this.coinsCollected+=50000,Cookies.set("dosh", coins ? parseInt(coins) + 50000 : 50000, {
-                    'expires': 0x16d
-                }))
             }
             else {
                 this.play("coin.mp3", 0.4, 0x0);
-                var coins = Cookies.get("dosh");
             }
         } else {
             this.coinsCollected += 1;
-            var coins = Cookies.get("dosh");
-            !app.net.isPrivate && Cookies.set("dosh", coins ? parseInt(coins) + 0x1 : 0x1, {
-                'expires': 0x16d
-            });
             this.coins = Math.min(0x63, this.coins + 0x1);
             this.coins >= Game.COINS_TO_LIFE && (this.lifeage(),
             this.coins = 0x0);
