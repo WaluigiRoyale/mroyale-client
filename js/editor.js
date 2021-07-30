@@ -12,6 +12,9 @@ var tileDefs = {
     7:  {'name': 'WATER STANDARD'},
     8:  {'name': 'WATER SURFACE'},
     9:  {'name': 'WATER CURRENT', 'extraDataName': 'Strength (0=full force left, 255=full force right)'},
+    10: {'name': 'ICE BLOCK'},
+    11: {'name': 'NOTE BLOCK'},
+    12: {'name': 'ICE SEMISOLID'},
     17: {'name': 'ITEM BLOCK STANDARD', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     18: {'name': 'COIN BLOCK STANDARD'},
     19: {'name': 'COIN BLOCK MULTI', 'extraDataName': 'Coin Count'},
@@ -25,7 +28,7 @@ var tileDefs = {
     84: {'name': 'WARP PIPE FAST', 'extraDataName': 'Target Warp ID'},
     85: {'name': 'WARP PIPE RIGHT FAST', 'extraDataName': 'Target Warp ID'},
     86: {'name': 'LEVEL END WARP', 'extraDataName': 'Target Level ID'},
-    160:{'name': 'FLAGPOLE', 'extraDataName': 'Coin Award (0=no, 1=yes)'},
+    160:{'name': 'FLAGPOLE', 'extraDataName': 'Award (0=None/1=Coins/2=1UP)'},
     165:{'name': 'VINE'},
     240:{'name': 'VOTE BLOCK'},
 };
