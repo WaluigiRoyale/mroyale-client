@@ -409,7 +409,19 @@ td32.TILE_PROPERTIES = {
         COLLIDE: true,
         HIDDEN: false,
         ASYNC: true,
-        TRIGGER: function(game, pid, td, level, zone, x, y, type) {}
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch(type) {
+                /* Touch */
+                case 0x00 : {
+                    if(game.pid === pid) {
+                        PlayerObject.ANIMATION_RATE = 3
+                        PlayerObject.MOVE_SPEED_ACCEL = 0.0125
+                        PlayerObject.MOVE_SPEED_DECEL = 0.0225
+                        PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025
+                    }
+                }
+            }
+        }
     },
     /* Solid Bumpable */
     0x02: {
@@ -473,7 +485,19 @@ td32.TILE_PROPERTIES = {
         PLATFORM: true,
         HIDDEN: false,
         ASYNC: true,
-        TRIGGER: function(game, pid, td, level, zone, x, y, type) {}
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch(type) {
+                /* Touch */
+                case 0x00 : {
+                    if(game.pid === pid) {
+                        PlayerObject.ANIMATION_RATE = 3
+                        PlayerObject.MOVE_SPEED_ACCEL = 0.0125
+                        PlayerObject.MOVE_SPEED_DECEL = 0.0225
+                        PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025
+                    }
+                }
+            }
+        }
     },
     /* Semisolid Weak */
     0x06: {
@@ -481,7 +505,19 @@ td32.TILE_PROPERTIES = {
         PLATFORM: "WEAK",
         HIDDEN: false,
         ASYNC: true,
-        TRIGGER: function(game, pid, td, level, zone, x, y, type) {}
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch(type) {
+                /* Touch */
+                case 0x00 : {
+                    if(game.pid === pid) {
+                        PlayerObject.ANIMATION_RATE = 3
+                        PlayerObject.MOVE_SPEED_ACCEL = 0.0125
+                        PlayerObject.MOVE_SPEED_DECEL = 0.0225
+                        PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025
+                    }
+                }
+            }
+        }
     },
     /* Water Standard */
     7: {
@@ -506,6 +542,63 @@ td32.TILE_PROPERTIES = {
         ASYNC: true,
         WATER: 1,
         WATER_CURRENT: true,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {}
+    },
+    /* Ice Block */
+    10: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: true,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch(type) {
+                /* Touch */
+                case 0x00 : {
+                    if(game.pid === pid) {
+                        PlayerObject.MOVE_SPEED_ACCEL = 1
+                        PlayerObject.MOVE_SPEED_ACCEL_AIR = 1
+                        PlayerObject.MOVE_SPEED_DECEL = 0.0100
+                        PlayerObject.ANIMATION_RATE = 1
+                    }
+                }
+            }
+
+        }
+    },
+    /* Note Block */
+    11: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: true,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch(type) {
+                /* Touch */
+                case 0x00 : {
+                    if(game.pid === pid) {
+                        PlayerObject.ANIMATION_RATE = 3
+                        PlayerObject.MOVE_SPEED_ACCEL = 0.0125
+                        PlayerObject.MOVE_SPEED_DECEL = 0.0225
+                        PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025
+                    }
+                }
+                case 0x10 : {
+                    if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+                    td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+                    break;
+                }
+                case 0x11 : {
+                    if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+                    td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+                    break;
+                }
+            }
+        }
+    },
+    /* Semisolid Ice */
+    12: {
+        COLLIDE: true,
+        PLATFORM: "ICE",
+        HIDDEN: false,
+        ASYNC: true,
         TRIGGER: function(game, pid, td, level, zone, x, y, type) {}
     },
     /* Item Block Standard */
@@ -559,6 +652,7 @@ td32.TILE_PROPERTIES = {
         ASYNC: false,
         TRIGGER: function(game, pid, td, level, zone, x, y, type) {
             switch(type) {
+                
                 /* Small bump */
                 /* Big bump */
                 case 0x10:
@@ -869,6 +963,7 @@ NETX.decode = function(/* Uint8Array */ data) {
             case 0x20 : { de.push(NET020.decode(data.slice(i, i+=NET020.BYTES-1))); break; }
             case 0x21 : { de.push(NET021.decode(data.slice(i, i+=NET021.BYTES-1))); break; }
             case 0x22 : { de.push(NET022.decode(data.slice(i, i+=NET022.BYTES-1))); break; }
+            case 0x23 : { de.push(NET023.decode(data.slice(i, i+=NET023.BYTES-1))); break; }
             case 0x30 : { de.push(NET030.decode(data.slice(i, i+=NET030.BYTES-1))); break; }
             default : { if(app) { app.menu.warn.show("Error decoding binary data! desig="+desig); } return de; }
         }
@@ -1094,6 +1189,17 @@ NET022.decode = function(/* NET022_SERV */ a) {
     };
 };
 
+var NET023 = {}; // GET_FLAG_1UP //blahblahblah
+/* ======================================================================================== */
+NET023.DESIGNATION = 0x23;
+NET023.BYTES = 5;
+
+NET023.decode = function(/* NET023_SERVER */ a) {
+    return {
+        designation: NET023.DESIGNATION
+    };
+};
+
 var NET030 = {}; // TILE_EVENT_TRIGGER [0x30] // As Uint8Array
 /* ======================================================================================== */
 NET030.DESIGNATION = 0x30;
@@ -1300,7 +1406,7 @@ DisclaimScreen.prototype.show = function(_0x2243c7) {
     this.element.style.display = "block";
 };
 DisclaimScreen.prototype.hide = function() {
-    this.linkElement.style.display = "none";
+    this.linkElement.style.display = "";
     this.element.style.display = "none";
 };
 "use strict";
@@ -1398,7 +1504,7 @@ MainScreen.prototype.show = function() {
 };
 MainScreen.prototype.hide = function() {
     this.padLoop && clearTimeout(this.padLoop);
-    this.linkElement.style.display = "none";
+    this.linkElement.style.display = "";
     this.element.style.display = "none";
     if (app && app.statusUpdater) {
         clearInterval(app.statusUpdater);
@@ -1500,7 +1606,7 @@ MainAsMemberScreen.prototype.show = function(data) {
     app.menu.main.winElement.innerText = "wins x"+this.wins+" deaths x"+this.deaths+" kills x"+this.kills+" coins x"+this.coins;
 };
 MainAsMemberScreen.prototype.hide = function() {
-    this.linkElement.style.display = "none";
+    this.linkElement.style.display = "";
     this.element.style.display = "none";
     if (app && app.statusUpdater) {
         clearInterval(app.statusUpdater);
@@ -1513,6 +1619,7 @@ MainAsMemberScreen.prototype.launch = function() {
 };
 
 MainAsMemberScreen.prototype.showProfile = function() {
+    document.getElementById("main-number").style.display = "";
     app.menu.profile.show({"nickname": this.nickname, "squad": this.squad, "skin": this.skin});
 };
 MainAsMemberScreen.prototype.showPwdChange = function() {
@@ -3410,6 +3517,13 @@ PlayerObject.prototype.physics = function() {
                 this.fallSpeed = 0x0;
                 grounded = true;
             }
+            else if (this.pos.y - (obj.definition.PLATFORM && obj.definition.PLATFORM === "ICE" ? this.dim : oneByOne).y >= obj.pos.y){
+                grounded = true;
+                PlayerObject.MOVE_SPEED_ACCEL = 1
+                PlayerObject.MOVE_SPEED_ACCEL_AIR = 1
+                PlayerObject.MOVE_SPEED_DECEL = 0.0125
+                PlayerObject.ANIMATION_RATE = 1
+            }
         }
     }
     this.grounded = grounded;
@@ -3854,6 +3968,204 @@ GoombaObject.prototype.draw = function(_0xa69c24) {
 };
 GoombaObject.prototype.play = GameObject.prototype.play;
 GameObject.REGISTER_OBJECT(GoombaObject);
+"use strict";
+
+function BuzzyBeetleObject(_0xe63f95, _0x58c9b9, _0x79afa7, _0x76d985, _0xd2f4d0, _0x77d018) {
+    GameObject.call(this, _0xe63f95, _0x58c9b9, _0x79afa7, _0x76d985);
+    this.oid = _0xd2f4d0;
+    this.variant = isNaN(parseInt(_0x77d018)) ? 0x0 : parseInt(_0x77d018);
+    this.setState(BuzzyBeetleObject.STATE.RUN);
+    this.bonkTimer = this.anim = 0x0;
+    this.loc = [this.pos.y + 0.5 * BuzzyBeetleObject.FLY_DISTANCE, this.pos.y - 0.5 * BuzzyBeetleObject.FLY_DISTANCE];
+    this.dim = vec2.make(0x1, 0x1);
+    this.fallSpeed = this.moveSpeed = 0x0;
+    this.disabled = this.grounded = !0x1;
+    this.disabledTimer = 0x0;
+    this.proxHit = !0x1;
+    this.immuneTimer = 0x0;
+    this.rev = !0x1;
+    this.dir = !0x0;
+    this.disable();
+}
+BuzzyBeetleObject.ASYNC = !0x1;
+BuzzyBeetleObject.ID = 0x17;
+BuzzyBeetleObject.NAME = "BUZZY BEETLE";
+BuzzyBeetleObject.VARIANT_OFFSET = 0x10;
+BuzzyBeetleObject.VARIANT_OFFSET_CASTLE = 0x20;
+BuzzyBeetleObject.CHECK_DIST = 0.1;
+BuzzyBeetleObject.SPRITE = {};
+BuzzyBeetleObject.SPRITE_LIST = [{
+    'NAME': "RUN0",
+    'ID': 0x0,
+    'INDEX': 0x8C
+}, {
+    'NAME': "RUN1",
+    'ID': 0x1,
+    'INDEX': 0x8D
+}, {
+    'NAME': "SHELL",
+    'ID': 0x2,
+    'INDEX': 0x8E
+}];
+for (_0x1bec55 = 0x0; _0x1bec55 < BuzzyBeetleObject.SPRITE_LIST.length; _0x1bec55++) BuzzyBeetleObject.SPRITE[BuzzyBeetleObject.SPRITE_LIST[_0x1bec55].NAME] = BuzzyBeetleObject.SPRITE_LIST[_0x1bec55], BuzzyBeetleObject.SPRITE[BuzzyBeetleObject.SPRITE_LIST[_0x1bec55].ID] = BuzzyBeetleObject.SPRITE_LIST[_0x1bec55];
+BuzzyBeetleObject.STATE = {};
+BuzzyBeetleObject.STATE_LIST = [{
+    'NAME': "RUN",
+    'ID': 0x0,
+    'SPRITE': [BuzzyBeetleObject.SPRITE.RUN0, BuzzyBeetleObject.SPRITE.RUN1]
+}, {
+    'NAME': "TRANSFORM",
+    'ID': 0x1,
+    'SPRITE': [BuzzyBeetleObject.SPRITE.SHELL]
+}, {
+    'NAME': "SHELL",
+    'ID': 0x2,
+    'SPRITE': [BuzzyBeetleObject.SPRITE.SHELL]
+}, {
+    'NAME': "SPIN",
+    'ID': 0x3,
+    'SPRITE': [BuzzyBeetleObject.SPRITE.SHELL]
+}, {
+    'NAME': "BONK",
+    'ID': 0x51,
+    'SPRITE': []
+}];
+for (_0x1bec55 = 0x0; _0x1bec55 < BuzzyBeetleObject.STATE_LIST.length; _0x1bec55++) BuzzyBeetleObject.STATE[BuzzyBeetleObject.STATE_LIST[_0x1bec55].NAME] = BuzzyBeetleObject.STATE_LIST[_0x1bec55], BuzzyBeetleObject.STATE[BuzzyBeetleObject.STATE_LIST[_0x1bec55].ID] = BuzzyBeetleObject.STATE_LIST[_0x1bec55];
+BuzzyBeetleObject.prototype.update = BuzzyBeetleObject.prototype.update;
+BuzzyBeetleObject.prototype.step = function() {
+    if (this.disabled) this.proximity();
+    else if (0x0 < this.disabledTimer && this.disabledTimer--, this.state === BuzzyBeetleObject.STATE.BONK) this.bonkTimer++ > BuzzyBeetleObject.BONK_TIME || 0x0 > this.pos.y + this.dim.y ? this.destroy() : (this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed)), this.moveSpeed *= BuzzyBeetleObject.BONK_DECEL, this.fallSpeed = Math.max(this.fallSpeed - BuzzyBeetleObject.FALL_SPEED_ACCEL, -BuzzyBeetleObject.BONK_FALL_SPEED));
+    else {
+        this.anim++;
+        this.sprite = this.state.SPRITE[parseInt(this.anim / BuzzyBeetleObject.ANIMATION_RATE) % this.state.SPRITE.length];
+        if (this.state === BuzzyBeetleObject.STATE.SHELL || this.state === BuzzyBeetleObject.STATE.TRANSFORM) --this.transformTimer < BuzzyBeetleObject.TRANSFORM_THRESHOLD && this.setState(BuzzyBeetleObject.STATE.TRANSFORM), 0x0 >= this.transformTimer && this.setState(BuzzyBeetleObject.STATE.RUN);
+        0x0 < this.immuneTimer && this.immuneTimer--;
+        this.control();
+        this.physics();
+        this.interaction();
+        this.sound();
+        0x0 > this.pos.y && this.destroy();
+    }
+};
+BuzzyBeetleObject.prototype.control = function() {
+    this.state === BuzzyBeetleObject.STATE.RUN && (this.grounded && !this.checkGround() && (this.dir = !this.dir), this.moveSpeed = this.dir ? -BuzzyBeetleObject.MOVE_SPEED_MAX : BuzzyBeetleObject.MOVE_SPEED_MAX);
+    this.state === BuzzyBeetleObject.STATE.SPIN && (this.moveSpeed = this.dir ? -BuzzyBeetleObject.SHELL_MOVE_SPEED_MAX : BuzzyBeetleObject.SHELL_MOVE_SPEED_MAX);
+    if (this.state === BuzzyBeetleObject.STATE.SHELL || this.state === BuzzyBeetleObject.STATE.TRANSFORM) this.moveSpeed = 0x0;
+};
+BuzzyBeetleObject.prototype.physics = function() {
+    this.grounded && (this.fallSpeed = 0x0);
+    this.fallSpeed = Math.max(this.fallSpeed - BuzzyBeetleObject.FALL_SPEED_ACCEL, -BuzzyBeetleObject.FALL_SPEED_MAX);
+    var _0xa3a017 = vec2.add(this.pos, vec2.make(this.moveSpeed, 0x0)),
+        _0xc0dedb = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed)),
+        _0xa23816 = vec2.make(0x0 <= this.moveSpeed ? this.pos.x : this.pos.x + this.moveSpeed, 0x0 >= this.fallSpeed ? this.pos.y : this.pos.y + this.fallSpeed),
+        _0xccb0ee = vec2.make(this.dim.y + Math.abs(this.moveSpeed), this.dim.y + Math.abs(this.fallSpeed)),
+        _0xa23816 = this.game.world.getZone(this.level, this.zone).getTiles(_0xa23816, _0xccb0ee),
+        _0xccb0ee = vec2.make(0x1, 0x1),
+        _0xf92b93 = !0x1;
+    this.grounded = !0x1;
+    for (var _0x688c61 = 0x0; _0x688c61 < _0xa23816.length; _0x688c61++) {
+        var _0x3e00f8 = _0xa23816[_0x688c61];
+        _0x3e00f8.definition.COLLIDE && squar.intersection(_0x3e00f8.pos, _0xccb0ee, _0xa3a017, this.dim) && (this.pos.x + this.dim.x <= _0x3e00f8.pos.x && _0xa3a017.x + this.dim.x > _0x3e00f8.pos.x ? (_0xa3a017.x = _0x3e00f8.pos.x - this.dim.x, _0xc0dedb.x = _0xa3a017.x, this.moveSpeed = 0x0, _0xf92b93 = !0x0) : this.pos.x >= _0x3e00f8.pos.x + _0xccb0ee.x && _0xa3a017.x < _0x3e00f8.pos.x + _0xccb0ee.x && (_0xa3a017.x = _0x3e00f8.pos.x + _0xccb0ee.x, _0xc0dedb.x = _0xa3a017.x, this.moveSpeed = 0x0, _0xf92b93 = !0x0));
+    }
+    for (_0x688c61 = 0x0; _0x688c61 < _0xa23816.length; _0x688c61++) _0x3e00f8 = _0xa23816[_0x688c61], _0x3e00f8.definition.COLLIDE && squar.intersection(_0x3e00f8.pos, _0xccb0ee, _0xc0dedb, this.dim) && (this.pos.y >= _0x3e00f8.pos.y + _0xccb0ee.y && _0xc0dedb.y < _0x3e00f8.pos.y + _0xccb0ee.y ? (_0xc0dedb.y = _0x3e00f8.pos.y + _0xccb0ee.y, this.grounded = !0x0) : this.pos.y + this.dim.y <= _0x3e00f8.pos.y && _0xc0dedb.y + this.dim.y > _0x3e00f8.pos.y && (_0xc0dedb.y = _0x3e00f8.pos.y - this.dim.y, this.jump = -0x1, this.fallSpeed = 0x0));
+    this.pos = vec2.make(_0xa3a017.x, _0xc0dedb.y);
+    _0xf92b93 && (this.dir = !this.dir);
+};
+BuzzyBeetleObject.prototype.interaction = function() {
+    if (this.state === BuzzyBeetleObject.STATE.SPIN)
+        for (var _0x99e08a = 0x0; _0x99e08a < this.game.objects.length; _0x99e08a++) {
+            var _0x73774d = this.game.objects[_0x99e08a];
+            _0x73774d === this || _0x73774d instanceof PlayerObject || !_0x73774d.isTangible() || !_0x73774d.damage || _0x73774d.level === this.level && _0x73774d.zone === this.zone && squar.intersection(_0x73774d.pos, _0x73774d.dim, this.pos, this.dim) && _0x73774d.damage();
+        }
+};
+BuzzyBeetleObject.prototype.sound = GameObject.prototype.sound;
+BuzzyBeetleObject.prototype.checkGround = function() {
+    var _0x7a9f6d = this.dir ? vec2.add(this.pos, vec2.make(-_BuzzyBeetleObject.CHECK_DIST, 0x0)) : vec2.add(this.pos, vec2.make(BuzzyBeetleObject.CHECK_DIST + this.dim.x, 0x0));
+    _0x7a9f6d.y -= 1.5;
+    return this.game.world.getZone(this.level, this.zone).getTile(_0x7a9f6d).definition.COLLIDE;
+};
+BuzzyBeetleObject.prototype.proximity = function() {
+    var ply = this.game.getPlayer();
+    if(ply && !ply.dead && ply.level === this.level && ply.zone === this.zone && !this.proxHit && vec2.distance(ply.pos, this.pos) < BuzzyBeetleObject.ENABLE_DIST) {
+      this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0xA0));
+      this.proxHit = true;
+    }
+  };
+BuzzyBeetleObject.prototype.enable = function() {
+    if(!this.disabled) { return; }
+    this.disabled = false;
+    this.disabledTimer = BuzzyBeetleObject.ENABLE_FADE_TIME;
+};
+BuzzyBeetleObject.prototype.disable = function() {
+    this.disabled = true;
+};
+BuzzyBeetleObject.prototype.damage = function(_0x92236d) {};
+BuzzyBeetleObject.prototype.bonk = function() {
+    this.dead || (this.setState(BuzzyBeetleObject.STATE.BONK), this.moveSpeed = v.BONK_IMP.x, this.fallSpeed = BuzzyBeetleObject.BONK_IMP.y, this.dead = !0x0, this.play("sfx/kick.wav", 0x1, 0.04));
+};
+BuzzyBeetleObject.prototype.stomped = function(_0x2f1cbf) {
+    if (this.state === BuzzyBeetleObject.STATE.RUN) this.setState(BuzzyBeetleObject.STATE.SHELL), this.transformTimer = BuzzyBeetleObject.TRANSFORM_TIME;
+    else if (this.state === BuzzyBeetleObject.STATE.SPIN) this.setState(BuzzyBeetleObject.STATE.SHELL), this.transformTimer = BuzzyBeetleObject.TRANSFORM_TIME;
+    else if (this.state === BuzzyBeetleObject.STATE.SHELL || this.state === BuzzyBeetleObject.STATE.TRANSFORM) this.setState(BuzzyBeetleObject.STATE.SPIN), this.dir = _0x2f1cbf;
+    this.play("sfx/stomp.wav", 0x1, 0.04);
+};
+BuzzyBeetleObject.prototype.playerCollide = function(_0x1bff1d) {
+    this.dead || this.garbage || (this.state === BuzzyBeetleObject.STATE.SHELL || this.state === BuzzyBeetleObject.STATE.TRANSFORM ? (_0x1bff1d = 0x0 < _0x1bff1d.pos.x - this.pos.x, this.stomped(_0x1bff1d), this.game.out.push(NET020.encode(this.level, this.zone, this.oid, _0x1bff1d ? 0x10 : 0x11)), this.immuneTimer = BuzzyBeetleObject.PLAYER_IMMUNE_TIME) : 0x0 >= this.immuneTimer && _0x1bff1d.damage(this));
+};
+BuzzyBeetleObject.prototype.playerStomp = GameObject.prototype.playerStomp;
+BuzzyBeetleObject.prototype.playerBump = GameObject.prototype.playerBump;
+BuzzyBeetleObject.prototype.kill = GameObject.prototype.kill;
+BuzzyBeetleObject.prototype.destroy = GameObject.prototype.destroy;
+BuzzyBeetleObject.prototype.isTangible = GameObject.prototype.isTangible;
+BuzzyBeetleObject.prototype.setState = function(STATE) {
+    if(STATE === this.state) { return; }
+    this.state = STATE;
+    if(STATE.SPRITE.length > 0) { this.sprite = STATE.SPRITE[0]; }
+   this.anim = 0;
+};
+BuzzyBeetleObject.prototype.draw = function(_0x1fb748) {
+    if (!this.disabled) {
+        var _0x4602fb;
+        _0x4602fb = this.state === BuzzyBeetleObject.STATE.BONK ? 0x3 : 0x0 < this.disabledTimer ? 0xa0 + parseInt(0x20 * (0x1 - this.disabledTimer / BuzzyBeetleObject.ENABLE_FADE_TIME)) : 0x0;
+        if (this.sprite.INDEX instanceof Array)
+            for (var _0x327889 = this.sprite.INDEX, _0xe31235 = 0x0; _0xe31235 < _0x327889.length; _0xe31235++)
+                for (var _0xc120b3 = 0x0; _0xc120b3 < _0x327889[_0xe31235].length; _0xc120b3++) {
+                    var _0xe41a2f = _0x327889[0x3 !== _0x4602fb ? _0xe31235 : _0x327889.length - 0x1 - _0xe31235][_0xc120b3];
+                    switch (this.variant) {
+                        case 0x1:
+                            _0xe41a2f += BuzzyBeetleObject.VARIANT_OFFSET;
+                            break;
+                        case 0x2:
+                            _0xe41a2f += 2*BuzzyBeetleObject.VARIANT_OFFSET_CASTLE;
+                            break;
+                    }
+                    _0x1fb748.push({
+                        'pos': vec2.add(this.pos, vec2.make(_0xc120b3, _0xe31235)),
+                        'reverse': !this.dir,
+                        'index': _0xe41a2f,
+                        'mode': _0x4602fb
+                    });
+                } else {
+                    _0xe41a2f = this.sprite.INDEX;
+                    switch (this.variant) {
+                        case 0x1:
+                            _0xe41a2f += BuzzyBeetleObject.VARIANT_OFFSET;
+                            break;
+                        case 0x2:
+                            _0xe41a2f += 2*BuzzyBeetleObject.VARIANT_OFFSET_CASTLE;
+                            break;
+                    }
+                    _0x1fb748.push({
+                        'pos': this.pos,
+                        'reverse': !this.dir,
+                        'index': _0xe41a2f,
+                        'mode': _0x4602fb
+                    });
+                }
+    }
+};
+BuzzyBeetleObject.prototype.play = GameObject.prototype.play;
+GameObject.REGISTER_OBJECT(BuzzyBeetleObject);
 "use strict";
 
 function KoopaObject(game, level, zone, pos, oid, fly, variant) {
@@ -6974,7 +7286,8 @@ AudioData.prototype.onload = function(ajax, context) {
     }, e => sound.onError(e));
 };
 AudioData.prototype.onError = function(e) {
-    console.error("Error while decoding audio data "+this.path+": " + e);
+    // console.error("Error while decoding audio data "+this.path+": " + e);
+    return;
 };
 AudioData.prototype.ready = function() {
     return undefined !== this.buffer;
@@ -6992,7 +7305,7 @@ function SoundFile(context, path, data, gainValue, playbackRateDeviation, destin
     }
     else {
         this.partialLoad = true;
-        app.menu.warn.show("Attempted to instance partially loaded sound data: '" + path + '\x27');
+        // app.menu.warn.show("Attempted to instance partially loaded sound data: '" + path + '\x27');
     }
 }
 SoundFile.prototype.create = function(gainValue, playbackRateDeviation, destination) {
@@ -7094,11 +7407,33 @@ Audio.prototype.initWebAudio = function(app) {
     } catch (exception) {
         return app.menu.warn.show("WebAudio not supported. Intializing fallback mode..."), false;
     }
-    var soundList = ["alert.mp3", "break.mp3", "breath.mp3", "bump.mp3", "gold.mp3", "spring.mp3", "coin.mp3", "fireball.mp3",
-        "firework.mp3", "flagpole.mp3", "item.mp3", "jump0.mp3", "jump1.mp3", "kick.mp3", "life.mp3", "pipe.mp3",
-        "powerup.mp3", "stomp.mp3", "vine.mp3"];
-    var musicList = ["main0.mp3", "main1.mp3", "main2.mp3", "main3.mp3", "level.mp3",
-        "castle.mp3", "victory.mp3", "star.mp3", "dead.mp3", "gameover.mp3", "hurry.mp3"];
+    var soundList = ["alert.mp3", "break.mp3", "breath.mp3", "bump.mp3", "gold.mp3", "spring.mp3", 
+        "coin.mp3", "fireball.mp3", "firework.mp3", "flagpole.mp3", "item.mp3", "jump0.mp3", 
+        "jump1.mp3", "kick.mp3", "life.mp3", "pipe.mp3","powerup.mp3", "stomp.mp3", "vine.mp3"];
+    var musicList = [
+        "main0.mp3", "main1.mp3", "main2.mp3", "main3.mp3", "level.mp3", // STANDARD
+        "castle.mp3", "victory.mp3", "star.mp3", "dead.mp3", "gameover.mp3", "hurry.mp3", 
+        // NEON
+        "nfirstarea.mp3", "nsecondarea.mp3", "nthirdarea.mp3", "nunderground.mp3",
+        "neonvictory.mp3", "nboss.mp3", "nwin.mp3",
+        // PASTEL
+        "pday.mp3", "pnight.mp3", "pcastle.mp3", "pboss.mp3", "pdesert.mp3", "prooftops.mp3",
+        "pwater.mp3", "pairship.mp3", "punderground.mp3",
+        // SMB2
+        "overworld.mp3", "ground.mp3", "clear.mp3", "boss.mp3",
+        // SMW
+        "atheletic.mp3", "bonusclear.mp3", "boss.mp3", "fortress.mp3", "overworld.mp3", "underground.mp3",
+        // FIRE
+        "fireman.mp3", "fireboss.mp3",
+        // HELL
+        "hellow.ogg", "hellunder.ogg", "hellwater.ogg", "hellcastle.ogg",
+        // XEXYZ
+        "xarea1.mp3", "xarea2.mpe", "xarea3.mp3", "xboss.mp3",
+        // WINGY
+        "wingy_o.mp3", "wingy_wtr.mp3", "wingy_lvl.mp3", "wingy_grnd.mp3", "wingy_c.mp3", "wingy_cf.mp3",
+        // ML1
+        "birabuto.mp3", "cave.mp3", "coinroom.mp3"
+    ];
     this.sounds = [];
     for (var i = 0x0; i < soundList.length; i++)
         if (!this.createAudio(soundList[i], this.soundPrefix)) return false;
@@ -7588,7 +7923,7 @@ Display.prototype.drawUI = function() {
         } else if (this.game instanceof LobbyGame) {
             var pc = app.players.length;
             if(pc < 2 && app.net.gameMode == 1) {
-                txt = this.game.touchMode ? pc : "P:"+"<2"+"/"+app.maxPlayers +" V:"+(pc < app.minPlayers?"<"+app.minPlayers+"P":Math.floor(100*app.votes/pc)+"/"+Math.floor(100*app.voteRateToStart)+"%") +" T:"+"0";
+                txt = this.game.touchMode ? pc : "P:"+"<2"+"/"+app.maxPlayers +" V:"+(pc < app.minPlayers?"<"+app.minPlayers+"P":Math.floor(100*app.votes/pc)+"/"+Math.floor(100*app.voteRateToStart)+"%") +" T:"+app.ticks;
             } else {
                 txt = this.game.touchMode ? pc : "P:"+pc+"/"+app.maxPlayers +" V:"+(pc < app.minPlayers?"<"+app.minPlayers+"P":Math.floor(100*app.votes/pc)+"/"+Math.floor(100*app.voteRateToStart)+"%") +" T:"+app.ticks;
             }
@@ -7924,10 +8259,11 @@ Game.GAME_OVER_TIME = 120;
 Game.COINS_TO_LIFE = 0x1e;
 
 Game.prototype.load = function(data) {
-    if (this instanceof LobbyGame)
+    if (this instanceof LobbyGame){
         app.menu.main.winElement.style.display = "";
-    else
+    }else{
         app.menu.main.winElement.style.display = "none";
+    }
     app.menu.load.show();
 
     /* Load world data */
@@ -8070,6 +8406,7 @@ Game.prototype.doUpdate = function(datas) {
             case 0x20 : { this.doNET020(data); break; }    //OBJECT_EVENT_TRIGGER
             case 0x21 : { this.doNET021(data); break; }    //GET_COIN
             case 0x22 : { this.doNET022(data); break; }    //GET_COIN_LB
+            case 0x23 : { this.doNET023(data); break; }    //ADD_FLAG_1UP
             case 0x30 : { this.doNET030(data); break; }    //TILE_EVENT_TRIGGER
         }
     }
@@ -8163,6 +8500,12 @@ Game.prototype.doNET022 = function(data) {
     var zn = this.getZone(pl.level, pl.zone);
     zn.effects.push(new RisingLabelEffect(pl.pos, "coins: "+data.coins));
 };
+
+Game.prototype.doNET023 = function(data) {
+    var pl = this.getPlayer();
+    var zn = this.getZone(pl.level, pl.zone);
+    zn.effects.push(new RisingLabelEffect(pl.pos, "1UP"))
+}
 
 Game.prototype.doNET030 = function(data) {
     var isLocalPlayer = data.pid === this.pid;
@@ -8697,7 +9040,6 @@ function App() {
     this.charMusic = Cookies.get("char_music") === "1";
 }
 App.prototype.init = function() {
-    document.getElementById("log").style.display = "none";
     document.getElementById("link-patch").style.display = "";
     document.getElementById("main-number").style.display = "";
     if (!this.goToLobby)
@@ -8795,5 +9137,5 @@ App.prototype.tick = function(data) {
 }
 
 var app = new App();
-print("loading game.min.js finished");
+//print("loading game.min.js finished");
 app.init();
