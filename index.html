@@ -5,15 +5,6 @@
         <meta property="og:title" content="Mario Royale" />
         <meta name="twitter:title" content="Mario Royale" />
 
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-199828636-1"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag() { dataLayer.push(arguments); }
-          gtag('js', new Date());
-
-          gtag('config', 'UA-199828636-1');
-        </script>
-
         <link rel="manifest" href="site.webmanifest">
         <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
         <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
@@ -42,9 +33,9 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="HandheldFriendly" content="true">
 
-        <link rel="canonical" href="http://marioroyale.cyuubi.gq/" />
-        <meta name="og:url" content="http://marioroyale.cyuubi.gq/" />
-        <meta property="og:url" content="http://marioroyale.cyuubi.gq/" />
+        <link rel="canonical" href="https://marioroyale.tk/" />
+        <meta name="og:url" content="https://marioroyale.tk/" />
+        <meta property="og:url" content="https://marioroyale.tk/" />
 
         <meta name="og:site_name" content="Mario Royale" />
         <meta property="og:site_name" content="Mario Royale" />
@@ -52,11 +43,11 @@
         <meta name="og:type" content="website" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:site" content="@realMarioRoyale" />
+        <meta name="twitter:site" content="@MarioRoyalePlus" />
 
-        <link rel='stylesheet' type='text/css' href='css/home.css?v=3.8.2'>
-        <link rel='stylesheet' type='text/css' href='css/spinner.css?v=3.8.2'>
-        <link rel='stylesheet' type='text/css' href='css/link.css?v=3.8.2'>
+        <link rel='stylesheet' type='text/css' href='css/home.css?v=3.8.8'>
+        <link rel='stylesheet' type='text/css' href='css/spinner.css?v=3.8.8'>
+        <link rel='stylesheet' type='text/css' href='css/link.css?v=3.8.8'>
         <script>
           /* Prevent phones from zooming screen. The webapp handles this. */
           document.addEventListener('touchmove', function(event) {
@@ -66,10 +57,10 @@
         </script>
     </head>
 
-    <body id='body' ondragstart="return false;" ondrop="return false;">
+    <!-- <body id='body' ondragstart="return false;" ondrop="return false;">
       <div id="log">
         <p class="debugLog">loading core.js started</p>
-      </div>
+      </div> -->
 
       <!-- Warning -->
       <div id='warn' class='warn' style="display:none;"></div>
@@ -99,7 +90,7 @@
         <div class='title'>Mario Royale</div>
         <div class='container-launch' style='margin-bottom: 20px'>
           <span id='main-launch' class='launch'>Play Now!</span>
-          <span class='players' id='main-numberFull'><span id='main-number' class='player-number' style="display:none;">?</span> Online</span>
+          <span class='players' id='main-numberFull'><span id='main-number' class='player-number' style="display:none;">##</span> Online</span>
           <span class='player-maintenance' id='main-maintenance' style="display:none;">Maintenance</span>
         </div>
         <div class="container-launch">
@@ -114,7 +105,7 @@
       <div id='mainAsMember' class='container-center' style='display: none;'>
         <div class='title'>Mario Royale</div>
         <div class='container-launch'>
-          <span class='players' id='mainAsMember-numberFull'><span id='mainAsMember-number' class='player-number'>?</span> Online</span>
+          <span class='players' id='mainAsMember-numberFull'><span id='mainAsMember-number' class='player-number'>##</span> Online</span>
           <span class='player-maintenance' id='mainAsMember-maintenance' style="display:none;">Maintenance</span>
           <div style='display:inline-block'>
             <span id='mainAsMember-launch' class='launch'>Play Now!</span>
@@ -231,21 +222,6 @@
         </form>
       </div>
 
-      <!-- Leader board -->
-      <div id='leaderboard' class='container-privLobby' style='display: none;'>
-        <div class='dis-lg'>Leader boards</div>
-        Select:
-        <div class='leaderboard-select' onclick="setLeaderBoard('coins')">coins</div>
-        <div class='leaderboard-select' onclick="setLeaderBoard('wins')">wins</div>
-        <div class='leaderboard-select' onclick="setLeaderBoard('kills')">kills</div>
-        <div id="leaderboard-content-coins"></div>
-        <div id="leaderboard-content-wins" style="display:none"></div>
-        <div id="leaderboard-content-kills" style="display:none"></div>
-        <div class="container-launch">
-          <span id='mainAsMember-logout' class='launch' onclick="hideLeaderBoard()">Close</span>
-        </div>
-      </div>
-
       <!-- Game -->
       <div id='game' class='fullscreen' oncontextmenu="return false">
           <canvas id="game-canvas" width="320" height="240">
@@ -279,7 +255,7 @@
             <span id='settings-show-privLobby' display="none">Private Lobby Options</span>
         </div>
         <div class="levelSelectRow">
-            <div onclick="window.open('./control.html?v=3.8.2')">Controls</div>
+            <div onclick="window.open('./control.html?v=3.8.8')">Controls</div>
             <div id="autoMove" class='levelSelectButton'>[ ] Auto Move</div>
         </div>
         <div class='dis'>GFX Mods</div>
@@ -330,12 +306,12 @@
         </div>
         <div class="link-l">
           <div class="rtfpn2"></div>
-          <div id="link-patch" class="link-patch" onclick="window.open('./patch.html?v=3.8.2')" style="display:none;">v3.8.2 Patch Notes</div>
+          <div id="link-patch" class="link-patch" onclick="window.open('./patch.html?v=3.8.8')" style="display:none;">v3.8.8 Patch Notes</div>
         </div>
         <div class="link-b">
           <div class="rtfpn"></div>
           <div>
-              <div class="link-con" onclick="window.open('./control.html?v=3.8.2')"></div>
+              <div class="link-con" onclick="window.open('./control.html?v=3.8.8')"></div>
           </div>
         </div>
           <div class="link-s">
@@ -353,6 +329,6 @@
       <script src='js/lib/cookie/js.cookie.min.js'></script>
 
       <!-- Core -->
-      <script src='js/core.js?v=3.8.2'></script>
+      <script src='js/core.js?v=3.8.8'></script>
     </body>
 </html>
