@@ -146,13 +146,13 @@ var resources = {}
 function loadNext() {
     if (jsons.length) {
         var next = jsons.shift();
-        print("loading "+next.split("/").pop()+" started");
+        //print("Loading "+next.split("/").pop()+" started");
         $.ajax({
             type: "GET",
             url: next + '?v=' + VERSION, 
             success: function(result) {
                 resources[next] = result;
-                print("loading "+next.split("/").pop()+" finished");
+                //print("Loading "+next.split("/").pop()+" finished");
                 loadNext();
             },
             dataType: "json",
@@ -162,7 +162,7 @@ function loadNext() {
     }
     if (scripts.length == 0) return;
     var next = scripts.shift();
-    print("loading "+next.split("/").pop()+" started");
+    //print("loading "+next.split("/").pop()+" started");
     $.ajax({
         type: "GET",
         url: next + '?v=' + VERSION, 
@@ -173,66 +173,4 @@ function loadNext() {
         cache: true
     });
 }
-
-var currentLeaderBoard = "coins";
-
-function setLeaderBoard(type) {
-    var curr = document.getElementById("leaderboard-content-"+currentLeaderBoard);
-    curr.style.display = "none";
-    var next = document.getElementById("leaderboard-content-"+type);
-    next.style.display = "";
-    currentLeaderBoard = type;
-}
-
-function showLeaderBoard() {
-    var elem = document.getElementById("leaderboard");
-    var leaderBoard;
-    elem.style.display = "";
-        $.ajax({
-            type: "GET",
-            url: "leaderboard.json", 
-            success: function(result) {
-                leaderBoard = result;
-                var updateLeaderBoard = function (type, values) {
-                    var elem2 = document.getElementById("leaderboard-content-"+type);
-                    elem2.innerHTML = "";
-                    var tab = document.createElement("table");
-                    tab.style.color = "white";
-                    var th = document.createElement("tr");
-                    th.innerHTML = "<th>#</th><th>name</th><th>"+type+"</th>";
-                    tab.appendChild(th);
-                    for (var p of values) {
-                        var tr = document.createElement("tr");
-                        var td = document.createElement("td");
-                        td.innerText = ""+p.pos;
-                        tr.appendChild(td);
-                        td = document.createElement("td");
-                        td.innerText = ""+p.nickname;
-                        td.style["padding-left"] = "10px";
-                        td.style["padding-right"] = "10px";
-                        tr.appendChild(td);
-                        td = document.createElement("td");
-                        td.innerText = ""+p[type];
-                        tr.appendChild(td);
-                        tab.appendChild(tr);
-                    }
-                    elem2.appendChild(tab);
-                };
-                updateLeaderBoard("coins", result.coinLeaderBoard);
-                updateLeaderBoard("wins", result.winsLeaderBoard);
-                updateLeaderBoard("kills", result.killsLeaderBoard);
-            },
-            dataType: "json",
-            cache: false
-        });
-        return;
-}
-
-function hideLeaderBoard() {
-    var elem = document.getElementById("leaderboard");
-    elem.style.display = "none";
-}
-
-print("loading core.js finished");
-
 loadNext();
