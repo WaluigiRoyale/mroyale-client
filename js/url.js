@@ -4,9 +4,8 @@ var SKINCOUNT = 1;
 var SKIN_MUSIC_URL = {};
 var TILE_ANIMATION = {};
 var OBJ_ANIMATION = {};
-var GUEST_SKINS = [];
+var assetData = resources["https://raw.githubusercontent.com/mroyale/assets/master/assets/" + "assets.json"];
 (function() {
-    var assetData = resources[ASSETS_URL + "assets.json"];
     if (assetData.skins.count != undefined)
         SKINCOUNT=assetData.skins.count;
     for (i in assetData.skins.properties) {
@@ -14,7 +13,6 @@ var GUEST_SKINS = [];
         var music = prop[i].music;
         if (music != undefined)
             SKIN_MUSIC_URL[prop[i].id] = music;
-        if (prop[i].forGuests) GUEST_SKINS.push(prop[i].id);
     }
     if (assetData.tileAnim) {
         for (var anim of assetData.tileAnim) {
@@ -35,4 +33,3 @@ var GUEST_SKINS = [];
         }
     }
 })();
-print("loading url.js finished");

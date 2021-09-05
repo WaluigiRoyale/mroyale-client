@@ -1,5 +1,4 @@
 const emptyTile = 30;
-var displayAlert = false;
 
 var tileDefs = {
     0:  {'name': 'AIR'},
@@ -15,9 +14,13 @@ var tileDefs = {
     10: {'name': 'ICE BLOCK'},
     11: {'name': 'NOTE BLOCK'},
     12: {'name': 'ICE SEMISOLID'},
+    13: {'name': 'ITEM NOTE BLOCK', 'extraDataName': 'Content', 'extraDataType': 'objId'},
+    14: {'name': 'FLIP BLOCK', 'extraDataName': 'Target Tile Data'},
+    15: {'name': 'NON-SOLID DAMAGE'},
     17: {'name': 'ITEM BLOCK STANDARD', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     18: {'name': 'COIN BLOCK STANDARD'},
     19: {'name': 'COIN BLOCK MULTI', 'extraDataName': 'Coin Count'},
+    20: {'name': 'PROGRESSIVE ITEM BLOCK'},
     21: {'name': 'ITEM BLOCK INVISIBLE', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     22: {'name': 'COIN BLOCK INVISIBLE'},
     24: {'name': 'VINE BLOCK'},
@@ -971,6 +974,7 @@ File.prototype.new = function(){
         mode:"royale",
         musicOverridePath:"music/",
         soundOverridePath:"sfx/",
+        assets:"assets.json",
         resource:[
             { id: "map", src: "https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_map.png" },
             { id: "obj", src: "https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_obj.png" }
@@ -1097,7 +1101,6 @@ function _0x4f2076() {
     }, false);
     document.getElementById("file-new").addEventListener("click", function(e) {
         app.file.new();
-        var displayAlert = true;
     });
 }
 _0x4f2076.prototype.error = function(_0x28d08b) {
@@ -1156,7 +1159,6 @@ function _0x3f2a38() {
     this.btnSave.onclick = function() {
         if (app.editor.tool) app.editor.tool.save();
         app.save();
-        var displayAlert = false;
     };
     this.btnAbout.onclick = function() {
         window.open("https://www.youtube.com/watch?v=oHg5SJYRHA0", "_blank");
@@ -1266,6 +1268,7 @@ function WorldTool(editor) {
     this.valMode = document.getElementById("editor-tool-world-mode");
     this.valMusicPath = document.getElementById("editor-tool-world-musicPath");
     this.valsoundPath = document.getElementById("editor-tool-world-soundPath");
+    this.valassetPath = document.getElementById("editor-tool-world-assetPath");
     this.btnNew = document.getElementById("editor-tool-world-new");
     var _0x1bb7eb = this;
     this.btnApply = document.getElementById("editor-tool-world-apply");
@@ -1313,6 +1316,7 @@ WorldTool.prototype.load = function() {
     this.valMode.value = this.editor.world.mode;
     this.valMusicPath.value = this.editor.world.musicOverridePath;
     this.valsoundPath.value = this.editor.world.soundOverridePath;
+    this.valassetPath.value = this.editor.world.assets;
     this.element.style.display = "block";
 };
 WorldTool.prototype.save = function() {
@@ -1324,6 +1328,7 @@ WorldTool.prototype.save = function() {
         this.editor.world.mode = this.valMode.value;
         this.editor.world.musicOverridePath = this.valmusicPath.value;
         this.editor.world.soundOverridePath = this.valsoundPath.value;
+        this.editor.world.assets = this.valassetPath.value;
     } catch (_0x5286c3) {
         app.menu.warn.show("Failed to parse value. Changes not applied.");
     }
@@ -1773,8 +1778,7 @@ ObjectTool.prototype.input = function(lastInput, mouse, keys) {
             } 
         }
     } else {
-        /* THIS THING CHECKS FOR MIDDLE CLICK. @TODO: CONVERT TO RIGHT CLICK */ /* TODO ACCOMPLISHED. NOW IT CHECKS FOR RIGHT CLICK. */
-        if (mouse.rmb && !this.mmbx) {
+        if (mouse.mmb && !this.mmbx) {
             this.mmbx = true;
             var objPos = shor2.encode(absMousePos.x, absMousePos.y);
             var newObj = {};
@@ -1784,7 +1788,7 @@ ObjectTool.prototype.input = function(lastInput, mouse, keys) {
             this.zone.obj.push(newObj);
             this.select(newObj);
         } else {
-            if (!mouse.rmb) this.mmbx = false;
+            if (!mouse.mmb) this.mmbx = false;
         }
     }
 };
@@ -1996,15 +2000,12 @@ function CopyTool(_0x5a4fc6) {
     var _0x29b2c0 = this;
     this.valWidth.onchange = function() {
         _0x29b2c0.update();
-        var displayAlert = true;
     };
     this.valHeight.onchange = function() {
         _0x29b2c0.update();
-        var displayAlert = true;
     };
     this.valOver.onchange = function() {
         _0x29b2c0.update();
-        var displayAlert = true;
     };
     this.copyData = void 0x0;
     this.dim = vec2.make(0x2, 0x2);
@@ -6291,6 +6292,7 @@ function World(editor, data) {
     this.shortname = data.shortname;
     this.musicOverridePath = data.musicOverridePath;
     this.soundOverridePath = data.soundOverridePath;
+    this.assets = data.assets;
     this.levels = [];
     for (var i = 0x0; i < data.world.length; i++) this.levels.push(new Level(editor, data.world[i]));
 }
@@ -6538,6 +6540,7 @@ Editor.prototype.compile = function() {
     outData.shortname = this.world.shortname;
     outData.musicOverridePath = this.world.musicOverridePath;
     outData.soundOverridePath = this.world.soundOverridePath;
+    outData.assets = this.world.assets;
     outData.resource = this.dataRaw.resource;
     outData.initial = this.world.initial;
     outData.world = [];
@@ -6655,7 +6658,6 @@ Editor.prototype.draw = function() {
     var that = this;
     this.frameReq = FrameReq.call(window, function() {
         that.draw();
-        var displayAlert = true;
     });
 };
 Editor.prototype.destroy = function() {
@@ -6674,7 +6676,6 @@ App.prototype.load = function(data) {
     this.menu.editorMenu();
     this.editor = new Editor(data);
     this.menu.list.generate();
-    var displayAlert = true;
 };
 App.prototype.save = function() {
     if (this.editor) {
@@ -6688,11 +6689,3 @@ App.prototype.close = function() {
 };
 var app = new App();
 app.init();
-
-function unloadPage(){ 
-    if(displayAlert === true){
-        return alert("You have unsaved changes on this page. Do you want to leave this page and discard your changes or stay on this page?");
-    }
-}
-
-window.onbeforeunload = unloadPage;

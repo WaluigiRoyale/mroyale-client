@@ -5,6 +5,43 @@ var levelSelectors = [];    //received from server
 var TILE_ANIMATION_FILTERED = {};
 var OBJ_ANIMATION_FILTERED = {};
 
+var LOBBY_MUSIC_URL = ASSETS_URL + "audio/music/lobby.mp3";
+var MENU_MUSIC_URL = ASSETS_URL + "audio/music/menu.mp3";
+
+var SKINCOUNT = 1;
+var SKIN_MUSIC_URL = {};
+var TILE_ANIMATION = {};
+var OBJ_ANIMATION = {};
+var assetData = resources["https://raw.githubusercontent.com/mroyale/assets/master/assets/" + "assets.json"];
+(function() {
+    if (assetData.skins.count != undefined)
+        SKINCOUNT=assetData.skins.count;
+    for (i in assetData.skins.properties) {
+        var prop = assetData.skins.properties;
+        var music = prop[i].music;
+        if (music != undefined)
+            SKIN_MUSIC_URL[prop[i].id] = music;
+    }
+    if (assetData.tileAnim) {
+        for (var anim of assetData.tileAnim) {
+            var obj = {};
+            obj.tiles = anim.tiles;
+            obj.delay = anim.delay;
+            obj.tilesets = anim.tilesets || [];
+            TILE_ANIMATION[anim.startTile] = obj;
+        }
+    }
+    if (assetData.objAnim) {
+        for (var anim of assetData.objAnim) {
+            var obj = {};
+            obj.tiles = anim.tiles;
+            obj.delay = anim.delay;
+            obj.tilesets = anim.tilesets || [];
+            OBJ_ANIMATION[anim.startTile] = obj;
+        }
+    }
+})();
+
 var util = {},
     vec2 = {
         'make': function(_0x9b9cda, _0x4101d1) {
@@ -556,7 +593,7 @@ td32.TILE_PROPERTIES = {
                     if(game.pid === pid) {
                         PlayerObject.MOVE_SPEED_ACCEL = 1
                         PlayerObject.MOVE_SPEED_ACCEL_AIR = 1
-                        PlayerObject.MOVE_SPEED_DECEL = 0.0100
+                        PlayerObject.MOVE_SPEED_DECEL = 0.0125
                         PlayerObject.ANIMATION_RATE = 1
                     }
                 }
@@ -601,13 +638,97 @@ td32.TILE_PROPERTIES = {
         ASYNC: true,
         TRIGGER: function(game, pid, td, level, zone, x, y, type) {}
     },
+    /* Item Note Block*/
+    13: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: false,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            if ((app.net.gameMode === 1 || app.net.gameMode === 2) && game.pid !== pid) return;
+            var noteHit = false;
+            /* I want to use switch case for this but I have no idea how to do it otherwise. (nevermind!)*/
+            switch(type) {
+                case 0x00 : {
+                    if(game.pid === pid) {
+                        console.log(td.index, td.data, td.definition, td)
+                        PlayerObject.ANIMATION_RATE = 3
+                        PlayerObject.MOVE_SPEED_ACCEL = 0.0125
+                        PlayerObject.MOVE_SPEED_DECEL = 0.0225
+                        PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025
+                    }
+                    if(noteHit == true) {
+                        td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+                        return;
+                    }
+                }
+                /* Small Bump */
+                /* Big Bump */
+                case 0x10 :
+                case 0x11 : {
+                    td.pos = {x:x,y:y};
+                    if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+                    var rep = 98331; // Replacement td32 data for tile.
+                    //game.world.getZone(level, zone).replace(x,y,rep);
+                    if(noteHit == false) {
+                        game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
+                        td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+                        game.world.getZone(level, zone).play(x,y,"item.mp3",1.,0.04);
+                        noteHit == true;
+                    } else {
+                        td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+                        return;
+                    };
+                    break;
+                }
+            }
+        }
+    },
+    /* Flip Block */
+    14: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: false,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            if ((app.net.gameMode === 1 || app.net.gameMode === 2) && game.pid !== pid) return;
+            console.log(td, td32, td32.TILE_PROPERTIES[14].TRIGGER)
+            switch(type) {
+                /* Small bump */
+                /* Big bump */
+                case 0x10 :
+                case 0x11 : {
+                    if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+                    var rep = 98331; // unused because it is a parameter, not a variable
+                    game.world.getZone(level, zone).replaceFlip(x,y,td.data,td);
+                    td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+                    game.world.getZone(level, zone).play(x,y,"bump.mp3",1.,0.04);
+                    break;
+                }
+            }
+        }
+    },
+    /* Non-Solid Damage */
+    15: {
+        COLLIDE: false,
+        HIDDEN: false,
+        ASYNC: true,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch(type) {
+                /* Touch */
+                case 0x00 : {
+                    if(game.pid === pid) {
+                        game.getPlayer().damage();
+                    }
+                }
+            }
+        }
+    },
     /* Item Block Standard */
     0x11: {
         COLLIDE: true,
         HIDDEN: false,
         ASYNC: false,
         TRIGGER: function(game, pid, td, level, zone, x, y, type) {
-            if ((app.net.gameMode === 1 || app.net.gameMode === 2) && game.pid !== pid) return;
+            if ((app.net.gameMode === 2) && game.pid !== pid) return;
             switch(type) {
                 /* Small bump */
                 /* Big bump */
@@ -630,7 +751,7 @@ td32.TILE_PROPERTIES = {
         HIDDEN: false,
         ASYNC: false,
         TRIGGER: function(game, pid, td, level, zone, x, y, type) {
-            if ((app.net.gameMode === 1 || app.net.gameMode === 2) && game.pid !== pid) return;
+            if ((app.net.gameMode === 2) && game.pid !== pid) return;
             switch(type) {
                 /* Small bump */
                 /* Big bump */
@@ -703,6 +824,37 @@ td32.TILE_PROPERTIES = {
             }
         }
     },
+    /* Progressive Item Block */
+    20: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: false,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            if ((app.net.gameMode === 2) && game.pid !== pid) return;
+            switch(type) {
+                /* Small bump */
+                /* Big bump */
+                case 0x10 : {
+                    if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+                    var rep = 98331; // Replacement td32 data for tile.
+                    game.world.getZone(level, zone).replace(x,y,rep);
+                    game.createObject(81, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
+                    td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+                    game.world.getZone(level, zone).play(x,y,"item.mp3",1.,0.04);
+                    break;
+                }
+                case 0x11 : {
+                    if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
+                    var rep = 98331; // Replacement td32 data for tile.
+                    game.world.getZone(level, zone).replace(x,y,rep);
+                    game.createObject(82, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
+                    td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+                    game.world.getZone(level, zone).play(x,y,"item.mp3",1.,0.04);
+                    break;
+                }
+            }
+        }
+    },
     /* Vine Block */
     0x18: {
         COLLIDE: true,
@@ -732,7 +884,7 @@ td32.TILE_PROPERTIES = {
         HIDDEN: true,
         ASYNC: false,
         TRIGGER: function(game, pid, td, level, zone, x, y, type) {
-            if ((app.net.gameMode === 1 || app.net.gameMode === 2) && game.pid !== pid) return;
+            if ((app.net.gameMode === 2) && game.pid !== pid) return;
             switch(type) {
                 /* Small bump */
                 /* Big bump */
@@ -1308,6 +1460,11 @@ function Menu() {
 Menu.prototype.hideAll = function() {
     for (var i = 0x1; i < this.menus.length; i++) this.menus[i].hide();
 };
+Menu.prototype.partHide = function() {
+    for (var i = 0x1; i < this.menus.length; i++) this.menus[i].hide();
+    this.linkElement = document.getElementById("link");
+    this.linkElement.style.display = "";
+}
 Menu.prototype.background = function(_0x36dd53) {
     if (_0x36dd53 !== this.bid) {
         switch (_0x36dd53) {
@@ -1512,7 +1669,7 @@ MainScreen.prototype.hide = function() {
     }
 };
 MainScreen.prototype.updateStatsBar = function() {
-    this.winElement.innerHTML = "Login to track statistics and use all skins";
+    this.winElement.innerHTML = "Login to track statistics";
 };
 "use strict";
 
@@ -1569,7 +1726,7 @@ function MainAsMemberScreen() {
 }
 
 MainAsMemberScreen.prototype.show = function(data) {
-    app.menu.hideAll();
+    app.menu.partHide();
     app.menu.background('a');
     if (data === undefined) {
         this.element.style.display = "block";
@@ -1594,7 +1751,8 @@ MainAsMemberScreen.prototype.show = function(data) {
     this.updPrivateBtn();
     this.updMusicBtn();
     this.updGameModeBtn();
-    this.linkElement.style.display = "block";
+    this.linkElement = document.getElementById("link");
+    this.linkElement.style.display = "";
     this.element.style.display = "block";
     if (app.goToLobby) {
         this.launch();
@@ -1690,27 +1848,10 @@ function genSelectSkin(screen, skinIdx) {
 
 function genAddSkinButton(screen, guest) {
     for (var i=0; i<SKINCOUNT; i++) {
-        if (guest) {
-            if (GUEST_SKINS.length && !GUEST_SKINS.includes(i))
-                continue;
-        }
-        /* if (DEV_SKINS.includes(i) && (!(screen instanceof ProfileScreen) || !(
-           ["taliondiscord",
-            "damonj17",
-            "ddmil@marioroyale:~$",
-            "pixelcraftian",
-            "igor",
-            "minus",
-            "cyuubi",
-            "gyorokpeter",
-            "zizzydizzymc",
-            "nuts & milk",
-            "jupitersky",
-            "nethowarrior",
-            "real novex",
-            "nightyoshi370"].includes(app.net.username.toLowerCase())))) {
-            continue;
-        } */
+        //if (guest) {
+        //    if (GUEST_SKINS.length && !GUEST_SKINS.includes(i))
+        //        continue;
+        //}
         var elem = document.createElement("div");
         elem.setAttribute("class", "skin-select-button");
         elem.setAttribute("id", screen.skinButtonPrefix+"-"+i);
@@ -2024,15 +2165,17 @@ function ProfileScreen() {
 }
 ProfileScreen.prototype.show = function(data) {
     app.menu.hideAll();
+    this.linkElement = document.getElementById("link");
     app.menu.navigation("profile", "profile");
     app.menu.background('a');
     this.nicknameInput.value = data["nickname"];
     this.squadInput.value = data["squad"];
-    if ($("#profile-skin-select div").length === 0) {
+    if ($("#profile-skin-select div").length === 0) { //profile-skin-select
         genAddSkinButton(this, false);
     }
     genSelectSkin(this, data["skin"]);
     this.reportError("");
+    this.linkElement.style.display = "";
     this.element.style.display = "block";
 };
 ProfileScreen.prototype.hide = function() {
@@ -2068,7 +2211,6 @@ function PwdChangeScreen() {
     var that = this;
     this.saveBtn.onclick = function() {
         that.save();
-        location.reload();
     };
     this.backBtn.onclick = function() {
         that.onBack();
@@ -2079,11 +2221,13 @@ PwdChangeScreen.prototype.show = function(data) {
     app.menu.navigation("pwdChange", "pwdChange");
     app.menu.background('a');
     this.element.style.display = "block";
+    this.resultLabel.style.display = "none";
 };
 PwdChangeScreen.prototype.hide = function() {
     this.element.style.display = "none";
 };
 PwdChangeScreen.prototype.reportError = function(message) {
+    this.resultLabel.style.display = "";
     this.resultLabel.style.color = "red";
     this.resultLabel.innerText = message;
 };
@@ -2130,10 +2274,11 @@ function LoginScreen() {
     };
 }
 LoginScreen.prototype.show = function() {
-    app.menu.hideAll();
+    app.menu.partHide();
     app.menu.navigation("login", "login");
     app.menu.background('a');
     this.element.style.display = "block";
+    this.resultLabel.style.display = "none";
 };
 LoginScreen.prototype.hide = function() {
     this.element.style.display = "none";
@@ -2143,6 +2288,7 @@ LoginScreen.prototype._onBack = function() {
     app.menu.main.show();
 };
 LoginScreen.prototype.reportError = function(message) {
+    this.resultLabel.style.display = "";
     this.resultLabel.style.color = "red";
     this.resultLabel.innerText = message;
 };
@@ -2183,10 +2329,11 @@ function RegisterScreen() {
     };
 }
 RegisterScreen.prototype.show = function() {
-    app.menu.hideAll();
+    app.menu.partHide();
     app.menu.navigation("register", "register");
     app.menu.background('a');
     this.element.style.display = "block";
+    this.resultLabel.style.display = "none";
 };
 RegisterScreen.prototype.hide = function() {
     this.element.style.display = "none";
@@ -2195,6 +2342,7 @@ RegisterScreen.prototype._onBack = function() {
     app.menu.main.show();
 };
 RegisterScreen.prototype.reportError = function(message) {
+    this.resultLabel.style.display = "";
     this.resultLabel.style.color = "red";
     this.resultLabel.innerText = message;
 };
@@ -3968,204 +4116,6 @@ GoombaObject.prototype.draw = function(_0xa69c24) {
 };
 GoombaObject.prototype.play = GameObject.prototype.play;
 GameObject.REGISTER_OBJECT(GoombaObject);
-"use strict";
-
-function BuzzyBeetleObject(_0xe63f95, _0x58c9b9, _0x79afa7, _0x76d985, _0xd2f4d0, _0x77d018) {
-    GameObject.call(this, _0xe63f95, _0x58c9b9, _0x79afa7, _0x76d985);
-    this.oid = _0xd2f4d0;
-    this.variant = isNaN(parseInt(_0x77d018)) ? 0x0 : parseInt(_0x77d018);
-    this.setState(BuzzyBeetleObject.STATE.RUN);
-    this.bonkTimer = this.anim = 0x0;
-    this.loc = [this.pos.y + 0.5 * BuzzyBeetleObject.FLY_DISTANCE, this.pos.y - 0.5 * BuzzyBeetleObject.FLY_DISTANCE];
-    this.dim = vec2.make(0x1, 0x1);
-    this.fallSpeed = this.moveSpeed = 0x0;
-    this.disabled = this.grounded = !0x1;
-    this.disabledTimer = 0x0;
-    this.proxHit = !0x1;
-    this.immuneTimer = 0x0;
-    this.rev = !0x1;
-    this.dir = !0x0;
-    this.disable();
-}
-BuzzyBeetleObject.ASYNC = !0x1;
-BuzzyBeetleObject.ID = 0x17;
-BuzzyBeetleObject.NAME = "BUZZY BEETLE";
-BuzzyBeetleObject.VARIANT_OFFSET = 0x10;
-BuzzyBeetleObject.VARIANT_OFFSET_CASTLE = 0x20;
-BuzzyBeetleObject.CHECK_DIST = 0.1;
-BuzzyBeetleObject.SPRITE = {};
-BuzzyBeetleObject.SPRITE_LIST = [{
-    'NAME': "RUN0",
-    'ID': 0x0,
-    'INDEX': 0x8C
-}, {
-    'NAME': "RUN1",
-    'ID': 0x1,
-    'INDEX': 0x8D
-}, {
-    'NAME': "SHELL",
-    'ID': 0x2,
-    'INDEX': 0x8E
-}];
-for (_0x1bec55 = 0x0; _0x1bec55 < BuzzyBeetleObject.SPRITE_LIST.length; _0x1bec55++) BuzzyBeetleObject.SPRITE[BuzzyBeetleObject.SPRITE_LIST[_0x1bec55].NAME] = BuzzyBeetleObject.SPRITE_LIST[_0x1bec55], BuzzyBeetleObject.SPRITE[BuzzyBeetleObject.SPRITE_LIST[_0x1bec55].ID] = BuzzyBeetleObject.SPRITE_LIST[_0x1bec55];
-BuzzyBeetleObject.STATE = {};
-BuzzyBeetleObject.STATE_LIST = [{
-    'NAME': "RUN",
-    'ID': 0x0,
-    'SPRITE': [BuzzyBeetleObject.SPRITE.RUN0, BuzzyBeetleObject.SPRITE.RUN1]
-}, {
-    'NAME': "TRANSFORM",
-    'ID': 0x1,
-    'SPRITE': [BuzzyBeetleObject.SPRITE.SHELL]
-}, {
-    'NAME': "SHELL",
-    'ID': 0x2,
-    'SPRITE': [BuzzyBeetleObject.SPRITE.SHELL]
-}, {
-    'NAME': "SPIN",
-    'ID': 0x3,
-    'SPRITE': [BuzzyBeetleObject.SPRITE.SHELL]
-}, {
-    'NAME': "BONK",
-    'ID': 0x51,
-    'SPRITE': []
-}];
-for (_0x1bec55 = 0x0; _0x1bec55 < BuzzyBeetleObject.STATE_LIST.length; _0x1bec55++) BuzzyBeetleObject.STATE[BuzzyBeetleObject.STATE_LIST[_0x1bec55].NAME] = BuzzyBeetleObject.STATE_LIST[_0x1bec55], BuzzyBeetleObject.STATE[BuzzyBeetleObject.STATE_LIST[_0x1bec55].ID] = BuzzyBeetleObject.STATE_LIST[_0x1bec55];
-BuzzyBeetleObject.prototype.update = BuzzyBeetleObject.prototype.update;
-BuzzyBeetleObject.prototype.step = function() {
-    if (this.disabled) this.proximity();
-    else if (0x0 < this.disabledTimer && this.disabledTimer--, this.state === BuzzyBeetleObject.STATE.BONK) this.bonkTimer++ > BuzzyBeetleObject.BONK_TIME || 0x0 > this.pos.y + this.dim.y ? this.destroy() : (this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed)), this.moveSpeed *= BuzzyBeetleObject.BONK_DECEL, this.fallSpeed = Math.max(this.fallSpeed - BuzzyBeetleObject.FALL_SPEED_ACCEL, -BuzzyBeetleObject.BONK_FALL_SPEED));
-    else {
-        this.anim++;
-        this.sprite = this.state.SPRITE[parseInt(this.anim / BuzzyBeetleObject.ANIMATION_RATE) % this.state.SPRITE.length];
-        if (this.state === BuzzyBeetleObject.STATE.SHELL || this.state === BuzzyBeetleObject.STATE.TRANSFORM) --this.transformTimer < BuzzyBeetleObject.TRANSFORM_THRESHOLD && this.setState(BuzzyBeetleObject.STATE.TRANSFORM), 0x0 >= this.transformTimer && this.setState(BuzzyBeetleObject.STATE.RUN);
-        0x0 < this.immuneTimer && this.immuneTimer--;
-        this.control();
-        this.physics();
-        this.interaction();
-        this.sound();
-        0x0 > this.pos.y && this.destroy();
-    }
-};
-BuzzyBeetleObject.prototype.control = function() {
-    this.state === BuzzyBeetleObject.STATE.RUN && (this.grounded && !this.checkGround() && (this.dir = !this.dir), this.moveSpeed = this.dir ? -BuzzyBeetleObject.MOVE_SPEED_MAX : BuzzyBeetleObject.MOVE_SPEED_MAX);
-    this.state === BuzzyBeetleObject.STATE.SPIN && (this.moveSpeed = this.dir ? -BuzzyBeetleObject.SHELL_MOVE_SPEED_MAX : BuzzyBeetleObject.SHELL_MOVE_SPEED_MAX);
-    if (this.state === BuzzyBeetleObject.STATE.SHELL || this.state === BuzzyBeetleObject.STATE.TRANSFORM) this.moveSpeed = 0x0;
-};
-BuzzyBeetleObject.prototype.physics = function() {
-    this.grounded && (this.fallSpeed = 0x0);
-    this.fallSpeed = Math.max(this.fallSpeed - BuzzyBeetleObject.FALL_SPEED_ACCEL, -BuzzyBeetleObject.FALL_SPEED_MAX);
-    var _0xa3a017 = vec2.add(this.pos, vec2.make(this.moveSpeed, 0x0)),
-        _0xc0dedb = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed)),
-        _0xa23816 = vec2.make(0x0 <= this.moveSpeed ? this.pos.x : this.pos.x + this.moveSpeed, 0x0 >= this.fallSpeed ? this.pos.y : this.pos.y + this.fallSpeed),
-        _0xccb0ee = vec2.make(this.dim.y + Math.abs(this.moveSpeed), this.dim.y + Math.abs(this.fallSpeed)),
-        _0xa23816 = this.game.world.getZone(this.level, this.zone).getTiles(_0xa23816, _0xccb0ee),
-        _0xccb0ee = vec2.make(0x1, 0x1),
-        _0xf92b93 = !0x1;
-    this.grounded = !0x1;
-    for (var _0x688c61 = 0x0; _0x688c61 < _0xa23816.length; _0x688c61++) {
-        var _0x3e00f8 = _0xa23816[_0x688c61];
-        _0x3e00f8.definition.COLLIDE && squar.intersection(_0x3e00f8.pos, _0xccb0ee, _0xa3a017, this.dim) && (this.pos.x + this.dim.x <= _0x3e00f8.pos.x && _0xa3a017.x + this.dim.x > _0x3e00f8.pos.x ? (_0xa3a017.x = _0x3e00f8.pos.x - this.dim.x, _0xc0dedb.x = _0xa3a017.x, this.moveSpeed = 0x0, _0xf92b93 = !0x0) : this.pos.x >= _0x3e00f8.pos.x + _0xccb0ee.x && _0xa3a017.x < _0x3e00f8.pos.x + _0xccb0ee.x && (_0xa3a017.x = _0x3e00f8.pos.x + _0xccb0ee.x, _0xc0dedb.x = _0xa3a017.x, this.moveSpeed = 0x0, _0xf92b93 = !0x0));
-    }
-    for (_0x688c61 = 0x0; _0x688c61 < _0xa23816.length; _0x688c61++) _0x3e00f8 = _0xa23816[_0x688c61], _0x3e00f8.definition.COLLIDE && squar.intersection(_0x3e00f8.pos, _0xccb0ee, _0xc0dedb, this.dim) && (this.pos.y >= _0x3e00f8.pos.y + _0xccb0ee.y && _0xc0dedb.y < _0x3e00f8.pos.y + _0xccb0ee.y ? (_0xc0dedb.y = _0x3e00f8.pos.y + _0xccb0ee.y, this.grounded = !0x0) : this.pos.y + this.dim.y <= _0x3e00f8.pos.y && _0xc0dedb.y + this.dim.y > _0x3e00f8.pos.y && (_0xc0dedb.y = _0x3e00f8.pos.y - this.dim.y, this.jump = -0x1, this.fallSpeed = 0x0));
-    this.pos = vec2.make(_0xa3a017.x, _0xc0dedb.y);
-    _0xf92b93 && (this.dir = !this.dir);
-};
-BuzzyBeetleObject.prototype.interaction = function() {
-    if (this.state === BuzzyBeetleObject.STATE.SPIN)
-        for (var _0x99e08a = 0x0; _0x99e08a < this.game.objects.length; _0x99e08a++) {
-            var _0x73774d = this.game.objects[_0x99e08a];
-            _0x73774d === this || _0x73774d instanceof PlayerObject || !_0x73774d.isTangible() || !_0x73774d.damage || _0x73774d.level === this.level && _0x73774d.zone === this.zone && squar.intersection(_0x73774d.pos, _0x73774d.dim, this.pos, this.dim) && _0x73774d.damage();
-        }
-};
-BuzzyBeetleObject.prototype.sound = GameObject.prototype.sound;
-BuzzyBeetleObject.prototype.checkGround = function() {
-    var _0x7a9f6d = this.dir ? vec2.add(this.pos, vec2.make(-_BuzzyBeetleObject.CHECK_DIST, 0x0)) : vec2.add(this.pos, vec2.make(BuzzyBeetleObject.CHECK_DIST + this.dim.x, 0x0));
-    _0x7a9f6d.y -= 1.5;
-    return this.game.world.getZone(this.level, this.zone).getTile(_0x7a9f6d).definition.COLLIDE;
-};
-BuzzyBeetleObject.prototype.proximity = function() {
-    var ply = this.game.getPlayer();
-    if(ply && !ply.dead && ply.level === this.level && ply.zone === this.zone && !this.proxHit && vec2.distance(ply.pos, this.pos) < BuzzyBeetleObject.ENABLE_DIST) {
-      this.game.out.push(NET020.encode(this.level, this.zone, this.oid, 0xA0));
-      this.proxHit = true;
-    }
-  };
-BuzzyBeetleObject.prototype.enable = function() {
-    if(!this.disabled) { return; }
-    this.disabled = false;
-    this.disabledTimer = BuzzyBeetleObject.ENABLE_FADE_TIME;
-};
-BuzzyBeetleObject.prototype.disable = function() {
-    this.disabled = true;
-};
-BuzzyBeetleObject.prototype.damage = function(_0x92236d) {};
-BuzzyBeetleObject.prototype.bonk = function() {
-    this.dead || (this.setState(BuzzyBeetleObject.STATE.BONK), this.moveSpeed = v.BONK_IMP.x, this.fallSpeed = BuzzyBeetleObject.BONK_IMP.y, this.dead = !0x0, this.play("sfx/kick.wav", 0x1, 0.04));
-};
-BuzzyBeetleObject.prototype.stomped = function(_0x2f1cbf) {
-    if (this.state === BuzzyBeetleObject.STATE.RUN) this.setState(BuzzyBeetleObject.STATE.SHELL), this.transformTimer = BuzzyBeetleObject.TRANSFORM_TIME;
-    else if (this.state === BuzzyBeetleObject.STATE.SPIN) this.setState(BuzzyBeetleObject.STATE.SHELL), this.transformTimer = BuzzyBeetleObject.TRANSFORM_TIME;
-    else if (this.state === BuzzyBeetleObject.STATE.SHELL || this.state === BuzzyBeetleObject.STATE.TRANSFORM) this.setState(BuzzyBeetleObject.STATE.SPIN), this.dir = _0x2f1cbf;
-    this.play("sfx/stomp.wav", 0x1, 0.04);
-};
-BuzzyBeetleObject.prototype.playerCollide = function(_0x1bff1d) {
-    this.dead || this.garbage || (this.state === BuzzyBeetleObject.STATE.SHELL || this.state === BuzzyBeetleObject.STATE.TRANSFORM ? (_0x1bff1d = 0x0 < _0x1bff1d.pos.x - this.pos.x, this.stomped(_0x1bff1d), this.game.out.push(NET020.encode(this.level, this.zone, this.oid, _0x1bff1d ? 0x10 : 0x11)), this.immuneTimer = BuzzyBeetleObject.PLAYER_IMMUNE_TIME) : 0x0 >= this.immuneTimer && _0x1bff1d.damage(this));
-};
-BuzzyBeetleObject.prototype.playerStomp = GameObject.prototype.playerStomp;
-BuzzyBeetleObject.prototype.playerBump = GameObject.prototype.playerBump;
-BuzzyBeetleObject.prototype.kill = GameObject.prototype.kill;
-BuzzyBeetleObject.prototype.destroy = GameObject.prototype.destroy;
-BuzzyBeetleObject.prototype.isTangible = GameObject.prototype.isTangible;
-BuzzyBeetleObject.prototype.setState = function(STATE) {
-    if(STATE === this.state) { return; }
-    this.state = STATE;
-    if(STATE.SPRITE.length > 0) { this.sprite = STATE.SPRITE[0]; }
-   this.anim = 0;
-};
-BuzzyBeetleObject.prototype.draw = function(_0x1fb748) {
-    if (!this.disabled) {
-        var _0x4602fb;
-        _0x4602fb = this.state === BuzzyBeetleObject.STATE.BONK ? 0x3 : 0x0 < this.disabledTimer ? 0xa0 + parseInt(0x20 * (0x1 - this.disabledTimer / BuzzyBeetleObject.ENABLE_FADE_TIME)) : 0x0;
-        if (this.sprite.INDEX instanceof Array)
-            for (var _0x327889 = this.sprite.INDEX, _0xe31235 = 0x0; _0xe31235 < _0x327889.length; _0xe31235++)
-                for (var _0xc120b3 = 0x0; _0xc120b3 < _0x327889[_0xe31235].length; _0xc120b3++) {
-                    var _0xe41a2f = _0x327889[0x3 !== _0x4602fb ? _0xe31235 : _0x327889.length - 0x1 - _0xe31235][_0xc120b3];
-                    switch (this.variant) {
-                        case 0x1:
-                            _0xe41a2f += BuzzyBeetleObject.VARIANT_OFFSET;
-                            break;
-                        case 0x2:
-                            _0xe41a2f += 2*BuzzyBeetleObject.VARIANT_OFFSET_CASTLE;
-                            break;
-                    }
-                    _0x1fb748.push({
-                        'pos': vec2.add(this.pos, vec2.make(_0xc120b3, _0xe31235)),
-                        'reverse': !this.dir,
-                        'index': _0xe41a2f,
-                        'mode': _0x4602fb
-                    });
-                } else {
-                    _0xe41a2f = this.sprite.INDEX;
-                    switch (this.variant) {
-                        case 0x1:
-                            _0xe41a2f += BuzzyBeetleObject.VARIANT_OFFSET;
-                            break;
-                        case 0x2:
-                            _0xe41a2f += 2*BuzzyBeetleObject.VARIANT_OFFSET_CASTLE;
-                            break;
-                    }
-                    _0x1fb748.push({
-                        'pos': this.pos,
-                        'reverse': !this.dir,
-                        'index': _0xe41a2f,
-                        'mode': _0x4602fb
-                    });
-                }
-    }
-};
-BuzzyBeetleObject.prototype.play = GameObject.prototype.play;
-GameObject.REGISTER_OBJECT(BuzzyBeetleObject);
 "use strict";
 
 function KoopaObject(game, level, zone, pos, oid, fly, variant) {
@@ -6283,32 +6233,88 @@ PowerUpObject.prototype.control = function() {
     this.jump >= PowerUpObject.JUMP_LENGTH && (this.jump = -0x1);
 };
 PowerUpObject.prototype.physics = function() {
-    if (this.rise) {
-        this.rise = false;
-        for (var _0x2d4761 = vec2.make(0x1, 0x1), _0x48762f = this.game.world.getZone(this.level, this.zone).getTiles(this.pos, this.dim), _0xae67e5 = 0x0; _0xae67e5 < _0x48762f.length; _0xae67e5++) {
-            var _0x323720 = _0x48762f[_0xae67e5];
-            if (_0x323720.definition.COLLIDE && squar.intersection(_0x323720.pos, _0x2d4761, this.pos, this.dim)) {
-                this.rise = true;
-                break;
-            }
-        }
-        this.rise && (this.pos.y += PowerUpObject.RISE_RATE);
-    } else {
-        -0x1 !== this.jump ? (this.fallSpeed = PowerUpObject.FALL_SPEED_MAX - this.jump * PowerUpObject.JUMP_DECEL, this.jump++) : (this.grounded && (this.fallSpeed = 0x0), this.fallSpeed = Math.max(this.fallSpeed - PowerUpObject.FALL_SPEED_ACCEL, -PowerUpObject.FALL_SPEED_MAX));
-        var _0x17799f = vec2.add(this.pos, vec2.make(this.moveSpeed, 0x0)),
-            _0x7b593c = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed)),
-            _0x2d4761 = vec2.make(0x0 <= this.moveSpeed ? this.pos.x : this.pos.x + this.moveSpeed, 0x0 >= this.fallSpeed ? this.pos.y : this.pos.y + this.fallSpeed),
-            _0x48762f = vec2.make(this.dim.y + Math.abs(this.moveSpeed), this.dim.y + Math.abs(this.fallSpeed)),
-            _0x48762f = this.game.world.getZone(this.level, this.zone).getTiles(_0x2d4761, _0x48762f),
-            _0x2d4761 = vec2.make(0x1, 0x1),
-            _0x32139c = false;
-        this.grounded = false;
-        for (_0xae67e5 = 0x0; _0xae67e5 < _0x48762f.length; _0xae67e5++) _0x323720 = _0x48762f[_0xae67e5], _0x323720.definition.COLLIDE && squar.intersection(_0x323720.pos, _0x2d4761, _0x17799f, this.dim) && (this.pos.x <= _0x17799f.x && _0x17799f.x + this.dim.x > _0x323720.pos.x ? (_0x17799f.x = _0x323720.pos.x - this.dim.x, _0x7b593c.x = _0x17799f.x, this.moveSpeed = 0x0, _0x32139c = true) : this.pos.x >= _0x17799f.x && _0x17799f.x < _0x323720.pos.x + _0x2d4761.x && (_0x17799f.x = _0x323720.pos.x + _0x2d4761.x, _0x7b593c.x = _0x17799f.x, this.moveSpeed = 0x0, _0x32139c = true));
-        for (_0xae67e5 = 0x0; _0xae67e5 < _0x48762f.length; _0xae67e5++) _0x323720 = _0x48762f[_0xae67e5], _0x323720.definition.COLLIDE && squar.intersection(_0x323720.pos, _0x2d4761, _0x7b593c, this.dim) && (this.pos.y >= _0x7b593c.y && _0x7b593c.y < _0x323720.pos.y + _0x2d4761.y ? (_0x7b593c.y = _0x323720.pos.y + _0x2d4761.y, this.grounded = true) : this.pos.y <= _0x7b593c.y && _0x7b593c.y + this.dim.y > _0x323720.pos.y && (_0x7b593c.y = _0x323720.pos.y - this.dim.y, this.jumping = -0x1, this.fallSpeed = 0x0));
-        this.pos = vec2.make(_0x17799f.x, _0x7b593c.y);
-        _0x32139c && (this.dir = !this.dir);
+    if(this.rise) {
+      this.rise = false;
+      
+      var tdim = vec2.make(1., 1.);
+      var tiles = this.game.world.getZone(this.level, this.zone).getTiles(this.pos, this.dim);
+      for(var i=0;i<tiles.length;i++) {
+        var tile = tiles[i];
+        if(!tile.definition.COLLIDE) { continue; }
+        if(squar.intersection(tile.pos, tdim, this.pos, this.dim)) { this.rise = true; break; }
+      }
+      
+      if(!this.rise) { return; }
+      
+      this.pos.y += PowerUpObject.RISE_RATE;
+      return;
     }
+    
+    if(this.jump !== -1) {
+      this.fallSpeed = PowerUpObject.FALL_SPEED_MAX - (this.jump*PowerUpObject.JUMP_DECEL);
+      this.jump++;
+    }
+    else {
+      if(this.grounded) {
+        this.fallSpeed = 0;
+      }
+      this.fallSpeed = Math.max(this.fallSpeed - PowerUpObject.FALL_SPEED_ACCEL, -PowerUpObject.FALL_SPEED_MAX);
+    }
+    
+    var movx = vec2.add(this.pos, vec2.make(this.moveSpeed, 0.));
+    var movy = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
+    
+    var ext1 = vec2.make(this.moveSpeed>=0?this.pos.x:this.pos.x+this.moveSpeed, this.fallSpeed<=0?this.pos.y:this.pos.y+this.fallSpeed);
+    var ext2 = vec2.make(this.dim.y+Math.abs(this.moveSpeed), this.dim.y+Math.abs(this.fallSpeed));
+    var tiles = this.game.world.getZone(this.level, this.zone).getTiles(ext1, ext2);
+    var tdim = vec2.make(1., 1.);
+    
+    var changeDir = false;
+    this.grounded = false;
+    for(var i=0;i<tiles.length;i++) {
+      var tile = tiles[i];
+      if(!tile.definition.COLLIDE) { continue; }
+      
+      var hitx = squar.intersection(tile.pos, tdim, movx, this.dim);
+      
+      if(hitx) {
+        if(this.pos.x <= movx.x && movx.x + this.dim.x > tile.pos.x) {
+          movx.x = tile.pos.x - this.dim.x;
+          movy.x = movx.x;
+          this.moveSpeed = 0;
+          changeDir = true;
+        }
+        else if(this.pos.x >= movx.x && movx.x < tile.pos.x + tdim.x) {
+          movx.x = tile.pos.x + tdim.x;
+          movy.x = movx.x;
+          this.moveSpeed = 0;
+          changeDir = true;
+        }
+      }
+    }
+      
+    for(var i=0;i<tiles.length;i++) {
+      var tile = tiles[i];
+      if(!tile.definition.COLLIDE) { continue; }
+      
+      var hity = squar.intersection(tile.pos, tdim, movy, this.dim);
+      
+      if(hity) {
+        if(this.pos.y >= movy.y && movy.y < tile.pos.y + tdim.y) {
+          movy.y = tile.pos.y + tdim.y;
+          this.grounded = true;
+        }
+        else if(this.pos.y <= movy.y && movy.y + this.dim.y > tile.pos.y) {
+          movy.y = tile.pos.y - this.dim.y;
+          this.jumping = -1;
+          this.fallSpeed = 0;
+        }
+      }
+    }
+    this.pos = vec2.make(movx.x, movy.y);
+    if(changeDir) { this.dir = !this.dir; }
 };
+
 PowerUpObject.prototype.bounce = function() {
     this.grounded && (this.dir = !this.dir);
     this.jump = 0x0;
@@ -7418,7 +7424,7 @@ Audio.prototype.initWebAudio = function(app) {
         "neonvictory.mp3", "nboss.mp3", "nwin.mp3",
         // PASTEL
         "pday.mp3", "pnight.mp3", "pcastle.mp3", "pboss.mp3", "pdesert.mp3", "prooftops.mp3",
-        "pwater.mp3", "pairship.mp3", "punderground.mp3",
+        "pwater.mp3", "pairship.mp3", "punderground.mp3", "pwin.mp3",
         // SMB2
         "overworld.mp3", "ground.mp3", "clear.mp3", "boss.mp3",
         // SMW
@@ -7981,15 +7987,20 @@ Display.prototype.drawTouch = function() {
     }
 };
 Display.prototype.drawLoad = function() {
-    var _0x37f267 = this.context,
-        _0x8de60e = this.canvas.width,
-        _0x131b2f = this.canvas.height;
-    _0x37f267.fillStyle = "black";
-    _0x37f267.fillRect(0x0, 0x0, _0x8de60e, _0x131b2f);
-    _0x37f267.font = "32px SmbWeb";
-    _0x37f267.fillStyle = "white";
-    _0x37f267.textAlign = "center";
-    _0x37f267.fillText("Loading Resources...", 0.5 * _0x8de60e, 0.5 * _0x131b2f);
+    /*
+         _0x37f267 = context
+         _0x8de60e = canvas width
+         _0x131b2f = canvas height
+     */
+    var canvas = this.context,
+        width = this.canvas.width,
+        height = this.canvas.height;
+    canvas.fillStyle = "black";
+    canvas.fillRect(0x0, 0x0, width, height);
+    canvas.font = "32px SmbWeb";
+    canvas.fillStyle = "white";
+    canvas.textAlign = "center";
+    canvas.fillText("Loading Resources...", 0.5 * width, 0.5 * height);
 };
 Display.prototype.destroy = function() {};
 "use strict";
@@ -8133,6 +8144,18 @@ Zone.prototype.replace = function(x, y, rep) {
     y = this.height() - 0x1 - y;
     this.mainLayer.data[y][x] = rep;
 };
+Zone.prototype.replaceFlip = function(x, y, rep, def) {
+    var flipRep = true;
+    y = this.height() - 0x1 - y;
+    this.mainLayer.data[y][x] = rep;
+
+    if(flipRep === true) {
+        setInterval(function() {
+            this.mainLayer.data[y][x] = def;
+        }, 5000)
+        flipRep = false;
+    } else return;
+}
 Zone.prototype.grow = function(_0x34397d, _0x27a117, _0x5e09da) {
     _0x27a117 = this.dimensions().y - 0x1 - _0x27a117;
     this.vines.push({
@@ -8249,11 +8272,11 @@ function Game(data) {
     }, 2);
 }
 
-Game.TICK_RATE = 0x21;
+Game.TICK_RATE = 28;
 Game.FDLC_TARGET = 0x3;
 Game.FDLC_MAX = Game.FDLC_TARGET + 0x2;
 
-Game.LEVEL_WARP_TIME = 0x64;
+Game.LEVEL_WARP_TIME = 160;
 Game.GAME_OVER_TIME = 120;
 
 Game.COINS_TO_LIFE = 0x1e;
@@ -8261,8 +8284,10 @@ Game.COINS_TO_LIFE = 0x1e;
 Game.prototype.load = function(data) {
     if (this instanceof LobbyGame){
         app.menu.main.winElement.style.display = "";
+        document.getElementById("settins-return-lobby").style.display = "none";
     }else{
         app.menu.main.winElement.style.display = "none";
+        document.getElementById("settins-return-lobby").style.display = "";
     }
     app.menu.load.show();
 
@@ -8277,6 +8302,20 @@ Game.prototype.load = function(data) {
         app.audio.setCustomMusicPrefix(data.musicOverridePath);
         reloadAudio = true;
     }
+    if(data.assets) {
+        $.getJSON(ASSETS_URL + "assets/" + data.assets, function(data) {
+            TILE_ANIMATION = {}
+            TILE_ANIMATION_FILTERED = {}
+            for (var anim of data.tileAnim) {
+                var obj = {};
+                obj.tiles = anim.tiles;
+                obj.delay = anim.delay;
+                obj.tilesets = anim.tilesets || [];
+                TILE_ANIMATION[anim.startTile] = obj;
+                TILE_ANIMATION_FILTERED[anim.startTile] = obj;
+            }
+        });
+    }
     if(reloadAudio)
         app.audio.initWebAudio(app);
 
@@ -8284,6 +8323,7 @@ Game.prototype.load = function(data) {
         return Object.keys(dict).filter(x=>dict[x].tilesets.length == 0 || dict[x].tilesets.includes(tileset))
             .reduce((res, key)=>(res[key]=dict[key], res), {}) ;
     };
+
     TILE_ANIMATION_FILTERED = filterByTileset(TILE_ANIMATION, data.resource.filter(x=>x.id=="map")[0].src);
     OBJ_ANIMATION_FILTERED = filterByTileset(OBJ_ANIMATION, data.resource.filter(x=>x.id=="obj")[0].src);
 
@@ -9040,6 +9080,7 @@ function App() {
     this.charMusic = Cookies.get("char_music") === "1";
 }
 App.prototype.init = function() {
+    document.getElementById("log").style.display = "none";
     document.getElementById("link-patch").style.display = "";
     document.getElementById("main-number").style.display = "";
     if (!this.goToLobby)

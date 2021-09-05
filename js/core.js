@@ -1,4 +1,6 @@
 const ASSETS_URL = "https://raw.githubusercontent.com/mroyale/assets/master/";
+const address = `${window.location.host}`;
+
 (function($) {
     var pagify = {
         items: {},
@@ -125,13 +127,6 @@ const ASSETS_URL = "https://raw.githubusercontent.com/mroyale/assets/master/";
     };
 })(jQuery);
 
-function print(text) {
-    var elem = document.createElement("p");
-    elem.innerText = text;
-    elem.setAttribute("class", "debugLog");
-    document.getElementById("log").appendChild(elem);
-}
-
 var VERSION = (function() {
     var scripts = document.getElementsByTagName('script');
     var index = scripts.length - 1;
@@ -139,8 +134,8 @@ var VERSION = (function() {
     return myScript.src.split("?v=").slice(-1)[0];
 })();
 
-var jsons = [ASSETS_URL + "assets.json"]
-var scripts = ["js/server.js", "js/url.js", "js/game.js"]
+var jsons = [ASSETS_URL + "assets/assets.json"]
+var scripts = ["js/server.js", "js/game.js"]
 var resources = {}
 
 function loadNext() {
@@ -151,6 +146,8 @@ function loadNext() {
             type: "GET",
             url: next + '?v=' + VERSION, 
             success: function(result) {
+                console.log(result);
+                console.log(next)
                 resources[next] = result;
                 //print("Loading "+next.split("/").pop()+" finished");
                 loadNext();
@@ -162,7 +159,6 @@ function loadNext() {
     }
     if (scripts.length == 0) return;
     var next = scripts.shift();
-    //print("loading "+next.split("/").pop()+" started");
     $.ajax({
         type: "GET",
         url: next + '?v=' + VERSION, 
@@ -172,5 +168,15 @@ function loadNext() {
         dataType: "script",
         cache: true
     });
+};
+
+function load() {
+    //var body = document.getElementById("body");
+    //document.body.style.backgroundColor = "black";
+
+    loadNext();
+    body.style.display = '';
+    document.body.style.backgroundColor = "";
 }
-loadNext();
+
+load();
