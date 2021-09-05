@@ -1,5 +1,4 @@
 const ASSETS_URL = "https://raw.githubusercontent.com/mroyale/assets/master/";
-const address = `${window.location.host}`;
 
 (function($) {
     var pagify = {
@@ -141,15 +140,11 @@ var resources = {}
 function loadNext() {
     if (jsons.length) {
         var next = jsons.shift();
-        //print("Loading "+next.split("/").pop()+" started");
         $.ajax({
             type: "GET",
             url: next + '?v=' + VERSION, 
             success: function(result) {
-                console.log(result);
-                console.log(next)
                 resources[next] = result;
-                //print("Loading "+next.split("/").pop()+" finished");
                 loadNext();
             },
             dataType: "json",
@@ -171,9 +166,6 @@ function loadNext() {
 };
 
 function load() {
-    //var body = document.getElementById("body");
-    //document.body.style.backgroundColor = "black";
-
     loadNext();
     body.style.display = '';
     document.body.style.backgroundColor = "";
