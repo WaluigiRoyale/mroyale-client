@@ -13,6 +13,8 @@ var SKIN_MUSIC_URL = {};
 var TILE_ANIMATION = {};
 var OBJ_ANIMATION = {};
 var assetData = resources["https://raw.githubusercontent.com/mroyale/assets/master/assets/" + "assets.json"];
+
+
 (function() {
     if (assetData.skins.count != undefined)
         SKINCOUNT=assetData.skins.count;
@@ -1039,6 +1041,35 @@ td32.TILE_PROPERTIES = {
             }
         }
     },
+    /* Level Warp Pipe Fast */
+    87: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: true,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch(type) {
+                /* Down */
+                case 0x01 : {
+                    if(game.pid === pid) {
+                        var ply = game.getPlayer();
+                        var l = game.world.getZone(level, zone).getTile(vec2.make(x-1,y));
+                        var r = game.world.getZone(level, zone).getTile(vec2.make(x+1,y));
+
+                        var cx;
+                        if(l.definition === this) { cx = x; }
+                        else if(r.definition === this) { cx = x+1; }
+                        else { return; }
+
+                        if(Math.abs((ply.pos.x + (ply.dim.x*.5)) - cx) <= 0.45) {
+                            ply.pipe(2, td.data, 0); 
+                            
+                            //ply.pipeLevel(2, td.data, 0);
+                        }
+                    }
+                }
+            }
+        }
+    },
     /* Flagpole */
     0xA0: {
         COLLIDE: false,
@@ -1848,10 +1879,6 @@ function genSelectSkin(screen, skinIdx) {
 
 function genAddSkinButton(screen, guest) {
     for (var i=0; i<SKINCOUNT; i++) {
-        //if (guest) {
-        //    if (GUEST_SKINS.length && !GUEST_SKINS.includes(i))
-        //        continue;
-        //}
         var elem = document.createElement("div");
         elem.setAttribute("class", "skin-select-button");
         elem.setAttribute("id", screen.skinButtonPrefix+"-"+i);
@@ -1876,6 +1903,7 @@ function NameScreen() {
     this.gmBtn = document.getElementById("name-gm-change");
     this.launchBtn = document.getElementById("name-launch");
     this.autoMoveBtn = document.getElementById("autoMove");
+    this.settingsCloseBtn = document.getElementById("settingsClose");
     this.padLoop = undefined;
     this.skinButtonPrefix = "skin-select";
     var that = this;
@@ -1895,6 +1923,10 @@ function NameScreen() {
     elem = document.getElementById("gfxTestObjRemove");
     elem.addEventListener("click", (function(){return function(event) {that.gfxTestObjRemove(event);};})());
     this.autoMoveBtn.addEventListener("click",(function(){return function(event) {that.setAutoMove(!app.autoMove);};})());
+
+    this.settingsCloseBtn.onclick = function() {
+        document.getElementById("settingsPanel").style.display = "none";
+    }
 
     this.launchBtn.onclick = function() {
         that.launch();
@@ -2646,11 +2678,11 @@ Network.prototype.setState = function(newState) {
     }
     this.state.ready();
 };
-Network.prototype.send = function(_0x2756bb) {
-    this.webSocket.send(JSON.stringify(_0x2756bb));
+Network.prototype.send = function(data) {
+    this.webSocket.send(JSON.stringify(data));
 };
-Network.prototype.sendBinary = function(_0x25450f) {
-    this.webSocket.send(_0x25450f.buffer);
+Network.prototype.sendBinary = function(data) {
+    this.webSocket.send(data.buffer);
 };
 Network.prototype.close = function() {
     undefined !== this.webSocket && this.webSocket.close();
@@ -3552,7 +3584,7 @@ PlayerObject.prototype.control = function() {
         if (this.btnA) {
             if ((this.grounded || this.underWater) && !this.btnAHot) {
                 this.jumping = 0x0;
-                this.play(this.underWater ? "stomp.mp3" : 0x0 < this.power ? "jump1.mp3" : "jump0.mp3", 0.7, 0.04);
+                this.play(this.underWater ? "swim.mp3" : 0x0 < this.power ? "jump1.mp3" : "jump0.mp3", 0.7, 0.04);
                 this.btnAHot = true;
             }
             if (this.jumping > a) this.jumping = -0x1;
@@ -3788,7 +3820,7 @@ PlayerObject.prototype.star = function() {
     (this.starMusic = this.play("star.mp3", 0x1, 0.04)) && this.starMusic.loop(true);
 };
 PlayerObject.prototype.tfm = function(_0x538c99) {
-    this.power < _0x538c99 ? this.play("powerup.mp3", 0x1, 0.04) : this.play("pipe.mp3", 0x1, 0.04);
+    this.power < _0x538c99 ? this.play("powerup.mp3", 0x1, 0.04) : this.play("powerdown.mp3", 0x1, 0.04);
     this.tfmTarget = _0x538c99;
     this.tfmTimer = PlayerObject.TRANSFORM_TIME;
     this.setState(PlayerObject.SNAME.TRANSFORM);
@@ -3813,6 +3845,15 @@ PlayerObject.prototype.pipe = function(pipeDir, warp, delay) {
     this.pipeExt = destLevel.data;
     this.pipeDelayLength = delay;
 };
+PlayerObject.prototype.pipeLevel = function(pipeDir, warp, delay) {
+    this.moveSpeed = 0;
+    if (!(0x1 !== pipeDir && 0x2 !== pipeDir)) this.setState(PlayerObject.SNAME.STAND);
+    this.pipeWarp = warp;
+    this.pipeTimer = 0x1e;
+    this.pipeDir = pipeDir;
+    this.pipeExt = game.levelWarp(warp);
+    this.pipeDelayLength = delay;
+}
 PlayerObject.prototype.weedeat = function() {
     for (var _0x5cc521 = 0x0; _0x5cc521 < this.game.objects.length; _0x5cc521++) {
         var _0x526625 = this.game.objects[_0x5cc521];
@@ -7415,7 +7456,7 @@ Audio.prototype.initWebAudio = function(app) {
     }
     var soundList = ["alert.mp3", "break.mp3", "breath.mp3", "bump.mp3", "gold.mp3", "spring.mp3", 
         "coin.mp3", "fireball.mp3", "firework.mp3", "flagpole.mp3", "item.mp3", "jump0.mp3", 
-        "jump1.mp3", "kick.mp3", "life.mp3", "pipe.mp3","powerup.mp3", "stomp.mp3", "vine.mp3"];
+        "jump1.mp3", "kick.mp3", "life.mp3", "pipe.mp3","powerup.mp3", "powerdown.mp3", "stomp.mp3", "swim.mp3", "vine.mp3"];
     var musicList = [
         "main0.mp3", "main1.mp3", "main2.mp3", "main3.mp3", "level.mp3", // STANDARD
         "castle.mp3", "victory.mp3", "star.mp3", "dead.mp3", "gameover.mp3", "hurry.mp3", 
@@ -7688,7 +7729,7 @@ Display.prototype.drawObject = function() {
             obj.pid !== this.game.pid &&
             obj.pos.x >= leftEdge &&
             obj.pos.x <= rightEdge &&
-            (obj.write && !app.settings.disableText && obj.write(textList),
+            (obj.write && /* !app.settings.disableText &&*/ obj.write(textList),
             obj.draw && obj.draw(spriteList));
     }
     var player = this.game.getPlayer();
@@ -8289,6 +8330,7 @@ Game.prototype.load = function(data) {
         app.menu.main.winElement.style.display = "none";
         document.getElementById("settins-return-lobby").style.display = "";
     }
+
     app.menu.load.show();
 
     /* Load world data */
@@ -8469,12 +8511,20 @@ Game.prototype.doNET010 = function(n) {
     var obj = this.createObject(PlayerObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid, n.skin, n.isDev]);
     obj.setState(PlayerObject.SNAME.GHOST);
     if(n.isDev) obj.name = app.getPlayerInfo(n.pid).name;
-    if (this.team) {
-        var playerInfo = app.getPlayerInfo(n.pid);
-        if (playerInfo && playerInfo.id !== this.pid && playerInfo.team === this.team) {
-            var ghost = this.getGhost(playerInfo.id);
-            if (ghost) ghost.name = playerInfo.displayName;
+    var filterNames = Cookies.get("text")
+    if(filterNames === 1) {
+        if (this.team) {
+            var playerInfo = app.getPlayerInfo(n.pid);
+            if (playerInfo && playerInfo.id !== this.pid && playerInfo.team === this.team) {
+                var ghost = this.getGhost(playerInfo.id);
+                if (ghost) ghost.name = playerInfo.displayName;
+            }
         }
+    } else {
+        var playerInfo = app.getPlayerInfo(n.pid);
+        /* if(playerInfo && playerInfo.id !== this.pid) */
+        var ghost = this.getGhost(playerInfo.id);
+        if (ghost) ghost.name = playerInfo.displayName
     }
 };
 
