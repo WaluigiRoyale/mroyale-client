@@ -1,4 +1,5 @@
 const ASSETS_URL = "https://raw.githubusercontent.com/mroyale/assets/master/";
+const address = `${window.location.host}`;
 
 (function($) {
     var pagify = {
@@ -126,6 +127,81 @@ const ASSETS_URL = "https://raw.githubusercontent.com/mroyale/assets/master/";
     };
 })(jQuery);
 
+var currentLeaderBoard = "coins";
+
+function setLeaderBoard(type) {
+    var curr = document.getElementById("leaderboard-content-"+currentLeaderBoard);
+    curr.style.display = "none";
+    var next = document.getElementById("leaderboard-content-"+type);
+    next.style.display = "";
+    currentLeaderBoard = type;
+}
+
+function showLeaderBoard() {
+    var elem = document.getElementById("leaderboard");
+    var leaderBoard;
+    elem.style.display = "";
+        $.ajax({
+            type: "GET",
+            url: "leaderboard.json", 
+            success: function(result) {
+                leaderBoard = result;
+                var updateLeaderBoard = function (type, values) {
+                    var elem2 = document.getElementById("leaderboard-content-"+type);
+                    elem2.innerHTML = "";
+                    var tab = document.createElement("table");
+                    tab.style.color = "white";
+                    var th = document.createElement("tr");
+                    th.innerHTML = "<th>#</th><th>name</th><th>"+type+"</th>";
+                    tab.appendChild(th);
+                    for (var p of values) {
+                        var tr = document.createElement("tr");
+                        var td = document.createElement("td");
+                        var div = document.createElement("div");
+                        div.setAttribute("class", "leaderboard-skin")
+                        div.style.backgroundImage = ASSETS_URL + 'img/game/smb_skin' + p.skin + '.png'
+                        var url = '<div class="leaderboard-skin" style="background-image: url("' + ASSETS_URL + 'img/game/smb_skin' + p.skin + '.png");"></div>'
+                        td.innerHTML = p.pos;
+                        switch(p.pos) {
+                            case 1 : {td.style.color = 'yellow';break;}
+                            case 2 : {td.style.color = 'silver';break;}
+                            case 3 : {td.style.color = '#CD7F32';break;}
+                            default : {td.style.color = 'white';break;}
+                        }
+                        tr.appendChild(td);
+                        td = document.createElement("td");
+                        td.innerText = ""+p.nickname;
+                        td.style["padding-left"] = "10px";
+                        td.style["padding-right"] = "10px";
+                        switch(p.pos) {
+                            case 1 : {td.style.color = 'yellow';break;}
+                            case 2 : {td.style.color = 'silver';break;}
+                            case 3 : {td.style.color = '#CD7F32';break;}
+                            default : {td.style.color = 'white';break;}
+                        }
+                        tr.appendChild(td);
+                        td = document.createElement("td");
+                        td.innerText = ""+p[type];
+                        tr.appendChild(td);
+                        tab.appendChild(tr);
+                    }
+                    elem2.appendChild(tab);
+                };
+                updateLeaderBoard("coins", result.coinLeaderBoard);
+                updateLeaderBoard("wins", result.winsLeaderBoard);
+                updateLeaderBoard("kills", result.killsLeaderBoard);
+            },
+            dataType: "json",
+            cache: false
+        });
+        return;
+}
+
+function hideLeaderBoard() {
+    var elem = document.getElementById("leaderboard");
+    elem.style.display = "none";
+}
+
 var VERSION = (function() {
     var scripts = document.getElementsByTagName('script');
     var index = scripts.length - 1;
@@ -134,7 +210,7 @@ var VERSION = (function() {
 })();
 
 var jsons = [ASSETS_URL + "assets/assets.json"]
-var scripts = ["js/server.js", "js/game.js"]
+var scripts = ["js/server.js", "js/game.js", "js/scripts/plant.js"]
 var resources = {}
 
 function loadNext() {
@@ -166,6 +242,7 @@ function loadNext() {
 };
 
 function load() {
+    document.body.style.backgroundColor = "#000000";
     loadNext();
     body.style.display = '';
     document.body.style.backgroundColor = "";

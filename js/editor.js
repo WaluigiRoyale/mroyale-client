@@ -42,7 +42,7 @@ var objDefs = {
     18:  {'name': 'KOOPA TROOPA GREEN', 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
     19:  {'name': 'KOOPA TROOPA RED', 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
     21:  {'name': 'FLYING FISH', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
-    22:  {'name': 'PIRANHA PLANT', 'paramDefs': [{'name': 'variant'}, {'name': 'direction'}]},
+    22:  {'name': 'PIRANHA PLANT', 'paramDefs': [{'name': 'variant'}, {'name': 'direction'}, {'name': 'movement'}]},
     23:  {'name': 'BUZZY BEETLE', 'paramDefs': [{'name': 'variant'}]}, // new
     25:  {'name': 'BOWSER', 'paramDefs': [{'name': 'attackType'}]},
     33:  {'name': 'FIRE BAR', 'paramDefs': [{'name': 'phase'}, {'name': 'length'}]},
@@ -1593,7 +1593,7 @@ ZoneTool.prototype.save = function() {
         this.zone.music = this.valMusic.value;
         this.zone.winmusic = this.valWinMusic.value;
     } catch (e) {
-        app.menu.warn.show("Failed to parse value. Changes not applied.");
+        app.menu.warn.show("Failed to parse value. Changes not applied. " + e);
     }
     app.menu.list.generate();
 };
