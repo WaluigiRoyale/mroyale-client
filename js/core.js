@@ -141,6 +141,7 @@ function showLeaderBoard() {
     var elem = document.getElementById("leaderboard");
     var leaderBoard;
     elem.style.display = "";
+    setInterval(() => {
         $.ajax({
             type: "GET",
             url: "leaderboard.json", 
@@ -195,6 +196,7 @@ function showLeaderBoard() {
             cache: false
         });
         return;
+    }, 250)
 }
 
 function hideLeaderBoard() {
