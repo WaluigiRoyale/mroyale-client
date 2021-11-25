@@ -1,19 +1,22 @@
-var GAMEMODES = ["vanilla", "pvp", "hell"];
-var DEV_SKINS = [0];
-var DEFAULT_PLAYER_NAME = "INFRINGIO";
-var levelSelectors = [];    //received from server
-var TILE_ANIMATION_FILTERED = {};
-var OBJ_ANIMATION_FILTERED = {};
+const GAMEMODES = ["vanilla", "pvp", "hell"];
+const DEV_SKINS = [0];
+const DEFAULT_PLAYER_NAME = "INFRINGIO";
+let levelSelectors = [];    //received from server
+let TILE_ANIMATION_FILTERED = {};
+let OBJ_ANIMATION_FILTERED = {};
 
-var LOBBY_MUSIC_URL = ASSETS_URL + "audio/music/lobby.mp3";
-var MENU_MUSIC_URL = ASSETS_URL + "audio/music/menu.mp3";
+let LOBBY_MUSIC_URL = ASSETS_URL + "audio/music/lobby.mp3";
+let MENU_MUSIC_URL = ASSETS_URL + "audio/music/menu.mp3";
 
-var SKINCOUNT = 1;
-var SKIN_MUSIC_URL = {};
-var TILE_ANIMATION = {};
-var OBJ_ANIMATION = {};
-var assetData = resources["https://raw.githubusercontent.com/mroyale/assets/master/assets/" + "assets.json"];
-var loopPodium = false;
+let SKINCOUNT = 1;
+let SKIN_MUSIC_URL = {};
+let TILE_ANIMATION = {};
+let OBJ_ANIMATION = {};
+let assetData = resources["https://raw.githubusercontent.com/mroyale/assets/master/assets/" + "assets.json"];
+let loopPodium = false;
+
+let minZoom = 0x8;
+let maxZoom = 0x1;
 
 (function() {
     if (assetData.skins.count != undefined)
@@ -7162,8 +7165,8 @@ function Camera(_0x450620){
 }
 Camera.MOVE_MULT=0.075;
 Camera.ZOOM_MULT=0.075;
-Camera.ZOOM_MAX=0x1;
-Camera.ZOOM_MIN=0x8;
+Camera.ZOOM_MAX = maxZoom;
+Camera.ZOOM_MIN = minZoom;
 Camera.prototype.move=function(_0x1c8341){
     this.pos=vec2.add(this.pos,vec2.scale(_0x1c8341,0x1/this .scale * Camera.MOVE_MULT));
 };
@@ -8209,6 +8212,7 @@ Game.prototype.load = function(data) {
         app.menu.main.winElement.style.display = "";
         document.getElementById("settins-return-lobby").style.display = "none";
     }else{
+        this.lives++
         app.menu.main.winElement.style.display = "none";
         document.getElementById("settins-return-lobby").style.display = "";
     }
@@ -8244,6 +8248,15 @@ Game.prototype.load = function(data) {
         if(data.podiumLoop == false) return;
         else loopPodium = true;
     }
+    if(data.minZoom) {
+        try { minZoom = data.minZoom;  }
+        catch { minZoom = 0x8; app.menu.warn.show("Cannot set min zoom, fallback initialized"); }
+    }
+    if(data.maxZoom) {
+        try { maxZoom = data.maxZoom; }
+        catch { minZoom = 0x8; app.menu.warn.show("Cannot set max zoom, fallback initialized"); }
+    }
+
     if(reloadAudio)
         app.audio.initWebAudio(app);
 
