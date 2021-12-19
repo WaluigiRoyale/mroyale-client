@@ -15,7 +15,7 @@ var tileDefs = {
     11: {'name': 'NOTE BLOCK'},
     12: {'name': 'ICE SEMISOLID'},
     13: {'name': 'ITEM NOTE BLOCK', 'extraDataName': 'Content', 'extraDataType': 'objId'},
-    14: {'name': 'FLIP BLOCK', 'extraDataName': 'Target Tile Data'},
+    14: {'name': 'FLIP BLOCK', 'extraDataName': 'Target Data'},
     15: {'name': 'NON-SOLID DAMAGE'},
     17: {'name': 'ITEM BLOCK STANDARD', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     18: {'name': 'COIN BLOCK STANDARD'},
@@ -45,7 +45,7 @@ var objDefs = {
     22:  {'name': 'PIRANHA PLANT', 'paramDefs': [{'name': 'variant'}, {'name': 'direction'}, {'name': 'movement'}]},
     23:  {'name': 'BUZZY BEETLE', 'paramDefs': [{'name': 'variant'}]}, // new
     25:  {'name': 'BOWSER', 'paramDefs': [{'name': 'attackType'}]},
-    33:  {'name': 'FIRE BAR', 'paramDefs': [{'name': 'phase'}, {'name': 'length'}]},
+    33:  {'name': 'FIRE BAR', 'paramDefs': [{'name': 'phase'}, {'name': 'length'}, {'name': 'speed'}]},
     34:  {'name': 'LAVA BUBBLE', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
     35:  {'name': 'BILL BLASTER', 'paramDefs': [{'name': 'delay'}, {'name': 'direction'}]},
     36:  {'name': 'BULLET', 'paramDefs': [{'name': 'direction'}]},
@@ -975,6 +975,7 @@ File.prototype.new = function(){
         musicOverridePath:"music/",
         soundOverridePath:"sfx/",
         assets:"assets.json",
+        podiumLoop: false,
         resource:[
             { id: "map", src: "https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_map.png" },
             { id: "obj", src: "https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_obj.png" }
@@ -1268,7 +1269,6 @@ function WorldTool(editor) {
     this.valMode = document.getElementById("editor-tool-world-mode");
     this.valMusicPath = document.getElementById("editor-tool-world-musicPath");
     this.valsoundPath = document.getElementById("editor-tool-world-soundPath");
-    this.valassetPath = document.getElementById("editor-tool-world-assetPath");
     this.btnNew = document.getElementById("editor-tool-world-new");
     var _0x1bb7eb = this;
     this.btnApply = document.getElementById("editor-tool-world-apply");
@@ -1316,7 +1316,6 @@ WorldTool.prototype.load = function() {
     this.valMode.value = this.editor.world.mode;
     this.valMusicPath.value = this.editor.world.musicOverridePath;
     this.valsoundPath.value = this.editor.world.soundOverridePath;
-    this.valassetPath.value = this.editor.world.assets;
     this.element.style.display = "block";
 };
 WorldTool.prototype.save = function() {
@@ -1328,7 +1327,6 @@ WorldTool.prototype.save = function() {
         this.editor.world.mode = this.valMode.value;
         this.editor.world.musicOverridePath = this.valmusicPath.value;
         this.editor.world.soundOverridePath = this.valsoundPath.value;
-        this.editor.world.assets = this.valassetPath.value;
     } catch (_0x5286c3) {
         app.menu.warn.show("Failed to parse value. Changes not applied.");
     }
@@ -6292,7 +6290,6 @@ function World(editor, data) {
     this.shortname = data.shortname;
     this.musicOverridePath = data.musicOverridePath;
     this.soundOverridePath = data.soundOverridePath;
-    this.assets = data.assets;
     this.levels = [];
     for (var i = 0x0; i < data.world.length; i++) this.levels.push(new Level(editor, data.world[i]));
 }
@@ -6541,6 +6538,7 @@ Editor.prototype.compile = function() {
     outData.musicOverridePath = this.world.musicOverridePath;
     outData.soundOverridePath = this.world.soundOverridePath;
     outData.assets = this.world.assets;
+    outData.podiumLoop = this.world.podiumLoop;
     outData.resource = this.dataRaw.resource;
     outData.initial = this.world.initial;
     outData.world = [];

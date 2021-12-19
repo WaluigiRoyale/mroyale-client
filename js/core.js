@@ -212,7 +212,7 @@ var VERSION = (function() {
 })();
 
 var jsons = [ASSETS_URL + "assets/assets.json"]
-var scripts = ["js/server.js", "js/game.js", "js/scripts/plant.js"]
+var scripts = ["js/server.js", "js/game.js", "js/scripts/plant.js", "js/scripts/firebar.js"]
 var resources = {}
 
 function loadNext() {

@@ -7,7 +7,6 @@ function checkSpeed(speed) {
 
 function PiranhaPlantObject(game, level, zone, pos, oid, variant, direction, movement) {
     GameObject.call(this, game, level, zone, vec2.add(pos, vec2.make(0.6, 0x0)));
-    console.log(movement)
     this.speed = 0.05;
     switch(parseInt(movement)) {
         case 1 : 

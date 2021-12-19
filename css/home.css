@@ -311,6 +311,10 @@ img {
   }
 }
 
+hr {
+  border: 2px dashed whitesmoke;
+}
+
 .password-input {
   font-family: SmbWeb;
   font-size: 64px;
@@ -530,7 +534,7 @@ img {
   left: 50%; /* position the left edge of the element at the middle of the parent */
   transform: translate(-50%, 10%); /* This is a shorthand of
                                        translateX(-50%) and translateY(10%) */
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.39);
 
   font-family: SmbWeb;
   font-size: 32px;
