@@ -1,3 +1,4 @@
+
 /* Writing CSS is like having ass cancer in your eyes */
 
 .link-r {
@@ -114,6 +115,19 @@
     margin-left: 6px;
     padding: 0px;
     background-color: rgba(0, 0, 0, 0.0);
+}
+
+.link-editor {
+    cursor: pointer;
+    display: inline-block;
+    width: 36px;
+    height: 27px;
+    background-image: url(https://raw.githubusercontent.com/mroyale/assets/master/img/home/warn.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 30px 27px;
+    margin-bottom: 1px;
+    vertical-align: top;
 }
 
 .link-con {
