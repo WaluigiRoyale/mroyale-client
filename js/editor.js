@@ -1,3 +1,4 @@
+
 const emptyTile = 30;
 
 var tileDefs = {
@@ -37,37 +38,37 @@ var tileDefs = {
 };
 
 var objDefs = {
-    1:   {'name': 'PLAYER', 'paramDefs': [{'name': 'skin'},{'name': 'isDev'}]},
-    17:  {'name': 'GOOMBA', 'paramDefs': [{'name': 'variant'}]},
-    18:  {'name': 'KOOPA TROOPA GREEN', 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
-    19:  {'name': 'KOOPA TROOPA RED', 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
-    21:  {'name': 'FLYING FISH', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
-    22:  {'name': 'PIRANHA PLANT', 'paramDefs': [{'name': 'variant'}, {'name': 'direction'}, {'name': 'movement'}]},
-    23:  {'name': 'BUZZY BEETLE', 'paramDefs': [{'name': 'variant'}]}, // new
-    25:  {'name': 'BOWSER', 'paramDefs': [{'name': 'attackType'}]},
-    33:  {'name': 'FIRE BAR', 'paramDefs': [{'name': 'phase'}, {'name': 'length'}, {'name': 'speed'}]},
-    34:  {'name': 'LAVA BUBBLE', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
-    35:  {'name': 'BILL BLASTER', 'paramDefs': [{'name': 'delay'}, {'name': 'direction'}]},
-    36:  {'name': 'BULLET', 'paramDefs': [{'name': 'direction'}]},
-    37:  {'name': 'OBJECT SPAWNER', 'paramDefs': [{'name': 'objectType'}, {'name': 'delay'}, {'name': 'direction'}]},
-    49:  {'name': 'HAMMER BRO', 'paramDefs': [{'name': 'phase'}]},
-    81:  {'name': 'MUSHROOM'},
-    82:  {'name': 'FIRE FLOWER'},
-    83:  {'name': 'ONEUP'},
-    84:  {'name': 'STAR'},
-    85:  {'name': 'AXE'},
-    86:  {'name': 'POISON MUSHROOM'},
-    97:  {'name': 'COIN'},
-    100: {'name': 'GOLD FLOWER'},
-    145: {'name': 'PLATFORM', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}, {'name': 'loop'}, {'name': 'delay'}, {'name': 'direction'}]},
-    146: {'name': 'BUS PLATFORM', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}]},
-    149: {'name': 'SPRING'},
-    161: {'name': 'FIREBALL PROJECTILE', 'paramDefs': [{'name': 'dir'},{'name': 'owner'},{'name': 'skin'}]},
-    162: {'name': 'FIRE BREATH PROJECTILE'},
-    163: {'name': 'HAMMER PROJECTILE', 'paramDefs': [{'name': 'owner'}, {'name': 'delay'}]},
-    177: {'name': 'FLAG'},
-    253: {'name': 'TEXT', 'paramDefs': [{'name': 'offset'}, {'name': 'size'}, {'name': 'color'}, {'name': 'text'}]},
-    254: {'name': 'CHECKMARK'},
+    1:   {'name': 'PLAYER', 'description': 'Creates a dummy player that can interact like a regular player.\nDoesn\'t mark player spawn location! Use the zone tab for that!', 'paramDefs': [{'name': 'skin'},{'name': 'isDev'}]},
+    17:  {'name': 'GOOMBA', 'description': 'Color should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'variant'}]},
+    18:  {'name': 'KOOPA TROOPA GREEN', 'description': 'Fly should be set to 0 or 1. 1 is flying.\nColor should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
+    19:  {'name': 'KOOPA TROOPA RED', 'description': 'Fly should be set to 0 or 1. 1 is flying.\nColor should bet set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
+    21:  {'name': 'FLYING FISH', 'description': 'Delay is a positive integer in seconds for how the fish should wait before jumping again.\nImpulse is a float value for how much force the fish should jump with.', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
+    22:  {'name': 'PIRANHA PLANT', 'description': 'Color should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'variant'}, {'name': 'direction'}, {'name': 'movement'}]},
+    23:  {'name': 'BUZZY BEETLE', 'description': 'Do not place this. It will not work.', 'paramDefs': [{'name': 'variant'}]}, // new
+    25:  {'name': 'BOWSER', 'description': 'Attack type should be set to 0, 1 or 2.\n0 is only fire breathing, 1 is only hammer throwing, 2 is both.', 'paramDefs': [{'name': 'attackType'}]},
+    33:  {'name': 'FIRE BAR', 'description': 'Phase should be only 0 or 1, only offsets it a bit.\nLength is how many fire balls should spawn\nDefault speed is 23, lower makes it go faster, negative makes it go in reverse.', 'paramDefs': [{'name': 'phase'}, {'name': 'length'}, {'name': 'speed'}]},
+    34:  {'name': 'LAVA BUBBLE', 'description': 'Delay is a positive integer in seconds for how long it takes for it to shoot\nImpulse indicates how much force it should shoot with.', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
+    35:  {'name': 'BILL BLASTER', 'description': 'Delay is a positive integer in seconds for how long it takes for it to shoot.\nDirection indicates which way to go. 0 is left, 1 is right.', 'paramDefs': [{'name': 'delay'}, {'name': 'direction'}]},
+    36:  {'name': 'BULLET', 'description': 'Do not place this. It will not work.', 'paramDefs': [{'name': 'direction'}]},
+    37:  {'name': 'OBJECT SPAWNER', 'description': 'objectType is which object to spawn\nDelay is a positive internet for how long it takes to spawn\nDirection indicates which way to go.', 'paramDefs': [{'name': 'objectType'}, {'name': 'delay'}, {'name': 'direction'}]},
+    49:  {'name': 'HAMMER BRO', 'description': 'Phase should be 0 or 1, indicates which way to go.', 'paramDefs': [{'name': 'phase'}]},
+    81:  {'name': 'MUSHROOM', 'description': 'Makes the player grow into Super Mario.'},
+    82:  {'name': 'FIRE FLOWER', 'description': 'Gives the player the ability to fire.'},
+    83:  {'name': 'ONEUP', 'description': 'Gives the player an extra life.'},
+    84:  {'name': 'STAR', 'description': 'Gives the player a few seconds of immunity\nThe player can also damage other players with the star.'},
+    85:  {'name': 'AXE', 'description': 'Kills any nearby Bowser objects, makes the player win.'},
+    86:  {'name': 'POISON MUSHROOM', 'description': 'Damages the player.'},
+    97:  {'name': 'COIN', 'description': 'Increases coin count by 1'},
+    100: {'name': 'GOLD FLOWER', 'description': 'Gives the player 500 leaderboard coins.'},
+    145: {'name': 'PLATFORM', 'description': '- Positive int, width of the platform\n- Float, how far to move on x axis\n- Float, how far to move on y axis\n- Float, speed\n- 0 or 1, if set to 1 it will loop instantly instead of returning\n- positive int, inital delay on platform. used to offset 2 platforms moving on same path\n- 0 or 1, starts at end point', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}, {'name': 'loop'}, {'name': 'delay'}, {'name': 'direction'}]},
+    146: {'name': 'BUS PLATFORM', 'description': '- Positive int, width of the platform\n- Float, how far to move on x axis\n- Float, how far to move on y axis\n- Float, speed\n- These are mostly indentical to PLATFORM but they only start once someone lands on them. Then they stop at the end.', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}]},
+    149: {'name': 'SPRING', 'description': 'Boing. Makes the player jump ~2 blocks when not holding, ~10 when holding the jump button.'},
+    161: {'name': 'FIREBALL PROJECTILE', 'description': 'Do not place this, it will not work.', 'paramDefs': [{'name': 'dir'},{'name': 'owner'},{'name': 'skin'}]},
+    162: {'name': 'FIRE BREATH PROJECTILE', 'description': 'Do not place this, it will not work.'},
+    163: {'name': 'HAMMER PROJECTILE', 'description': 'Do not place this, it will not work.', 'paramDefs': [{'name': 'owner'}, {'name': 'delay'}]},
+    177: {'name': 'FLAG', 'description': 'Required for flagpoles, slides down then allows player to proceed to the next level.'},
+    253: {'name': 'TEXT', 'description': '- float, vertical offset for text position\n- float 1.0 = the size of 1 tile\n- html color code, #FFFFFF for white\n- string, just a text string after this', 'paramDefs': [{'name': 'offset'}, {'name': 'size'}, {'name': 'color'}, {'name': 'text'}]},
+    254: {'name': 'CHECKMARK', 'description': 'Do not place this, it will not work.'},
 };
 
 var util = {},
@@ -1793,6 +1794,8 @@ ObjectTool.prototype.input = function(lastInput, mouse, keys) {
 
 ObjectTool.prototype.updParamTools = function() {
     var pdef = objDefs[this.obj.type].paramDefs;
+    var inf = objDefs[this.obj.type].description;
+    document.getElementById('editor-tool-object-info').innerText = inf;
     var currParamLimit = pdef ? pdef.length : 0;
     for (var i=0;i<this.editor.objParamLimit;++i) {
         var box = document.getElementById("editor-tool-object-param-box-"+i);
