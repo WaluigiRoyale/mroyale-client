@@ -1,3 +1,7 @@
+
+//import { resources } from './core.js';
+//const ASSETS_URL = "https://raw.githubusercontent.com/mroyale/assets/master/";
+
 const GAMEMODES = ["vanilla", "pvp", "hell"];
 const DEV_SKINS = [0];
 const DEFAULT_PLAYER_NAME = "INFRINGIO"; // TODO Remove
@@ -2250,15 +2254,15 @@ ProfileScreen.prototype.show = function(data) {
     app.menu.background('a');
     this.nicknameInput.value = data["nickname"];
     this.squadInput.value = data["squad"];
-    if ($("#profile-skin-select div").length === 0) {
-        for (var i in _0x592fa2) {
-            var elem = document.createElement("div");
-            elem.setAttribute("class", "skin-select-button");
-            elem.setAttribute("id", 'profile-skin-select-' + _0x592fa2[i]);
-            elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_skin" + _0x592fa2[i] +".png')";
-            elem.addEventListener("click", (function(a){return function() { ProfileScreen.prototype.select(a); }; } ) (_0x592fa2[i]));
-            document.getElementById('profile-skin-select').appendChild(elem);
-        }
+    //$("#profile-skin-select div").length === 0;
+    document.getElementById('profile-skin-select').innerHTML = "";
+    for (var i in _0x592fa2) {
+        var elem = document.createElement("div");
+        elem.setAttribute("class", "skin-select-button");
+        elem.setAttribute("id", 'profile-skin-select-' + _0x592fa2[i]);
+        elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_skin" + _0x592fa2[i] +".png')";
+        elem.addEventListener("click", (function(a){return function() { ProfileScreen.prototype.select(a); }; } ) (_0x592fa2[i]));
+        document.getElementById('profile-skin-select').appendChild(elem);
     }
     this.selectSkin(data["skin"]);
     skinMenu = data["skin"];
@@ -2388,7 +2392,6 @@ ShopScreen.prototype.success = function(msg, skin) {
     let shopResult = document.getElementById('shopResult');
     shopResult.innerText = msg;
     shopResult.style.color = '#68BC00';
-    recent.push(skin);
 };
 
 ShopScreen.prototype.purchased = function(msg) {
@@ -2404,8 +2407,8 @@ ShopScreen.prototype.handleCoins = function(data) {
 };
 
 ShopScreen.prototype.return = function() {
-    //app.menu.mainAsMember.show();
-    location.reload();
+    //location.reload();
+    app.menu.mainAsMember.show();
 };
 
 ShopScreen.prototype.hide = function() {
@@ -2925,7 +2928,8 @@ InputState.prototype.handleUpdProfileResult = function(data) {
 };
 InputState.prototype.handleSkinResult = function(data) {
     ShopScreen.prototype.handleCoins(data.coins);
-    consosle.log(data);
+    _0x592fa2 = data.skins;
+    console.log(data);
 };
 InputState.prototype.handleLoginResult = function(data) {
     if (data.status) {
@@ -9113,11 +9117,12 @@ function App() {
     if (this.goToLobby)
         Cookies.remove("go_to_lobby");
     this.session = Cookies.get("session");
+    /* Disable menu music, reason is because dumb w3 devs
     this.audioElement = document.createElement('audio');
     this.audioElement.setAttribute('src', MENU_MUSIC_URL);
     this.audioElement.load;
     this.audioElement.volume = 0.2;
-    this.audioElement.loop = true;
+    this.audioElement.loop = true;*/
     this.hurryingUp = false;
     this.hurryUpStart = null;
     this.hurryUpTime = null;
@@ -9133,8 +9138,8 @@ function App() {
     this.settings.showSettings = false;
     this.audio = new Audio(this);
     this.players = [];
-    if (0x1 !== parseInt(Cookies.get("music")))
-        this.audioElement.play();
+    //if (0x1 !== parseInt(Cookies.get("music")))
+    //    this.audioElement.play();
     this.statusUpdater = null;
     this.charMusic = Cookies.get("char_music") === "1";
 }
