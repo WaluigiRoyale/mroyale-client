@@ -1,5 +1,5 @@
-
 const emptyTile = 30;
+let dirty = false;
 
 var tileDefs = {
     0:  {'name': 'AIR'},
@@ -1625,6 +1625,7 @@ function TileTool(editor) {
     };
     this.valDepth.onchange = function() {
         that.brushChangeWarning.style.display="";
+        dirty = true;
         that.update();
     };
     this.valDef.onchange = function() {
@@ -1633,10 +1634,12 @@ function TileTool(editor) {
     };
     this.valTileData.onchange = function() {
         that.brushChangeWarning.style.display="";
+        dirty = true;
         that.update();
     };
     this.valTileDataObjId.onchange = function() {
         that.brushChangeWarning.style.display="";
+        dirty = true;
         that.valTileData.value = that.valTileDataObjId.value;
         that.update();
     };
@@ -1653,6 +1656,7 @@ TileTool.prototype.input = function(lastInput, mouse, keys) {
         if (targetIndex < tileCount) {
             if (mouse.lmb) {
                 this.valIndex.value = targetIndex;
+                dirty = true;
                 this.update();
             }
         } else {
@@ -1663,9 +1667,11 @@ TileTool.prototype.input = function(lastInput, mouse, keys) {
             } else {
                 if (mouse.lmb) {
                     this.brushChangeWarning.style.display="none";
+                    dirty = true;
                     zoneData[targetTile.y][targetTile.x] = this.brush;
                 } else if (mouse.mmb) {
                     this.brushChangeWarning.style.display="none";
+                    dirty = true;
                     this.setBrush(zoneData[targetTile.y][targetTile.x]);
                 }
             }
@@ -1786,6 +1792,7 @@ ObjectTool.prototype.input = function(lastInput, mouse, keys) {
             newObj.param = this.obj.param;
             this.zone.obj.push(newObj);
             this.select(newObj);
+            dirty = true;
         } else {
             if (!mouse.mmb) this.mmbx = false;
         }
@@ -6567,6 +6574,7 @@ Editor.prototype.compile = function() {
         }
         outData.world.push(outLevel);
     }
+    dirty = false;
     return JSON.stringify(outData);
 };
 Editor.prototype.setTool = function(toolType) {
@@ -6688,5 +6696,10 @@ App.prototype.close = function() {
     this.editor && this.editor.destroy();
     location.reload();
 };
+
+window.onbeforeunload = (e) => {
+    if (dirty) {return "Do you want to exit this page?";}
+}
+
 var app = new App();
 app.init();

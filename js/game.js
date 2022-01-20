@@ -1,4 +1,3 @@
-
 //import { resources } from './core.js';
 //const ASSETS_URL = "https://raw.githubusercontent.com/mroyale/assets/master/";
 
@@ -3263,7 +3262,7 @@ PlayerObject.ARROW_THRESHOLD_MAX = 0x6;
 PlayerObject.TEAM_OFFSET = vec2.make(0x0, 0x0);
 PlayerObject.TEAM_SIZE = 0.3;
 PlayerObject.TEAM_COLOR = "rgba(255,255,255,0.75)";
-PlayerObject.DEV_TEAM_COLOR = "rgba(255,255,0,1)";
+PlayerObject.DEV_TEAM_COLOR = "rgba(255,255,255,0.75)";
 PlayerObject.SPRITE = {};
 PlayerObject.SPRITE_LIST = [{
     'NAME': "S_STAND",

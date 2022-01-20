@@ -1,4 +1,3 @@
-
 const ASSETS_URL = "https://raw.githubusercontent.com/mroyale/assets/master/";
 
 (function($) {
