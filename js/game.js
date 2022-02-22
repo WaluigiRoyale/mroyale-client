@@ -1,3 +1,4 @@
+
 //import { resources } from './core.js';
 //const ASSETS_URL = "https://raw.githubusercontent.com/mroyale/assets/master/";
 
@@ -10,7 +11,7 @@ let TILE_ANIMATION_FILTERED = {};
 let OBJ_ANIMATION_FILTERED = {};
 
 let LOBBY_MUSIC_URL = ASSETS_URL + "audio/music/lobby.mp3";
-let MENU_MUSIC_URL = ASSETS_URL + "audio/music/snow.mp3";
+let MENU_MUSIC_URL = ASSETS_URL + "audio/music/menu.mp3";
 
 let SKIN_MUSIC_URL = {};
 let skins = {}
@@ -409,6 +410,8 @@ td32.TRIGGER = {
         TOUCH: 0x00,
         DOWN: 0x01,
         PUSH: 0x02,
+        FIREBALL: 0x03,
+        SHELL: 0x04,
         SMALL_BUMP: 0x10,
         BIG_BUMP: 0x11
     }
@@ -501,7 +504,8 @@ td32.TILE_PROPERTIES = {
                 /* Small bump */
                 /* Big bump */
                 case 0x10 :
-                case 0x11 : {
+                case 0x11 :
+                case 0x04 : {
                     if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
                     td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
                     break;
@@ -522,7 +526,9 @@ td32.TILE_PROPERTIES = {
                     td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
                     break;
                 }
+                /* Shell */
                 /* Big bump */
+                case 0x04 :
                 case 0x11 : {
                     if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
                     td32.GEN_FUNC.BREAK(game, pid, td, level, zone, x, y, type);
@@ -669,50 +675,6 @@ td32.TILE_PROPERTIES = {
         ASYNC: true,
         TRIGGER: function(game, pid, td, level, zone, x, y, type) {}
     },
-    /* Item Note Block*/
-    13: {
-        COLLIDE: true,
-        HIDDEN: false,
-        ASYNC: false,
-        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
-            if ((app.net.gameMode === 1 || app.net.gameMode === 2) && game.pid !== pid) return;
-            var noteHit = false;
-            /* I want to use switch case for this but I have no idea how to do it otherwise. (nevermind!)*/
-            switch(type) {
-                case 0x00 : {
-                    if(game.pid === pid) {
-                        PlayerObject.ANIMATION_RATE = 3
-                        PlayerObject.MOVE_SPEED_ACCEL = 0.0125
-                        PlayerObject.MOVE_SPEED_DECEL = 0.0225
-                        PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025
-                    }
-                    if(noteHit == true) {
-                        td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
-                        return;
-                    }
-                }
-                /* Small Bump */
-                /* Big Bump */
-                case 0x10 :
-                case 0x11 : {
-                    td.pos = {x:x,y:y};
-                    if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
-                    var rep = 98331; // Replacement td32 data for tile.
-                    //game.world.getZone(level, zone).replace(x,y,rep);
-                    if(noteHit == false) {
-                        game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
-                        td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
-                        game.world.getZone(level, zone).play(x,y,"item.mp3",1.,0.04);
-                        noteHit == true;
-                    } else {
-                        td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
-                        return;
-                    };
-                    break;
-                }
-            }
-        }
-    },
     /* Flip Block */
     14: {
         COLLIDE: true,
@@ -751,6 +713,41 @@ td32.TILE_PROPERTIES = {
             }
         }
     },
+    /* Ice Tile Block */
+    13: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: false,
+        ICE: true,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch(type) {
+                /* Fireball */
+                case 0x03 : {
+                    game.world.getZone(level, zone).replace(x,y,td.data);
+                    break;
+                }
+            }
+        }
+    },
+    /* Ice Object Block */
+    16: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: false,
+        ICE: true,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch(type) {
+                /* Fireball */
+                case 0x03 : {
+                    var rep = 30; // td32 replacement tile
+                    game.world.getZone(level, zone).replace(x, y, rep);
+                    game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
+                    break;
+                }
+            }
+        }
+    },
+
     /* Item Block Standard */
     0x11: {
         COLLIDE: true,
@@ -761,8 +758,10 @@ td32.TILE_PROPERTIES = {
             switch(type) {
                 /* Small bump */
                 /* Big bump */
+                /* Shell */
                 case 0x10 :
-                case 0x11 : {
+                case 0x11 :
+                case 0x04 : {
                     if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
                     var rep = 98331; // Replacement td32 data for tile.
                     game.world.getZone(level, zone).replace(x,y,rep);
@@ -784,8 +783,10 @@ td32.TILE_PROPERTIES = {
             switch(type) {
                 /* Small bump */
                 /* Big bump */
+                /* Shell */
                 case 0x10 :
-                case 0x11 : {
+                case 0x11 :
+                case 0x04 : {
                     if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
                     game.createObject(td.data, level, zone, vec2.make(x,y), [shor2.encode(x,y)]);
                     td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
@@ -802,11 +803,12 @@ td32.TILE_PROPERTIES = {
         ASYNC: false,
         TRIGGER: function(game, pid, td, level, zone, x, y, type) {
             switch(type) {
-                
                 /* Small bump */
                 /* Big bump */
+                /* Shell */
                 case 0x10:
-                case 0x11: {
+                case 0x11:
+                case 0x04:{
                     if(game.pid === pid) {
                         game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type));
                         game.addCoin(false, true);
@@ -829,8 +831,10 @@ td32.TILE_PROPERTIES = {
             switch(type) {
                 /* Small bump */
                 /* Big bump */
+                /* Shell */
                 case 0x10 :
-                case 0x11 : {
+                case 0x11 :
+                case 0x04 : {
                     if(game.pid === pid) {
                         game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type));
                         game.addCoin(false, true);
@@ -863,7 +867,9 @@ td32.TILE_PROPERTIES = {
             switch(type) {
                 /* Small bump */
                 /* Big bump */
-                case 0x10 : {
+                /* Shell */
+                case 0x10 :
+                case 0x04 : {
                     if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
                     var rep = 98331; // Replacement td32 data for tile.
                     game.world.getZone(level, zone).replace(x,y,rep);
@@ -893,8 +899,10 @@ td32.TILE_PROPERTIES = {
             switch(type) {
                 /* Small bump */
                 /* Big bump */
+                /* Shell */
                 case 0x10 :
-                case 0x11 : {
+                case 0x11 :
+                case 0x04 : {
                     if(game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x,y), type)); }
                     var rep = 98331; // Replacement td32 data for tile.
                     var vin = td32.data(10813796, td.data); // Vine td32 data for tile.
@@ -1068,30 +1076,33 @@ td32.TILE_PROPERTIES = {
             }
         }
     },
-    /* Level Warp Pipe Fast */
+    /* Warp Pipe Left Slow */
     87: {
         COLLIDE: true,
         HIDDEN: false,
         ASYNC: true,
         TRIGGER: function(game, pid, td, level, zone, x, y, type) {
             switch(type) {
-                /* Down */
-                case 0x01 : {
-                    if(game.pid === pid) {
-                        var ply = game.getPlayer();
-                        var l = game.world.getZone(level, zone).getTile(vec2.make(x-1,y));
-                        var r = game.world.getZone(level, zone).getTile(vec2.make(x+1,y));
-
-                        var cx;
-                        if(l.definition === this) { cx = x; }
-                        else if(r.definition === this) { cx = x+1; }
-                        else { return; }
-
-                        if(Math.abs((ply.pos.x + (ply.dim.x*.5)) - cx) <= 0.45) {
-                            ply.pipe(2, td.data, 0); 
-                            
-                            //ply.pipeLevel(2, td.data, 0);
-                        }
+                /* Push */
+                case 0x02 : {
+                    if (game.pid === pid) {
+                        game.getPlayer().pipe(3, td.data, 50);
+                    }
+                }
+            }
+        }
+    },
+    /* Warp Pipe Left Fast */
+    88: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: true,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch(type) {
+                /* Push */
+                case 0x02 : {
+                    if (game.pid === pid) {
+                        game.getPlayer().pipe(3, td.data, 0);
                     }
                 }
             }
@@ -1148,6 +1159,22 @@ td32.TILE_PROPERTIES = {
                     game.createObject(CheckObject.ID, level, zone, vec2.make(x,y+1), [shor2.encode(x,y)]);
                     td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
                     break;
+                }
+            }
+        }
+    },
+    /* Sound Tile */
+    0xF1: {
+        COLLIDE: false,
+        HIDDEN: false,
+        ASYNC: false,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch (type) {
+                /* Touch */
+                case 0x00 : {
+                    if (game.pid === pid) {
+                        game.world.getZone(level, zone).play(x, y, td.data, 1., 0.04);
+                    }
                 }
             }
         }
@@ -1633,6 +1660,7 @@ function MainScreen() {
     this.element = document.getElementById("main");
     this.linkElement = document.getElementById("link");
     this.winElement = document.getElementById("win");
+    this.leaderElement = document.getElementById("link-leaderboard");
     this.launchBtn = document.getElementById("main-launch");
     this.loginBtn = document.getElementById("main-login");
     this.registerBtn = document.getElementById("main-register");
@@ -1735,7 +1763,7 @@ MainScreen.prototype.hide = function() {
     }
 };
 MainScreen.prototype.updateStatsBar = function() {
-    this.winElement.innerHTML = "Login to track statistics and use all skins";
+    this.winElement.innerText = "Login to track statistics and use all skins";
 };
 "use strict";
 
@@ -1927,7 +1955,7 @@ function genAddSkinButton(screen, guest) {
         var elem = document.createElement("div");
         elem.setAttribute("class", "skin-select-button");
         elem.setAttribute("id", screen.skinButtonPrefix+"-"+i);
-        elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_skin" + i +".png')";
+        elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/skins/smb_skin" + i +".png')";
         elem.addEventListener("click", (function(a){return function() {genSelectSkin(screen, a);};})(i));
         document.getElementById(screen.skinButtonPrefix).appendChild(elem);
     }
@@ -2259,7 +2287,7 @@ ProfileScreen.prototype.show = function(data) {
         var elem = document.createElement("div");
         elem.setAttribute("class", "skin-select-button");
         elem.setAttribute("id", 'profile-skin-select-' + _0x592fa2[i]);
-        elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_skin" + _0x592fa2[i] +".png')";
+        elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/skins/smb_skin" + _0x592fa2[i] +".png')";
         elem.addEventListener("click", (function(a){return function() { ProfileScreen.prototype.select(a); }; } ) (_0x592fa2[i]));
         document.getElementById('profile-skin-select').appendChild(elem);
     }
@@ -2357,7 +2385,7 @@ ShopScreen.prototype.show = function() {
             var elem = document.createElement("div");
             elem.setAttribute("class", "skin-select-button");
             elem.setAttribute("id", 'shop-' + skin.id);
-            elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_skin" + skin.id +".png')";
+            elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/skins/smb_skin" + skin.id +".png')";
             elem.addEventListener("click", (function(a){return function() { ShopScreen.prototype.select(a); }; } ) (skin.id));
             document.getElementById('shop-select').appendChild(elem);
         }
@@ -2819,23 +2847,28 @@ Network.prototype.connect = function(args) {
     }
 };
 Network.prototype.handlePacket = function(data) {
-    if (undefined === this.state || !this.state.handlePacket(data)) switch (data.type) {
-        case "s00":
-            this.setState(data.state);
-            break;
-        case "s01":
-            this.handleBlob(data.packets);
-            break;
-        case "s02":
-            break;
-        case "x00":
-            app.menu.error.show("Server Exception", data.message);
-            break;
-        case "x01":
-            app.menu.error.show("Server Exception", data.message, data.trace);
-            break;
-        default:
-            app.menu.error.show("Recieved invalid packet type: " + data.type, JSON.stringify(data));
+    if (undefined === this.state || !this.state.handlePacket(data)) {
+        switch (data.type) {
+            case "s00":
+                this.setState(data.state);
+                break;
+            case "s01":
+                this.handleBlob(data.packets);
+                break;
+            case "s02":
+                break;
+            case "x00":
+                app.menu.error.show("Server Exception", data.message);
+                break;
+            case "x01":
+                app.menu.error.show("Server Exception", data.message, data.trace);
+                break;
+            case "slb":
+                app.menu.warn.show(JSON.stringify(data.data.winsLeaderBoard));
+                break;
+            default:
+                app.menu.error.show("Recieved invalid packet type: " + data.type, JSON.stringify(data));
+        }
     }
 };
 Network.prototype.handleBinary = function(data) {
@@ -2890,6 +2923,8 @@ InputState.prototype.handlePacket = function(data) {
             return this.handleLogoutResult(data), true;
         case "lpr":
             return this.handleUpdProfileResult(data), true;
+        case "llb":
+            return this.updateLeaderboard(data), true;
         case "prc":
             return this.handleSkinResult(data), true;
         default:
@@ -2928,7 +2963,6 @@ InputState.prototype.handleUpdProfileResult = function(data) {
 InputState.prototype.handleSkinResult = function(data) {
     ShopScreen.prototype.handleCoins(data.coins);
     _0x592fa2 = data.skins;
-    console.log(data);
 };
 InputState.prototype.handleLoginResult = function(data) {
     if (data.status) {
@@ -3201,6 +3235,7 @@ function PlayerObject(game, level, zone, pos, pid, skin, isDev) {
     this.attackTimer = 0x0;
     this.autoTarget = undefined;
     this.btnD = [0x0, 0x0];
+    this.btnU = false;
     this.btnBde = this.btnBg = this.btnB = this.btnA = false;
     this.btnAHot = false;
     this.setState(PlayerObject.SNAME.STAND);
@@ -3218,7 +3253,7 @@ PlayerObject.MOVE_SPEED_MAX = 0.215;
 PlayerObject.MOVE_SPEED_ACCEL = 0.0125;
 PlayerObject.MOVE_SPEED_DECEL = 0.0225;
 PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025;
-PlayerObject.STUCK_SLIDE_SPEED = 0.08;
+PlayerObject.STUCK_SLIDE_SPEED = 0.09;
 PlayerObject.FALL_SPEED_MAX = 0.45;
 PlayerObject.FALL_SPEED_ACCEL = 0.085;
 PlayerObject.BOUNCE_LENGTH_MIN = 0x1;
@@ -3269,6 +3304,10 @@ PlayerObject.SPRITE_LIST = [{
     'ID': 0x0,
     'INDEX': 0xd
 }, {
+    'NAME': "S_TAUNT",
+    'ID': 0x8,
+    'INDEX': 0x5
+}, {
     'NAME': "S_RUN0",
     'ID': 0x1,
     'INDEX': 0xa
@@ -3302,6 +3341,13 @@ PlayerObject.SPRITE_LIST = [{
     'INDEX': [
         [0x2d],
         [0x1d]
+    ]
+}, {
+    'NAME': "B_TAUNT",
+    'ID': 0x2A,
+    'INDEX': [
+        [32],
+        [16]
     ]
 }, {
     'NAME': "B_DOWN",
@@ -3372,6 +3418,13 @@ PlayerObject.SPRITE_LIST = [{
     'INDEX': [
         [0x4c, 0x4b],
         [0x3c, 0x3b]
+    ]
+}, {
+    'NAME': "F_TAUNT",
+    'ID': 0x51,
+    'INDEX': [
+        [34, 33],
+        [18, 17]
     ]
 }, {
     'NAME': "F_DOWN",
@@ -3455,6 +3508,7 @@ PlayerObject.SPRITE_LIST = [{
 for (var _0x1bec55 = 0x0; _0x1bec55 < PlayerObject.SPRITE_LIST.length; _0x1bec55++) PlayerObject.SPRITE[PlayerObject.SPRITE_LIST[_0x1bec55].NAME] = PlayerObject.SPRITE_LIST[_0x1bec55], PlayerObject.SPRITE[PlayerObject.SPRITE_LIST[_0x1bec55].ID] = PlayerObject.SPRITE_LIST[_0x1bec55];
 PlayerObject.SNAME = {};
 PlayerObject.SNAME.STAND = "STAND";
+PlayerObject.SNAME.TAUNT = "TAUNT";
 PlayerObject.SNAME.DOWN = "DOWN";
 PlayerObject.SNAME.RUN = "RUN";
 PlayerObject.SNAME.SLIDE = "SLIDE";
@@ -3475,6 +3529,11 @@ PlayerObject.STATE = [{
     'ID': 0x0,
     'DIM': _0x4a74c1,
     'SPRITE': [PlayerObject.SPRITE.S_STAND]
+}, {
+    'NAME': PlayerObject.SNAME.TAUNT,
+    'ID': 0x8,
+    'DIM': _0x4a74c1,
+    'SPRITE': [PlayerObject.SPRITE.S_TAUNT]
 }, {
     'NAME': PlayerObject.SNAME.DOWN,
     'ID': 0x1,
@@ -3516,6 +3575,11 @@ PlayerObject.STATE = [{
     'DIM': _0x124f5a,
     'SPRITE': [PlayerObject.SPRITE.B_STAND]
 }, {
+    'NAME': PlayerObject.SNAME.TAUNT,
+    'ID': 0x2a,
+    'DIM': _0x124f5a,
+    'SPRITE': [PlayerObject.SPRITE.B_TAUNT]
+}, {
     'NAME': PlayerObject.SNAME.DOWN,
     'ID': 0x21,
     'DIM': _0x4a74c1,
@@ -3555,6 +3619,11 @@ PlayerObject.STATE = [{
     'ID': 0x40,
     'DIM': _0x124f5a,
     'SPRITE': [PlayerObject.SPRITE.F_STAND]
+}, {
+    'NAME': PlayerObject.SNAME.TAUNT,
+    'ID': 0x49,
+    'DIM': _0x124f5a,
+    'SPRITE': [PlayerObject.SPRITE.F_TAUNT]
 }, {
     'NAME': PlayerObject.SNAME.DOWN,
     'ID': 0x41,
@@ -3725,11 +3794,12 @@ PlayerObject.prototype.step = function() {
         }
     } else this.lastPos = this.pos, 0x0 < this.damageTimer && this.damageTimer--, this.attackCharge < PlayerObject.MAX_CHARGE && this.attackCharge++, 0x0 < this.attackTimer && this.attackTimer--, this.autoTarget && this.autoMove(), this.control(), this.physics(), this.interaction(), this.arrow(), this.sound(), 0x0 > this.pos.y && this.kill();
 };
-PlayerObject.prototype.input = function(abtnD, abtnA, abtnB, abtnTA) {
+PlayerObject.prototype.input = function(abtnD, abtnA, abtnB, abtnTA, abtnU) {
     this.btnD = abtnD;
     if (app.autoMove && this.btnD[0] == 0) this.btnD[0] = 1;
     this.btnA = abtnA;
     this.btnB = abtnB;
+    this.btnU = abtnU;
     if (abtnTA) {
         this.btnA = true;
         this.btnAHot = false;
@@ -3743,8 +3813,10 @@ PlayerObject.prototype.autoMove = function() {
 PlayerObject.prototype.control = function() {
     if (this.grounded) this.btnBg = this.btnB;
     if (this.isState(PlayerObject.SNAME.DOWN) && this.collisionTest(this.pos, this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.power).DIM)) {
-        if (- 0x1 !== this.btnD[0x1]) this.moveSpeed = 0.5 * (this.moveSpeed + PlayerObject.STUCK_SLIDE_SPEED);
+        if (- 0x1 !== this.btnD[0x1] && !this.btnA) this.moveSpeed = 0.5 * (this.moveSpeed + PlayerObject.STUCK_SLIDE_SPEED);
+        
         this.moveSpeed = Math.sign(this.moveSpeed) * Math.max(Math.abs(this.moveSpeed) - PlayerObject.MOVE_SPEED_DECEL, 0x0);
+        return;
     } else {
         if (0x0 !== this.btnD[0x0]) {
             if (0.01 < Math.abs(this.moveSpeed) && !(0x0 <= this.btnD[0x0] ^ 0x0 > this.moveSpeed)) {
@@ -3780,8 +3852,13 @@ PlayerObject.prototype.control = function() {
             this.btnAHot = false;
             if (this.jumping > b) this.jumping = -0x1;
         }
+
+        if (this.btnU && this.grounded && this.moveSpeed === 0 && !this.isState(PlayerObject.SNAME.DOWN)) { // make sure holding up button, while grounded, while completely still and not crouching
+            this.setState(PlayerObject.SNAME.TAUNT);
+        }
+
         this.grounded || this.setState(PlayerObject.SNAME.FALL);
-        this.btnB && !this.btnBde && 0x2 === this.power && !this.isState(PlayerObject.SNAME.DOWN) && !this.isState(PlayerObject.SNAME.SLIDE) && 0x1 > this.attackTimer && this.attackCharge >= PlayerObject.ATTACK_CHARGE && (this.attack(), this.game.out.push(NET013.encode(0x1)));
+        this.btnB && !this.btnBde && 0x2 === this.power && !this.isState(PlayerObject.SNAME.DOWN) && !this.isState(PlayerObject.SNAME.TAUNT) && !this.isState(PlayerObject.SNAME.SLIDE) && 0x1 > this.attackTimer && this.attackCharge >= PlayerObject.ATTACK_CHARGE && (this.attack(), this.game.out.push(NET013.encode(0x1)));
         this.btnBde = this.btnB;
         0x0 < this.attackTimer && 0x2 === this.power && (this.isState(PlayerObject.SNAME.STAND) || this.isState(PlayerObject.SNAME.RUN)) && this.setState(PlayerObject.SNAME.ATTACK);
     }
@@ -3904,10 +3981,24 @@ PlayerObject.prototype.physics = function() {
         for (_0x5b32b0 = 0x0; _0x5b32b0 < _0x346d1d.length; _0x5b32b0++) obj = _0x346d1d[_0x5b32b0], obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, td32.TRIGGER.TYPE.PUSH);
     for (_0x5b32b0 = 0x0; _0x5b32b0 < _0x50b7b9.length; _0x5b32b0++) obj = _0x50b7b9[_0x5b32b0], obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, 0x0 < this.power ? td32.TRIGGER.TYPE.BIG_BUMP : td32.TRIGGER.TYPE.SMALL_BUMP), this.jumping = -0x1, this.fallSpeed = -PlayerObject.BLOCK_BUMP_THRESHOLD;
 };
-PlayerObject.prototype.collisionTest = function(_0x569425, _0x1323bb) {
+/*PlayerObject.prototype.collisionTest = function(_0x569425, _0x1323bb) {
     for (var _0x4dc291 = vec2.make(0x1, 0x1), _0x471838 = this.game.world.getZone(this.level, this.zone).getTiles(_0x569425, _0x1323bb), _0x426d64 = 0x0; _0x426d64 < _0x471838.length; _0x426d64++) {
         var _0x2faa4b = _0x471838[_0x426d64];
         if (_0x2faa4b.definition.COLLIDE && squar.intersection(_0x2faa4b.pos, _0x4dc291, _0x569425, _0x1323bb)) return true;
+    }
+    return false;
+};*/
+
+/* God bless OSS */
+PlayerObject.prototype.collisionTest = function(pos, dim) {
+    var tdim = vec2.make(1., 1.);
+    var tiles = this.game.world.getZone(this.level, this.zone).getTiles(pos, dim);
+    for(var i=0;i<tiles.length;i++) {
+      var tile = tiles[i];
+      if(!tile.definition.COLLIDE) { continue; }
+      
+      if(tile.definition.PLATFORM !== undefined) return false;
+      if(squar.intersection(tile.pos, tdim, pos, dim)) { return true; }
     }
     return false;
 };
@@ -4487,7 +4578,7 @@ KoopaObject.prototype.control = function() {
     else if (this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) this.moveSpeed = 0x0;
     this.jump > KoopaObject.JUMP_LENGTH_MAX && (this.jump = -0x1);
 };
-KoopaObject.prototype.physics = function() {
+/*KoopaObject.prototype.physics = function() {
     -0x1 !== this.jump ? (this.fallSpeed = KoopaObject.FALL_SPEED_MAX - this.jump * KoopaObject.JUMP_DECEL, this.jump++, this.grounded = false) : (this.grounded && (this.fallSpeed = 0x0), this.fallSpeed = Math.max(this.fallSpeed - KoopaObject.FALL_SPEED_ACCEL, -KoopaObject.FALL_SPEED_MAX));
     this.grounded && (this.fallSpeed = 0x0);
     this.fallSpeed = Math.max(this.fallSpeed - KoopaObject.FALL_SPEED_ACCEL, -KoopaObject.FALL_SPEED_MAX);
@@ -4506,7 +4597,80 @@ KoopaObject.prototype.physics = function() {
     for (_0x277a15 = 0x0; _0x277a15 < _0x186c6d.length; _0x277a15++) _0xb496d = _0x186c6d[_0x277a15], _0xb496d.definition.COLLIDE && squar.intersection(_0xb496d.pos, _0x1f400c, _0xa7c94d, this.dim) && (this.pos.y >= _0xb496d.pos.y + _0x1f400c.y && _0xa7c94d.y < _0xb496d.pos.y + _0x1f400c.y ? (_0xa7c94d.y = _0xb496d.pos.y + _0x1f400c.y, this.grounded = true) : this.pos.y + this.dim.y <= _0xb496d.pos.y && _0xa7c94d.y + this.dim.y > _0xb496d.pos.y && (_0xa7c94d.y = _0xb496d.pos.y - this.dim.y, this.jump = -0x1, this.fallSpeed = 0x0));
     this.pos = vec2.make(_0x228c79.x, _0xa7c94d.y);
     _0x350f0e && (this.dir = !this.dir);
-};
+};*/
+
+KoopaObject.prototype.physics = function() {
+    if(this.jump !== -1) {
+      this.fallSpeed = KoopaObject.FALL_SPEED_MAX - (this.jump*KoopaObject.JUMP_DECEL);
+      this.jump++;
+      this.grounded = false;
+    }
+    else {
+      if(this.grounded) { this.fallSpeed = 0; }
+      this.fallSpeed = Math.max(this.fallSpeed - KoopaObject.FALL_SPEED_ACCEL, -KoopaObject.FALL_SPEED_MAX);
+    }
+    
+    if(this.grounded) {
+      this.fallSpeed = 0;
+    }
+    this.fallSpeed = Math.max(this.fallSpeed - KoopaObject.FALL_SPEED_ACCEL, -KoopaObject.FALL_SPEED_MAX);
+    
+    var movx = vec2.add(this.pos, vec2.make(this.moveSpeed, 0.));
+    var movy = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
+    
+    var ext1 = vec2.make(this.moveSpeed>=0?this.pos.x:this.pos.x+this.moveSpeed, this.fallSpeed<=0?this.pos.y:this.pos.y+this.fallSpeed);
+    var ext2 = vec2.make(this.dim.y+Math.abs(this.moveSpeed), this.dim.y+Math.abs(this.fallSpeed));
+    var tiles = this.game.world.getZone(this.level, this.zone).getTiles(ext1, ext2);
+    var tdim = vec2.make(1., 1.);
+    
+    var changeDir = false;
+    this.grounded = false;
+    for(var i=0;i<tiles.length;i++) {
+      var tile = tiles[i];
+      if(!tile.definition.COLLIDE) { continue; }
+      
+      var hitx = squar.intersection(tile.pos, tdim, movx, this.dim);
+      
+      if(hitx) {
+        if (this.state === KoopaObject.STATE.SPIN) tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.SHELL);
+
+        if(this.pos.x + this.dim.x <= tile.pos.x && movx.x + this.dim.x > tile.pos.x) {
+          movx.x = tile.pos.x - this.dim.x;
+          movy.x = movx.x;
+          this.moveSpeed = 0;
+          changeDir = true;
+        }
+        else if(this.pos.x >= tile.pos.x + tdim.x && movx.x < tile.pos.x + tdim.x) {
+          movx.x = tile.pos.x + tdim.x;
+          movy.x = movx.x;
+          this.moveSpeed = 0;
+          changeDir = true;
+        }
+      }
+    }
+      
+    for(var i=0;i<tiles.length;i++) {
+      var tile = tiles[i];
+      if(!tile.definition.COLLIDE) { continue; }
+      
+      var hity = squar.intersection(tile.pos, tdim, movy, this.dim);
+      
+      if(hity) {
+        if(this.pos.y >= tile.pos.y + tdim.y && movy.y < tile.pos.y + tdim.y) {
+          movy.y = tile.pos.y + tdim.y;
+          this.grounded = true;
+        }
+        else if(this.pos.y + this.dim.y <= tile.pos.y && movy.y + this.dim.y > tile.pos.y) {
+          movy.y = tile.pos.y - this.dim.y;
+          this.jump = -1;
+          this.fallSpeed = 0;
+        }
+      }
+    }
+    this.pos = vec2.make(movx.x, movy.y);
+    if(changeDir) { this.dir = !this.dir; }
+  };
+
 KoopaObject.prototype.interaction = function() {
     if (this.state === KoopaObject.STATE.SPIN)
         for (var _0x369f51 = 0x0; _0x369f51 < this.game.objects.length; _0x369f51++) {
@@ -4718,6 +4882,81 @@ Koopa2Object.prototype.control = function() {
     if (this.state === Koopa2Object.STATE.SHELL || this.state === Koopa2Object.STATE.TRANSFORM) this.moveSpeed = 0x0;
 };
 Koopa2Object.prototype.physics = function() {
+    if(this.state === Koopa2Object.STATE.FLY) {
+      if(this.rev) {
+        this.fallSpeed = Math.min(Koopa2Object.FLY_SPEED_MAX, this.fallSpeed+Koopa2Object.FLY_ACCEL);
+        this.pos.y += this.fallSpeed;
+        if(this.pos.y >= this.loc[0]) { this.rev = false; }
+      }
+      else {
+        this.fallSpeed = Math.max(-Koopa2Object.FLY_SPEED_MAX, this.fallSpeed-Koopa2Object.FLY_ACCEL);
+        this.pos.y += this.fallSpeed;
+        if(this.pos.y <= this.loc[1]) { this.rev = true; }
+      }
+      return;
+    }
+    
+    if(this.grounded) {
+      this.fallSpeed = 0;
+    }
+    this.fallSpeed = Math.max(this.fallSpeed - KoopaObject.FALL_SPEED_ACCEL, -KoopaObject.FALL_SPEED_MAX);
+    
+    var movx = vec2.add(this.pos, vec2.make(this.moveSpeed, 0.));
+    var movy = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
+    
+    var ext1 = vec2.make(this.moveSpeed>=0?this.pos.x:this.pos.x+this.moveSpeed, this.fallSpeed<=0?this.pos.y:this.pos.y+this.fallSpeed);
+    var ext2 = vec2.make(this.dim.y+Math.abs(this.moveSpeed), this.dim.y+Math.abs(this.fallSpeed));
+    var tiles = this.game.world.getZone(this.level, this.zone).getTiles(ext1, ext2);
+    var tdim = vec2.make(1., 1.);
+    
+    var changeDir = false;
+    this.grounded = false;
+    for(var i=0;i<tiles.length;i++) {
+      var tile = tiles[i];
+      if(!tile.definition.COLLIDE) { continue; }
+      
+      var hitx = squar.intersection(tile.pos, tdim, movx, this.dim);
+      
+      if(hitx) {
+        if (this.state === Koopa2Object.STATE.SPIN) tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.SHELL);
+
+        if(this.pos.x + this.dim.x <= tile.pos.x && movx.x + this.dim.x > tile.pos.x) {
+          movx.x = tile.pos.x - this.dim.x;
+          movy.x = movx.x;
+          this.moveSpeed = 0;
+          changeDir = true;
+        }
+        else if(this.pos.x >= tile.pos.x + tdim.x && movx.x < tile.pos.x + tdim.x) {
+          movx.x = tile.pos.x + tdim.x;
+          movy.x = movx.x;
+          this.moveSpeed = 0;
+          changeDir = true;
+        }
+      }
+    }
+      
+    for(var i=0;i<tiles.length;i++) {
+      var tile = tiles[i];
+      if(!tile.definition.COLLIDE) { continue; }
+      
+      var hity = squar.intersection(tile.pos, tdim, movy, this.dim);
+      
+      if(hity) {
+        if(this.pos.y >= tile.pos.y + tdim.y && movy.y < tile.pos.y + tdim.y) {
+          movy.y = tile.pos.y + tdim.y;
+          this.fallSpeed = 0;
+          this.grounded = true;
+        }
+        else if(this.pos.y + this.dim.y <= tile.pos.y && movy.y + this.dim.y > tile.pos.y) {
+          movy.y = tile.pos.y - this.dim.y;
+          this.fallSpeed = 0;
+        }
+      }
+    }
+    this.pos = vec2.make(movx.x, movy.y);
+    if(changeDir) { this.dir = !this.dir; }
+};
+/*function() {
     if (this.state === Koopa2Object.STATE.FLY) this.rev ? (this.fallSpeed = Math.min(Koopa2Object.FLY_SPEED_MAX, this.fallSpeed + Koopa2Object.FLY_ACCEL), this.pos.y += this.fallSpeed, this.pos.y >= this.loc[0x0] && (this.rev = false)) : (this.fallSpeed = Math.max(-Koopa2Object.FLY_SPEED_MAX, this.fallSpeed - Koopa2Object.FLY_ACCEL), this.pos.y += this.fallSpeed, this.pos.y <= this.loc[0x1] && (this.rev = true));
     else {
         this.grounded && (this.fallSpeed = 0x0);
@@ -4738,7 +4977,7 @@ Koopa2Object.prototype.physics = function() {
         this.pos = vec2.make(_0x487bc8.x, _0x41141f.y);
         _0x58fc4d && (this.dir = !this.dir);
     }
-};
+};*/
 Koopa2Object.prototype.interaction = function() {
     if (this.state === Koopa2Object.STATE.SPIN)
         for (var _0x55c0e3 = 0x0; _0x55c0e3 < this.game.objects.length; _0x55c0e3++) {
@@ -5894,7 +6133,7 @@ SpawnerObject.prototype.fire = function() {
 SpawnerObject.prototype.isTangible = function() { return false; };
 GameObject.REGISTER_OBJECT(SpawnerObject);
 
-function FireballObject(game, level, zone, pos, oid, dir, owner, skin) {
+/*function FireballObject(game, level, zone, pos, oid, dir, owner, skin) {
     GameObject.call(this, game, level, zone, pos);
     this.owner = owner;
     this.skin = skin;
@@ -6010,7 +6249,7 @@ FireballObject.prototype.draw = function(_0x12ec20) {
     });
 };
 FireballObject.prototype.play = GameObject.prototype.play;
-GameObject.REGISTER_OBJECT(FireballObject);
+GameObject.REGISTER_OBJECT(FireballObject);*/
 "use strict";
 
 function FireBreathObject(game, level, zone, pos) {
@@ -6218,7 +6457,7 @@ function PowerUpObject(game, level, zone, pos, oid) {
     GameObject.call(this, game, level, zone, pos);
     this.oid = oid;
     this.anim = 0x0;
-    this.dim = vec2.make(0x1, 0x1);
+    this.dim = vec2.make(0x1, 0.9);
     this.fallSpeed = this.moveSpeed = 0x0;
     this.rise = this.grounded = false;
     var size = vec2.make(0x1, 0x1);
@@ -7439,30 +7678,10 @@ Audio.prototype.initWebAudio = function(app) {
     var soundList = ["alert.mp3", "break.mp3", "breath.mp3", "bump.mp3", "gold.mp3", "spring.mp3", 
         "coin.mp3", "fireball.mp3", "firework.mp3", "flagpole.mp3", "item.mp3", "jump0.mp3", 
         "jump1.mp3", "kick.mp3", "life.mp3", "pipe.mp3","powerup.mp3", "powerdown.mp3", "stomp.mp3", "swim.mp3", "vine.mp3"];
-    var musicList = [
-        "main0.mp3", "main1.mp3", "main2.mp3", "main3.mp3", "level.mp3", // STANDARD
-        "castle.mp3", "victory.mp3", "star.mp3", "dead.mp3", "gameover.mp3", "hurry.mp3", 
-        // NEON
-        "nfirstarea.mp3", "nsecondarea.mp3", "nthirdarea.mp3", "nunderground.mp3",
-        "neonvictory.mp3", "nboss.mp3", "nwin.mp3",
-        // PASTEL
-        "pday.mp3", "pnight.mp3", "pcastle.mp3", "pboss.mp3", "pdesert.mp3", "prooftops.mp3",
-        "pwater.mp3", "pairship.mp3", "punderground.mp3", "pwin.mp3",
-        // SMB2
-        "overworld.mp3", "ground.mp3", "clear.mp3", "boss.mp3",
-        // SMW
-        "atheletic.mp3", "bonusclear.mp3", "boss.mp3", "fortress.mp3", "overworld.mp3", "underground.mp3",
-        // FIRE
-        "fireman.mp3", "fireboss.mp3",
-        // HELL
-        "hellow.ogg", "hellunder.ogg", "hellwater.ogg", "hellcastle.ogg",
-        // XEXYZ
-        "xarea1.mp3", "xarea2.mpe", "xarea3.mp3", "xboss.mp3",
-        // WINGY
-        "wingy_o.mp3", "wingy_wtr.mp3", "wingy_lvl.mp3", "wingy_grnd.mp3", "wingy_c.mp3", "wingy_cf.mp3",
-        // ML1
-        "birabuto.mp3", "cave.mp3", "coinroom.mp3"
-    ];
+        var musicList = [
+            "main0.mp3", "main1.mp3", "main2.mp3", "main3.mp3", "level.mp3", // STANDARD
+            "castle.mp3", "victory.mp3", "star.mp3", "dead.mp3", "gameover.mp3", "hurry.mp3"
+        ];
     this.sounds = [];
     for (var i = 0x0; i < soundList.length; i++)
         if (!this.createAudio(soundList[i], this.soundPrefix)) return false;
@@ -7615,7 +7834,7 @@ function Display(game, container, canvas, resource) {
     this.canvas = canvas;
     this.context = this.canvas.getContext('2d');
     //add default skin
-    resource.push({ id: "skin0", src: ASSETS_URL + "img/game/smb_skin0.png"});
+    resource.push({ id: "skin0", src: ASSETS_URL + "img/skins/smb_skin0.png"});
     //add ui texture
     resource.push({ id: "ui", src: ASSETS_URL + "img/game/smb_ui.png" });
     this.resource = new Resource(resource);
@@ -7625,7 +7844,7 @@ Display.TEXRES = 0x10;
 Display.prototype.ensureSkin = function(skin) {
     var spriteMap = this.resource.getTexture("skin"+skin);
     if (spriteMap === undefined) {
-        this.resource.addTexture({id:"skin" + skin, src: ASSETS_URL + "img/game/smb_skin" + skin +".png", isSkin:true});
+        this.resource.addTexture({id:"skin" + skin, src: ASSETS_URL + "img/skins/smb_skin" + skin +".png", isSkin:true});
     }
 }
 Display.prototype.clear = function() {
@@ -8697,14 +8916,15 @@ Game.prototype.doInput = function(lastInput) {
         (keys[input.assignK.right] || pad.button(input.assignG.right) || 0.1 < pad.ax.x) && abtnD[0x0]++;
         var abtnA = keys[input.assignK.a] || pad.button(input.assignG.a),
             abtnB = keys[input.assignK.b] || pad.button(input.assignG.b),
-            abtnTA = keys[input.assignK.ta] || pad.button(input.assignG.ta);
+            abtnTA = keys[input.assignK.ta] || pad.button(input.assignG.ta),
+            abtnU = keys[input.assignK.up] || pad.button(input.assignG.up);
         mouse.spin && this.display.camera.zoom(mouse.spin);
         if (this.padReturnToLobby && abtnA) {
             Cookies.set("go_to_lobby", "1");
             location.reload();
             this.padReturnToLobby = false;
         }
-        player.input(abtnD, abtnA, abtnB, abtnTA);
+        player.input(abtnD, abtnA, abtnB, abtnTA, abtnU);
         var game = this;
         var canvasWidth = this.display.canvas.width;
         for (var i = 0x0; i < lastInput.mouse.length; i++) {
@@ -9116,12 +9336,13 @@ function App() {
     if (this.goToLobby)
         Cookies.remove("go_to_lobby");
     this.session = Cookies.get("session");
-    /* Disable menu music, reason is because dumb w3 devs
+
     this.audioElement = document.createElement('audio');
     this.audioElement.setAttribute('src', MENU_MUSIC_URL);
     this.audioElement.load;
     this.audioElement.volume = 0.2;
-    this.audioElement.loop = true;*/
+    this.audioElement.loop = true;
+
     this.hurryingUp = false;
     this.hurryUpStart = null;
     this.hurryUpTime = null;
@@ -9137,8 +9358,8 @@ function App() {
     this.settings.showSettings = false;
     this.audio = new Audio(this);
     this.players = [];
-    //if (0x1 !== parseInt(Cookies.get("music")))
-    //    this.audioElement.play();
+    if (0x1 !== parseInt(Cookies.get("music")))
+        this.audioElement.play();
     this.statusUpdater = null;
     this.charMusic = Cookies.get("char_music") === "1";
 }
