@@ -1,4 +1,5 @@
-<html>
+
+<html lang="en-US">
 
 <head>
   <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -22,6 +23,7 @@
   <meta charset="utf-8">
   <meta name="viewport" id="meta-zoom"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
 
   <meta name="keywords"
     content="Mario Royale, Mario, Super Mario, Super Mario Bros, Royale, Super Mario Royale, Super Mario Bros Royale" />
@@ -67,9 +69,9 @@
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:site" content="@MarioRoyalePlus" />
 
-  <link rel='stylesheet' type='text/css' href='css/home.css?v=4.1.3'>
-  <link rel='stylesheet' type='text/css' href='css/spinner.css?v=4.1.3'>
-  <link rel='stylesheet' type='text/css' href='css/link.css?v=4.1.3'>
+  <link rel='stylesheet' type='text/css' href='css/home.css?v=4.1.9'>
+  <link rel='stylesheet' type='text/css' href='css/spinner.css?v=4.1.9'>
+  <link rel='stylesheet' type='text/css' href='css/link.css?v=4.1.9'>
   <script>
     /* Prevent phones from zooming screen. The webapp handles this. */
     document.addEventListener('touchmove', function (event) {
@@ -327,10 +329,18 @@
     <div id="levelSelectCustomResult" class="levelSelectRow">&nbsp;</div>
   </div>
 
-  <!-- Mod manager -->
+  <!-- Mod Manager -->
   <div id='modManager' class='container-privLobby' style='display:none;'>
-    <div class='dis-sm-r' id='settingsClose' onclick='document.getElementById("modManager").style.display = "none";'>x</div>
+    <div class='dis-sm-r' id='settingsClose' onclick="document.getElementById('modManager').style.display = 'none';">x</div>
     <div class='dis-lg'>Mod Manager</div>
+
+    <div class="dis">Mods</div>
+
+    <div class="levelSelectRow">
+      <div id="gfxTitle" class='levelSelectButton'>Upload Mod</div>
+      <input type="file" id="gfxModAdd" name="gfxModAdd" accept=".json" />
+    </div>
+
   </div>
 
   <!-- Options menu -->
@@ -399,14 +409,14 @@
     </div>
     <div class="link-l">
       <div class="rtfpn2"></div>
-      <div id="link-patch" class="link-patch" onclick="window.open('./patch.html?v=4.1.3')" style="display:none;">v4.1.3 Patch Notes</div>
+      <div id="link-patch" class="link-patch" onclick="window.open('./patch.html?v=4.1.9')" style="display:none;">v4.1.9 Patch Notes</div>
     </div>
     <div class="link-b">
       <div class="rtfpn"></div>
       <div>
         <div class="link-leaderboard" onclick="showLeaderBoard()">Leaderboards</div>
-        <div class="link-editor" onclick="window.open('./editor.html?v=4.1.3')"></div>
-        <div class="link-con" onclick="window.open('./control.html?v=4.1.3')"></div>
+        <div class="link-editor" onclick="window.open('./editor.html?v=4.1.9')"></div>
+        <div class="link-con" onclick="window.open('./control.html?v=4.1.9')"></div>
       </div>
     </div>
     <div class="link-s">
@@ -420,11 +430,11 @@
   </div>
 
   <!-- Libs -->
-  <script src='js/lib/jquery/jquery-3.1.1.min.js'></script>
+  <script src='js/lib/jquery/jquery-3.6.0.min.js'></script>
   <script src='js/lib/cookie/js.cookie.min.js'></script>
 
   <!-- Core -->
-  <script src='js/core.js?v=4.1.3'></script>
+  <script src='js/core.js?v=4.1.9'></script>
 </body>
 
 </html>
