@@ -1,3 +1,4 @@
+
 @font-face {
     font-family: SmbWeb;
     src: url('../font/smbfont.ttf') format("truetype");
@@ -417,7 +418,7 @@ hr {
   width: 16px;
   height: 16px;
   margin: 12px;
-  background: url(https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_skin0.png) -208px 0;
+  background: url(https://raw.githubusercontent.com/mroyale/assets/master/img/skins/smb_skin0.png) -208px 0;
   transform: scale(2)
 }
 
@@ -428,7 +429,7 @@ hr {
   height: 16px;
   margin: 12px;
   border: 2px solid #3c3c3c;
-  background: url(https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_skin0.png) -208px 0;
+  background: url(https://raw.githubusercontent.com/mroyale/assets/master/img/skins/smb_skin0.png) -208px 0;
   transform: scale(2)
 }
 
