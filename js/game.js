@@ -3522,166 +3522,166 @@ PlayerObject.SNAME.HIDE = "HIDE";
 PlayerObject.SNAME.GHOST = "GHOST";
 PlayerObject.SNAME.DEADGHOST = "DEADGHOST";
 PlayerObject.HideSprite = 0x70;
-var _0x4a74c1 = vec2.make(0.9, 0.95),
-    _0x124f5a = vec2.make(0.9, 1.9);
+var DIM0 = vec2.make(0.9, 0.95), // small
+    DIM1 = vec2.make(0.9, 1.9); // big
 PlayerObject.STATE = [{
     'NAME': PlayerObject.SNAME.STAND,
     'ID': 0x0,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.S_STAND]
 }, {
     'NAME': PlayerObject.SNAME.TAUNT,
     'ID': 0x8,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.S_TAUNT]
 }, {
     'NAME': PlayerObject.SNAME.DOWN,
     'ID': 0x1,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.S_STAND]
 }, {
     'NAME': PlayerObject.SNAME.RUN,
     'ID': 0x2,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.S_RUN2, PlayerObject.SPRITE.S_RUN1, PlayerObject.SPRITE.S_RUN0]
 }, {
     'NAME': PlayerObject.SNAME.SLIDE,
     'ID': 0x3,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.S_SLIDE]
 }, {
     'NAME': PlayerObject.SNAME.FALL,
     'ID': 0x4,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.S_FALL]
 }, {
     'NAME': PlayerObject.SNAME.TRANSFORM,
     'ID': 0x5,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.S_STAND]
 }, {
     'NAME': PlayerObject.SNAME.POLE,
     'ID': 0x6,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.S_CLIMB1]
 }, {
     'NAME': PlayerObject.SNAME.CLIMB,
     'ID': 0x7,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.S_CLIMB0, PlayerObject.SPRITE.S_CLIMB1]
 }, {
     'NAME': PlayerObject.SNAME.STAND,
     'ID': 0x20,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.B_STAND]
 }, {
     'NAME': PlayerObject.SNAME.TAUNT,
     'ID': 0x2a,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.B_TAUNT]
 }, {
     'NAME': PlayerObject.SNAME.DOWN,
     'ID': 0x21,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.B_DOWN]
 }, {
     'NAME': PlayerObject.SNAME.RUN,
     'ID': 0x22,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.B_RUN2, PlayerObject.SPRITE.B_RUN1, PlayerObject.SPRITE.B_RUN0]
 }, {
     'NAME': PlayerObject.SNAME.SLIDE,
     'ID': 0x23,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.B_SLIDE]
 }, {
     'NAME': PlayerObject.SNAME.FALL,
     'ID': 0x24,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.B_FALL]
 }, {
     'NAME': PlayerObject.SNAME.TRANSFORM,
     'ID': 0x25,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.B_TRANSFORM]
 }, {
     'NAME': PlayerObject.SNAME.POLE,
     'ID': 0x26,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.B_CLIMB0]
 }, {
     'NAME': PlayerObject.SNAME.CLIMB,
     'ID': 0x27,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.B_CLIMB0, PlayerObject.SPRITE.B_CLIMB1]
 }, {
     'NAME': PlayerObject.SNAME.STAND,
     'ID': 0x40,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.F_STAND]
 }, {
     'NAME': PlayerObject.SNAME.TAUNT,
     'ID': 0x49,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.F_TAUNT]
 }, {
     'NAME': PlayerObject.SNAME.DOWN,
     'ID': 0x41,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.F_DOWN]
 }, {
     'NAME': PlayerObject.SNAME.RUN,
     'ID': 0x42,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.F_RUN2, PlayerObject.SPRITE.F_RUN1, PlayerObject.SPRITE.F_RUN0]
 }, {
     'NAME': PlayerObject.SNAME.SLIDE,
     'ID': 0x43,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.F_SLIDE]
 }, {
     'NAME': PlayerObject.SNAME.FALL,
     'ID': 0x44,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.F_FALL]
 }, {
     'NAME': PlayerObject.SNAME.ATTACK,
     'ID': 0x45,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.F_ATTACK]
 }, {
     'NAME': PlayerObject.SNAME.TRANSFORM,
     'ID': 0x46,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.F_TRANSFORM]
 }, {
     'NAME': PlayerObject.SNAME.POLE,
     'ID': 0x47,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.F_CLIMB0]
 }, {
     'NAME': PlayerObject.SNAME.CLIMB,
     'ID': 0x48,
-    'DIM': _0x124f5a,
+    'DIM': DIM1,
     'SPRITE': [PlayerObject.SPRITE.F_CLIMB0, PlayerObject.SPRITE.F_CLIMB1]
 }, {
     'NAME': PlayerObject.SNAME.DEAD,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'ID': 0x60,
     'SPRITE': [PlayerObject.SPRITE.G_DEAD]
 }, {
     'NAME': PlayerObject.SNAME.HIDE,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'ID': PlayerObject.HideSprite,
     'SPRITE': [PlayerObject.SPRITE.G_HIDE]
 }, {
     'NAME': PlayerObject.SNAME.GHOST,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'ID': 0xff,
     'SPRITE': []
 }, {
     'NAME': PlayerObject.SNAME.DEADGHOST,
-    'DIM': _0x4a74c1,
+    'DIM': DIM0,
     'ID': 0xfe,
     'SPRITE': [PlayerObject.SPRITE.G_DEAD]
 }];
@@ -3855,6 +3855,18 @@ PlayerObject.prototype.control = function() {
 
         if (this.btnU && this.grounded && this.moveSpeed === 0 && !this.isState(PlayerObject.SNAME.DOWN)) { // make sure holding up button, while grounded, while completely still and not crouching
             this.setState(PlayerObject.SNAME.TAUNT);
+        }
+
+        if (this.moveSpeed > 0.300 || this.moveSpeed < -0.300) {
+            if (DIM0.x || DIM1.x == 1)  {
+                DIM0.x = 1; // increase small hitbox
+                DIM1.x = 1; // increase big hitbox
+            }
+        } else {
+            if (DIM0.x || DIM1.x !== 1) {
+                DIM0.x = 0.9; // reset small hitbox
+                DIM1.x = 0.9; // reset big hitbox
+            }
         }
 
         this.grounded || this.setState(PlayerObject.SNAME.FALL);
