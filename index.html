@@ -69,9 +69,9 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@MarioRoyalePlus" />
   
-    <link rel='stylesheet' type='text/css' href='css/home.css?v=4.1.9.1'>
-    <link rel='stylesheet' type='text/css' href='css/spinner.css?v=4.1.9.1'>
-    <link rel='stylesheet' type='text/css' href='css/link.css?v=4.1.9.1'>
+    <link rel='stylesheet' type='text/css' href='css/home.css?v=4.2.0'>
+    <link rel='stylesheet' type='text/css' href='css/spinner.css?v=4.2.0'>
+    <link rel='stylesheet' type='text/css' href='css/link.css?v=4.2.0'>
     <script>
       /* Prevent phones from zooming screen. The webapp handles this. */
       document.addEventListener('touchmove', function (event) {
@@ -320,7 +320,7 @@
     <div id='privLobby' class='container-privLobby' style='display: none;'>
       <div class='dis-sm-r' id="privLobbyClose">x</div>
       <div class='dis-lg'>World Select</div>
-      <div id="levelSelectStandard" class="levelSelectRow">
+      <div id="levelSelectStandard" class="levelSelectRow" style='font-size:14px;width:650px;'>
       </div>
       <div class="levelSelectRow">
         <div id="levelSelectCustom" class='levelSelectButton'>Custom</div>
@@ -359,6 +359,9 @@
       </div>
       <div class="levelSelectRow">
         <div id="autoMove" class='levelSelectButton'>[ ] Auto Move</div>
+      </div>
+      <div class="levelSelectRow">
+        <div id="compactMode" class='levelSelectButton'>[ ] Compact Mode</div>
       </div>
       <div class='dis'>GFX Mods</div>
       <div class="levelSelectRow">
@@ -409,14 +412,14 @@
       </div>
       <div class="link-l">
         <div class="rtfpn2"></div>
-        <div id="link-patch" class="link-patch" onclick="window.open('./patch.html?v=4.1.9.1')" style="display:none;">v4.1.9.1 Patch Notes</div>
+        <div id="link-patch" class="link-patch" onclick="window.open('./patch.html?v=4.2.0')" style="display:none;">v4.2.0 Patch Notes</div>
       </div>
       <div class="link-b">
         <div class="rtfpn"></div>
         <div>
           <div class="link-leaderboard" onclick="showLeaderBoard()">Leaderboards</div>
-          <div class="link-editor" onclick="window.open('./editor.html?v=4.1.9.1')"></div>
-          <div class="link-con" onclick="window.open('./control.html?v=4.1.9.1')"></div>
+          <div class="link-editor" onclick="window.open('./editor.html?v=4.2.0')"></div>
+          <div class="link-con" onclick="window.open('./control.html?v=4.2.0')"></div>
         </div>
       </div>
       <div class="link-s">
@@ -434,7 +437,7 @@
     <script src='js/lib/cookie/js.cookie.min.js'></script>
   
     <!-- Core -->
-    <script src='js/core.js?v=4.1.9.1'></script>
+    <script src='js/core.js?v=4.2.0'></script>
   </body>
   
   </html>  
