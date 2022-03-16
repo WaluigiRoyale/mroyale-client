@@ -1,3 +1,4 @@
+
 const emptyTile = 30;
 let dirty = false;
 
@@ -15,16 +16,18 @@ var tileDefs = {
     10: {'name': 'ICE BLOCK'},
     11: {'name': 'NOTE BLOCK'},
     12: {'name': 'ICE SEMISOLID'},
-    13: {'name': 'ITEM NOTE BLOCK', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     14: {'name': 'FLIP BLOCK', 'extraDataName': 'Target Data'},
     15: {'name': 'NON-SOLID DAMAGE'},
+    13: {'name': 'ICE TILE BLOCK', 'extraDataName': 'Target Tile Data'},
+    16: {'name': 'ICE OBJECT BLOCK', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     17: {'name': 'ITEM BLOCK STANDARD', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     18: {'name': 'COIN BLOCK STANDARD'},
     19: {'name': 'COIN BLOCK MULTI', 'extraDataName': 'Coin Count'},
     20: {'name': 'PROGRESSIVE ITEM BLOCK'},
+    26: {'name': 'PROGRESSIVE ITEM BLOCK INVISIBLE'},
     21: {'name': 'ITEM BLOCK INVISIBLE', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     22: {'name': 'COIN BLOCK INVISIBLE'},
-    24: {'name': 'VINE BLOCK'},
+    24: {'name': 'VINE BLOCK', 'extraDataName': 'Target Warp ID'},
     25: {'name': 'ITEM BLOCK INFINITE', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     81: {'name': 'WARP TILE', 'extraDataName': 'Target Warp ID'},
     82: {'name': 'WARP PIPE SLOW', 'extraDataName': 'Target Warp ID'},
@@ -32,9 +35,12 @@ var tileDefs = {
     84: {'name': 'WARP PIPE FAST', 'extraDataName': 'Target Warp ID'},
     85: {'name': 'WARP PIPE RIGHT FAST', 'extraDataName': 'Target Warp ID'},
     86: {'name': 'LEVEL END WARP', 'extraDataName': 'Target Level ID'},
+    87: {'name': 'WARP PIPE SINGLE SLOW', 'extraDataName': 'Target Warp ID'},
+    88: {'name': 'WARP PIPE SINGLE FAST', 'extraDataName': 'Target Warp ID'},
     160:{'name': 'FLAGPOLE', 'extraDataName': 'Award (0=None/1=Coins/2=1UP)'},
     165:{'name': 'VINE'},
     240:{'name': 'VOTE BLOCK'},
+    241:{'name': 'SOUND BLOCK', 'extraDataName': 'SFX Name'}
 };
 
 var objDefs = {
@@ -43,7 +49,9 @@ var objDefs = {
     18:  {'name': 'KOOPA TROOPA GREEN', 'description': 'Fly should be set to 0 or 1. 1 is flying.\nColor should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
     19:  {'name': 'KOOPA TROOPA RED', 'description': 'Fly should be set to 0 or 1. 1 is flying.\nColor should bet set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
     21:  {'name': 'FLYING FISH', 'description': 'Delay is a positive integer in seconds for how the fish should wait before jumping again.\nImpulse is a float value for how much force the fish should jump with.', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
-    22:  {'name': 'PIRANHA PLANT', 'description': 'Color should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'variant'}, {'name': 'direction'}, {'name': 'movement'}]},
+    22:  {'name': 'PIRANHA PLANT', 'description': '- Color should be set to 0 or 1. 0 is the light one, 1 is the dark one.\n- Direction should be 0 or 1. 0 is normal, 1 is upside down.\n- Movement should be 0 or 1. 1 stops the plant from moving. Leave blank for default (0)', 'paramDefs': [{'name': 'variant'}, {'name': 'direction'}, {'name': 'movement'}]},
+    23:  {'name': 'SPINY SHELL', 'description': 'No params.'}, // New
+    24:  {'name': 'BUZZY BEETLE', 'description': 'No params.'},
     25:  {'name': 'BOWSER', 'description': 'Attack type should be set to 0, 1 or 2.\n0 is only fire breathing, 1 is only hammer throwing, 2 is both.', 'paramDefs': [{'name': 'attackType'}]},
     33:  {'name': 'FIRE BAR', 'description': 'Phase should be only 0 or 1, only offsets it a bit.\nLength is how many fire balls should spawn\nDefault speed is 23, lower makes it go faster, negative makes it go in reverse.', 'paramDefs': [{'name': 'phase'}, {'name': 'length'}, {'name': 'speed'}]},
     34:  {'name': 'LAVA BUBBLE', 'description': 'Delay is a positive integer in seconds for how long it takes for it to shoot\nImpulse indicates how much force it should shoot with.', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
@@ -58,7 +66,7 @@ var objDefs = {
     85:  {'name': 'AXE', 'description': 'Kills any nearby Bowser objects, makes the player win.'},
     86:  {'name': 'POISON MUSHROOM', 'description': 'Damages the player.'},
     97:  {'name': 'COIN', 'description': 'Increases coin count by 1'},
-    100: {'name': 'GOLD FLOWER', 'description': 'Gives the player 500 leaderboard coins.'},
+    100: {'name': 'GOLD FLOWER', 'description': '- This should not be manually placed. The game randomly selects a coin block to be replaced with a gold flower, and that gives you 500 coins. This will not.'},
     145: {'name': 'PLATFORM', 'description': '- Positive int, width of the platform\n- Float, how far to move on x axis\n- Float, how far to move on y axis\n- Float, speed\n- 0 or 1, if set to 1 it will loop instantly instead of returning\n- positive int, inital delay on platform. used to offset 2 platforms moving on same path\n- 0 or 1, starts at end point', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}, {'name': 'loop'}, {'name': 'delay'}, {'name': 'direction'}]},
     146: {'name': 'BUS PLATFORM', 'description': '- Positive int, width of the platform\n- Float, how far to move on x axis\n- Float, how far to move on y axis\n- Float, speed\n- These are mostly indentical to PLATFORM but they only start once someone lands on them. Then they stop at the end.', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}]},
     149: {'name': 'SPRING', 'description': 'Boing. Makes the player jump ~2 blocks when not holding, ~10 when holding the jump button.'},
@@ -1278,6 +1286,7 @@ function WorldTool(editor) {
     this.btnNew = document.getElementById("editor-tool-world-new");
     this.btnNew.onclick = function() {
         _0x1bb7eb.addLevel();
+        dirty = true;
     };
 }
 WorldTool.prototype.addLevel = function() {
@@ -1422,6 +1431,7 @@ function ZoneTool(editor) {
     this.valColor = document.getElementById("editor-tool-zone-color");
     this.valMusic = document.getElementById("editor-tool-zone-music");
     this.valWinMusic = document.getElementById("editor-tool-zone-winmusic");
+    this.valVicMusic = document.getElementById("editor-tool-zone-victorymusic");
     this.valWidth = document.getElementById("editor-tool-zone-width");
     this.valHeight = document.getElementById("editor-tool-zone-height");
     this.btnApply = document.getElementById("editor-tool-zone-apply");
@@ -1431,6 +1441,7 @@ function ZoneTool(editor) {
     this.btnSize = document.getElementById("editor-tool-zone-resize");
     this.btnSize.onclick = function() {
         that.resize();
+        dirty = true;
     };
     this.btnShiftX = document.getElementById("editor-tool-zone-shiftx");
     this.btnShiftX.onclick = function() {
@@ -1574,6 +1585,7 @@ ZoneTool.prototype.load = function() {
     this.valColor.value = this.zone.color;
     this.valMusic.value = this.zone.music;
     this.valWinMusic.value = this.zone.winmusic || "";
+    this.valVicMusic.value = this.zone.victorymusic || "";
     var dims = this.zone.dimensions();
     this.valWidth.value = dims.x;
     this.valHeight.value = dims.y;
@@ -1590,6 +1602,7 @@ ZoneTool.prototype.save = function() {
         this.zone.color = this.valColor.value;
         this.zone.music = this.valMusic.value;
         this.zone.winmusic = this.valWinMusic.value;
+        this.zone.victorymusic = this.valVicMusic.value;
     } catch (e) {
         app.menu.warn.show("Failed to parse value. Changes not applied. " + e);
     }
@@ -1752,25 +1765,31 @@ ObjectTool.prototype.input = function(lastInput, mouse, keys) {
     if (this.selected && 0x1 > --this.moveTimer) {
         if (keys[0x57] || keys[0x26]) {
             this.move(0x0, 0x1);
+            dirty = true;
             return;
         }
         if (keys[0x53] || keys[0x28]) {
             this.move(0x0, -0x1);
+            dirty = true;
             return;
         }
         if (keys[0x41] || keys[0x25]) {
             this.move(-0x1, 0x0);
+            dirty = true;
             return;
         }
         if (keys[0x44] || keys[0x27]) {
             this.move(0x1, 0x0);
+            dirty = true;
             return;
         }
         if (keys[0x2e]) {
             this.delete();
+            dirty = true;
             return;
         }
     }
+
     var absMousePos = vec2.chop(this.editor.display.camera.unproject(mouse.pos));
     absMousePos.y = this.zone.height() - absMousePos.y - 0x1;
     if (mouse.lmb) {
@@ -1894,9 +1913,11 @@ function WarpTool(editor) {
     var that = this;
     this.valId.onchange = function() {
         that.update();
+        dirty = true;
     };
     this.valData.onchange = function() {
         that.update();
+        dirty = true;
     };
     this.moveTimer = 0x0;
     this.mmbx = false;
@@ -1972,6 +1993,7 @@ WarpTool.prototype.move = function(dx, dy) {
         this.selected.pos = shor2.encode(pos.x, pos.y);
         this.moveTimer = 0x4;
     }
+    dirty = true;
 };
 WarpTool.prototype.delete = function() {
     for (var _0x344d5e = 0x0; _0x344d5e < this.zone.warp.length; _0x344d5e++)
@@ -1979,6 +2001,7 @@ WarpTool.prototype.delete = function() {
             this.zone.warp.splice(_0x344d5e, 0x1);
             break;
         }
+    dirty = true;
 };
 WarpTool.prototype.reload = function() {
     this.save();
@@ -1993,6 +2016,7 @@ WarpTool.prototype.save = function() {};
 WarpTool.prototype.destroy = function() {
     this.element.style.display = "none";
     this.save();
+    dirty = true;
     this.valId.onchange = void 0x0;
 };
 "use strict";
@@ -2045,6 +2069,7 @@ CopyTool.prototype.doPaste = function(pos) {
             for (var j = 0x0; j < this.copyData[0x0].length && j + pos.x < zoneData[0x0].length; j++) 
                 if (this.overwrite === undefined || zoneData[pos.y + i][pos.x + j] === this.overwrite)
                     zoneData[pos.y + i][pos.x + j] = this.copyData[i][j];
+        dirty = true;
     }
 };
 CopyTool.prototype.update = function() {
@@ -6367,6 +6392,7 @@ function Zone(game, level, data) {
     this.color = data.color;
     this.music = data.music ? data.music : '';
     this.winmusic = data.winmusic ? data.winmusic : '';
+    this.victorymusic = data.victorymusic ? data.victorymusic : '';
     this.layers = data.layers || [];
     if (data.data) {
         for (var i=0; i<this.layers.length && this.layers[i].z < 0; i++);
@@ -6566,6 +6592,7 @@ Editor.prototype.compile = function() {
             outZone.color = zone.color;
             outZone.music = zone.music;
             outZone.winmusic = zone.winmusic;
+            outZone.victorymusic = zone.victorymusic;
             outZone.layers = zone.layers;
             outZone.obj = zone.obj;
             outZone.warp = zone.warp;

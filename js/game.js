@@ -1,3 +1,4 @@
+
 const GAMEMODES = ["vanilla", "pvp", "hell"];
 const DEV_SKINS = [0];
 const DEFAULT_PLAYER_NAME = "INFRINGIO"; // TODO Remove
@@ -3957,72 +3958,6 @@ PlayerObject.prototype.control = function() {
     }
 };
 
-/*PlayerObject.prototype.control = function () {
-    app.menu.warn.show(`${this.jumping}<br>${this.state.NAME}<br>${this.crouchJump}<br>${this.power}`, false, false)
-    if (this.grounded) this.btnBg = this.btnB;
-    if (0x0 !== this.btnD[0x0]) {
-        if (0.01 < Math.abs(this.moveSpeed) && !(0x0 <= this.btnD[0x0] ^ 0x0 > this.moveSpeed)) {
-            this.moveSpeed += PlayerObject.MOVE_SPEED_DECEL * this.btnD[0x0];
-            this.setState(PlayerObject.SNAME.SLIDE);
-        } else {
-            this.moveSpeed = this.btnD[0x0] * Math.min(Math.abs(this.moveSpeed) + 0.0125, this.underWater ? 0.200 : this.btnBg ? 0.315 : 0.215);
-            this.setState(PlayerObject.SNAME.RUN);
-        }
-        if (this.grounded || this.underWater) this.reverse = 0x0 <= this.btnD[0x0];
-    } else {
-        if (!this.underWater || this.grounded) { //decelerate when not holding a button
-            if (0.01 < Math.abs(this.moveSpeed)) {
-                this.moveSpeed = Math.sign(this.moveSpeed) * Math.max(Math.abs(this.moveSpeed) - PlayerObject.MOVE_SPEED_DECEL, 0x0);
-                this.setState(PlayerObject.SNAME.RUN);
-            } else {
-                this.moveSpeed = 0x0, this.setState(PlayerObject.SNAME.STAND);
-            }
-            if (-0x1 === this.btnD[0x1]) this.setState(PlayerObject.SNAME.DOWN);
-        }
-    }
-    var a = this.isSpring ? 0xe : this.underWater == 1 ? 0.1 : 0x7;
-    var b = this.isSpring ? PlayerObject.SPRING_LENGTH_MIN : this.isBounce ? PlayerObject.BOUNCE_LENGTH_MIN : PlayerObject.JUMP_LENGTH_MIN;
-    for (i = 0x0; i < PlayerObject.JUMP_SPEED_INC_THRESHOLD.length && Math.abs(this.moveSpeed) >= PlayerObject.JUMP_SPEED_INC_THRESHOLD[i]; i++) a++;
-    if (this.btnA) {
-        if ((this.grounded || this.underWater) && !this.btnAHot) {
-            if (this.isState(PlayerObject.SNAME.DOWN)) this.crouchJump = true;
-            this.jumping = 0x0;
-            this.play(this.underWater ? "swim.mp3" : 0x0 < this.power ? "jump1.mp3" : "jump0.mp3", 0.7, 0.04);
-            this.btnAHot = true;
-        }
-        if (this.jumping > a) this.jumping = -0x1;
-    } else {
-        this.btnAHot = false;
-        if (this.jumping > b) this.jumping = -0x1;
-    }
-
-    if (this.btnU && this.grounded && this.moveSpeed === 0 && !this.isState(PlayerObject.SNAME.DOWN)) { // make sure holding up button, while grounded, while completely still and not crouching
-        this.setState(PlayerObject.SNAME.TAUNT);
-    }
-
-    if (this.moveSpeed > 0.300 || this.moveSpeed < -0.300) {
-        if (DIM0.x || DIM1.x == 1) {
-            DIM0.x = 1; // increase small hitbox
-            DIM1.x = 1; // increase big hitbox
-        }
-    } else {
-        if (DIM0.x || DIM1.x !== 1) {
-            DIM0.x = 0.9; // reset small hitbox
-            DIM1.x = 0.9; // reset big hitbox
-        }
-    }
-
-    if (!this.grounded) {
-        this.crouchJump ? this.setState(PlayerObject.SNAME.CROUCHJUMP) : this.setState(PlayerObject.SNAME.FALL);
-    } else {
-        if(this.jumping == -1) this.crouchJump = false;
-    }
-    
-    this.btnB && !this.btnBde && 0x2 === this.power && !this.isState(PlayerObject.SNAME.DOWN) && !this.isState(PlayerObject.SNAME.TAUNT) && !this.isState(PlayerObject.SNAME.SLIDE) && 0x1 > this.attackTimer && this.attackCharge >= PlayerObject.ATTACK_CHARGE && (this.attack(), this.game.out.push(NET013.encode(0x1)));
-    this.btnBde = this.btnB;
-    0x0 < this.attackTimer && 0x2 === this.power && (this.isState(PlayerObject.SNAME.STAND) || this.isState(PlayerObject.SNAME.RUN)) && this.setState(PlayerObject.SNAME.ATTACK);
-};*/
-
 PlayerObject.prototype.physics = function () {
     if (-0x1 !== this.jumping) {
         this.fallSpeed = (this.underWater == 1 ? 0.3 : 0.45) - 0.005 * this.jumping;
@@ -4140,13 +4075,6 @@ PlayerObject.prototype.physics = function () {
         for (_0x5b32b0 = 0x0; _0x5b32b0 < _0x346d1d.length; _0x5b32b0++) obj = _0x346d1d[_0x5b32b0], obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, td32.TRIGGER.TYPE.PUSH);
     for (_0x5b32b0 = 0x0; _0x5b32b0 < _0x50b7b9.length; _0x5b32b0++) obj = _0x50b7b9[_0x5b32b0], obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, 0x0 < this.power ? td32.TRIGGER.TYPE.BIG_BUMP : td32.TRIGGER.TYPE.SMALL_BUMP), this.jumping = -0x1, this.fallSpeed = -PlayerObject.BLOCK_BUMP_THRESHOLD;
 };
-/*PlayerObject.prototype.collisionTest = function(_0x569425, _0x1323bb) {
-    for (var _0x4dc291 = vec2.make(0x1, 0x1), _0x471838 = this.game.world.getZone(this.level, this.zone).getTiles(_0x569425, _0x1323bb), _0x426d64 = 0x0; _0x426d64 < _0x471838.length; _0x426d64++) {
-        var _0x2faa4b = _0x471838[_0x426d64];
-        if (_0x2faa4b.definition.COLLIDE && squar.intersection(_0x2faa4b.pos, _0x4dc291, _0x569425, _0x1323bb)) return true;
-    }
-    return false;
-};*/
 
 /* God bless OSS */
 PlayerObject.prototype.collisionTest = function (pos, dim) {
@@ -4359,11 +4287,11 @@ PlayerObject.prototype.isState = function (stName) {
     return stName === this.state.NAME;
 };
 PlayerObject.prototype.draw = function (spriteList) {
-    if (!(this.isState(PlayerObject.SNAME.HIDE) || 0x0 < this.pipeDelay || 0x0 < this.damageTimer && 0x1 < this.damageTimer % 0x3)) {
+    if (!(this.isState(PlayerObject.SNAME.HIDE) || 0x0 < this.pipeDelay || 0x0 < this.damageTimer && 0x1 < this.damageTimer % 0x3 && !this.isState(PlayerObject.SNAME.POLE))) {
         var mode;
-        /* mode = 0x0 < this.starTimer ? 0x2 : ((this.isState(PlayerObject.SNAME.GHOST) || this.isState(PlayerObject.SNAME.DEADGHOST)) && !this.isDev) ? 0x1 : 0x1; */
         if(this.starTimer > 0) { mode = 0x02; }
         else if(this.isState(PlayerObject.SNAME.GHOST) || this.isState(PlayerObject.SNAME.DEADGHOST)) { mode = 0x01; }
+        else if(this.isState(PlayerObject.SNAME.POLE)) { mode = 0x00; }
         else { mode = 0x00; }
         if (this.sprite.INDEX instanceof Array)
             for (var _0x5814e0 = this.sprite.INDEX, _0x3f6b38 = 0x0; _0x3f6b38 < _0x5814e0.length; _0x3f6b38++)
@@ -4740,26 +4668,6 @@ KoopaObject.prototype.control = function () {
     else if (this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) this.moveSpeed = 0x0;
     this.jump > KoopaObject.JUMP_LENGTH_MAX && (this.jump = -0x1);
 };
-/*KoopaObject.prototype.physics = function() {
-    -0x1 !== this.jump ? (this.fallSpeed = KoopaObject.FALL_SPEED_MAX - this.jump * KoopaObject.JUMP_DECEL, this.jump++, this.grounded = false) : (this.grounded && (this.fallSpeed = 0x0), this.fallSpeed = Math.max(this.fallSpeed - KoopaObject.FALL_SPEED_ACCEL, -KoopaObject.FALL_SPEED_MAX));
-    this.grounded && (this.fallSpeed = 0x0);
-    this.fallSpeed = Math.max(this.fallSpeed - KoopaObject.FALL_SPEED_ACCEL, -KoopaObject.FALL_SPEED_MAX);
-    var _0x228c79 = vec2.add(this.pos, vec2.make(this.moveSpeed, 0x0)),
-        _0xa7c94d = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed)),
-        _0x186c6d = vec2.make(0x0 <= this.moveSpeed ? this.pos.x : this.pos.x + this.moveSpeed, 0x0 >= this.fallSpeed ? this.pos.y : this.pos.y + this.fallSpeed),
-        _0x1f400c = vec2.make(this.dim.y + Math.abs(this.moveSpeed), this.dim.y + Math.abs(this.fallSpeed)),
-        _0x186c6d = this.game.world.getZone(this.level, this.zone).getTiles(_0x186c6d, _0x1f400c),
-        _0x1f400c = vec2.make(0x1, 0x1),
-        _0x350f0e = false;
-    this.grounded = false;
-    for (var _0x277a15 = 0x0; _0x277a15 < _0x186c6d.length; _0x277a15++) {
-        var _0xb496d = _0x186c6d[_0x277a15];
-        _0xb496d.definition.COLLIDE && squar.intersection(_0xb496d.pos, _0x1f400c, _0x228c79, this.dim) && (this.pos.x + this.dim.x <= _0xb496d.pos.x && _0x228c79.x + this.dim.x > _0xb496d.pos.x ? (_0x228c79.x = _0xb496d.pos.x - this.dim.x, _0xa7c94d.x = _0x228c79.x, this.moveSpeed = 0x0, _0x350f0e = true) : this.pos.x >= _0xb496d.pos.x + _0x1f400c.x && _0x228c79.x < _0xb496d.pos.x + _0x1f400c.x && (_0x228c79.x = _0xb496d.pos.x + _0x1f400c.x, _0xa7c94d.x = _0x228c79.x, this.moveSpeed = 0x0, _0x350f0e = true));
-    }
-    for (_0x277a15 = 0x0; _0x277a15 < _0x186c6d.length; _0x277a15++) _0xb496d = _0x186c6d[_0x277a15], _0xb496d.definition.COLLIDE && squar.intersection(_0xb496d.pos, _0x1f400c, _0xa7c94d, this.dim) && (this.pos.y >= _0xb496d.pos.y + _0x1f400c.y && _0xa7c94d.y < _0xb496d.pos.y + _0x1f400c.y ? (_0xa7c94d.y = _0xb496d.pos.y + _0x1f400c.y, this.grounded = true) : this.pos.y + this.dim.y <= _0xb496d.pos.y && _0xa7c94d.y + this.dim.y > _0xb496d.pos.y && (_0xa7c94d.y = _0xb496d.pos.y - this.dim.y, this.jump = -0x1, this.fallSpeed = 0x0));
-    this.pos = vec2.make(_0x228c79.x, _0xa7c94d.y);
-    _0x350f0e && (this.dir = !this.dir);
-};*/
 
 KoopaObject.prototype.physics = function () {
     if (this.jump !== -1) {
@@ -6295,123 +6203,6 @@ SpawnerObject.prototype.fire = function () {
 SpawnerObject.prototype.isTangible = function () { return false; };
 GameObject.REGISTER_OBJECT(SpawnerObject);
 
-/*function FireballObject(game, level, zone, pos, oid, dir, owner, skin) {
-    GameObject.call(this, game, level, zone, pos);
-    this.owner = owner;
-    this.skin = skin;
-    this.state = FireballObject.STATE.IDLE;
-    this.sprite = this.state.SPRITE[0x0];
-    this.deadTimer = this.anim = 0x0;
-    this.dim = vec2.make(0.5, 0.5);
-    this.fallSpeed = -FireballObject.FALL_SPEED_MAX;
-    this.dir = dir;
-}
-FireballObject.ASYNC = true;
-FireballObject.ID = 0xa1;
-FireballObject.NAME = "FIREBALL PROJECTILE";
-FireballObject.ANIMATION_RATE = 0x2;
-FireballObject.SOFFSET = vec2.make(-0.25, -0.25);
-FireballObject.DEAD_ANIM_LENGTH = 0x3;
-FireballObject.SPEED = 0.475;
-FireballObject.BOUNCE_SPEED = 0.375;
-FireballObject.FALL_SPEED_MAX = 0.425;
-FireballObject.FALL_SPEED_ACCEL = 0.065;
-FireballObject.SPRITE = {};
-FireballObject.SPRITE_LIST = [{
-    'NAME': "IDLE0",
-    'ID': 0x0,
-    'INDEX': 0x01
-}, {
-    'NAME': "IDLE1",
-    'ID': 0x1,
-    'INDEX': 0x02
-}, {
-    'NAME': "IDLE2",
-    'ID': 0x2,
-    'INDEX': 0x03
-}, {
-    'NAME': "IDLE3",
-    'ID': 0x3,
-    'INDEX': 0x04
-}, {
-    'NAME': "DEAD0",
-    'ID': 0x4,
-    'INDEX': 0x0e
-}, {
-    'NAME': "DEAD1",
-    'ID': 0x5,
-    'INDEX': 0x0f
-}, {
-    'NAME': "DEAD2",
-    'ID': 0x6,
-    'INDEX': 0x1f
-}];
-for (_0x1bec55 = 0x0; _0x1bec55 < FireballObject.SPRITE_LIST.length; _0x1bec55++) FireballObject.SPRITE[FireballObject.SPRITE_LIST[_0x1bec55].NAME] = FireballObject.SPRITE_LIST[_0x1bec55], FireballObject.SPRITE[FireballObject.SPRITE_LIST[_0x1bec55].ID] = FireballObject.SPRITE_LIST[_0x1bec55];
-FireballObject.STATE = {};
-FireballObject.STATE_LIST = [{
-    'NAME': "IDLE",
-    'ID': 0x0,
-    'SPRITE': [FireballObject.SPRITE.IDLE0, FireballObject.SPRITE.IDLE1, FireballObject.SPRITE.IDLE2, FireballObject.SPRITE.IDLE3]
-}, {
-    'NAME': "DEAD",
-    'ID': 0x50,
-    'SPRITE': [FireballObject.SPRITE.DEAD0, FireballObject.SPRITE.DEAD1, FireballObject.SPRITE.DEAD2]
-}];
-for (_0x1bec55 = 0x0; _0x1bec55 < FireballObject.STATE_LIST.length; _0x1bec55++) FireballObject.STATE[FireballObject.STATE_LIST[_0x1bec55].NAME] = FireballObject.STATE_LIST[_0x1bec55], FireballObject.STATE[FireballObject.STATE_LIST[_0x1bec55].ID] = FireballObject.STATE_LIST[_0x1bec55];
-FireballObject.prototype.update = function(_0x244c91) {};
-FireballObject.prototype.step = function() {
-    this.state === FireballObject.STATE.DEAD ? this.deadTimer < FireballObject.DEAD_ANIM_LENGTH ? this.sprite = this.state.SPRITE[this.deadTimer++] : this.destroy() : (this.anim++, this.sprite = this.state.SPRITE[parseInt(this.anim / FireballObject.ANIMATION_RATE) % this.state.SPRITE.length], this.control(), this.physics(), this.interaction(), this.sound(), 0x0 > this.pos.y && this.kill());
-};
-FireballObject.prototype.control = function() {};
-FireballObject.prototype.physics = function() {
-    var _0x3236a4 = this.dir ? FireballObject.SPEED : -FireballObject.SPEED;
-    this.fallSpeed = Math.max(this.fallSpeed - FireballObject.FALL_SPEED_ACCEL, -FireballObject.FALL_SPEED_MAX);
-    for (var _0x129f7c = vec2.add(this.pos, vec2.make(_0x3236a4, this.fallSpeed)), _0x42654a = vec2.make(this.pos.x + Math.min(0x0, _0x3236a4), this.pos.y + Math.min(0x0, this.fallSpeed)), _0x3236a4 = vec2.make(this.dim.x + Math.max(0x0, _0x3236a4), this.dim.y + Math.max(0x0, this.fallSpeed)), _0x10832b = this.game.world.getZone(this.level, this.zone).getTiles(_0x42654a, _0x3236a4), _0x42654a = vec2.make(0x1, 0x1), _0x3236a4 = [], _0x564789 = 0x0; _0x564789 < _0x10832b.length; _0x564789++) {
-        var _0x1dc741 = _0x10832b[_0x564789];
-        _0x1dc741.definition.COLLIDE && (squar.intersection(_0x1dc741.pos, _0x42654a, _0x129f7c, this.dim) || squar.intersection(_0x1dc741.pos, _0x42654a, this.pos, this.dim)) && _0x3236a4.push(_0x1dc741);
-    }
-    _0x10832b = vec2.make(_0x129f7c.x, this.pos.y);
-    for (_0x564789 = 0x0; _0x564789 < _0x3236a4.length; _0x564789++) _0x1dc741 = _0x3236a4[_0x564789], squar.intersection(_0x1dc741.pos, _0x42654a, _0x10832b, this.dim) && (_0x10832b.x = _0x10832b.x + 0.5 * this.dim.x < _0x1dc741.pos.x + 0.5 * _0x42654a.x ? _0x1dc741.pos.x - this.dim.x : _0x1dc741.pos.x + _0x42654a.x, this.kill());
-    _0x129f7c.x = _0x10832b.x;
-    for (_0x564789 = 0x0; _0x564789 < _0x3236a4.length; _0x564789++) _0x1dc741 = _0x3236a4[_0x564789], squar.intersection(_0x1dc741.pos, _0x42654a, _0x129f7c, this.dim) && (this.pos.y >= _0x129f7c.y ? (_0x129f7c.y = _0x1dc741.pos.y + _0x42654a.y, this.fallSpeed = FireballObject.BOUNCE_SPEED) : (_0x129f7c.y = _0x1dc741.pos.y - this.dim.y, this.fallSpeed = -FireballObject.BOUNCE_SPEED));
-    this.pos = _0x129f7c;
-};
-FireballObject.prototype.interaction = function() {
-    for (var _0x51d7a3 = 0x0; _0x51d7a3 < this.game.objects.length; _0x51d7a3++) {
-        var _0x1f6129 = this.game.objects[_0x51d7a3];
-        if (_0x1f6129 !== this && _0x1f6129.pid !== this.owner && _0x1f6129.isTangible() && (!(_0x1f6129 instanceof PlayerObject) || app.net.gameMode === 1) && _0x1f6129.damage && _0x1f6129.level === this.level && _0x1f6129.zone === this.zone && squar.intersection(_0x1f6129.pos, _0x1f6129.dim, this.pos, this.dim)) {
-            (app.net.gameMode !== 1 ? this.owner === this.game.pid : (_0x1f6129 instanceof PlayerObject ? _0x1f6129.pid == this.game.pid : this.owner === this.game.pid)) && _0x1f6129.damage(this);
-            if (app.net.gameMode === 1 && _0x1f6129 instanceof PlayerObject && _0x1f6129.pid == this.game.pid && _0x1f6129.dead) this.game.out.push(NET017.encode(this.owner));
-            this.kill();
-            break;
-        }
-    }
-};
-FireballObject.prototype.sound = GameObject.prototype.sound;
-FireballObject.prototype.playerCollide = function(_0x596050) {};
-FireballObject.prototype.playerStomp = function(_0x282b15) {};
-FireballObject.prototype.playerBump = function(_0xad5318) {};
-FireballObject.prototype.kill = function() {
-    this.setState(FireballObject.STATE.DEAD);
-    this.play("firework.mp3", 0.7, 0.04);
-    this.dead = true;
-};
-FireballObject.prototype.isTangible = GameObject.prototype.isTangible;
-FireballObject.prototype.destroy = GameObject.prototype.destroy;
-FireballObject.prototype.setState = function(_0x37987d) {
-    _0x37987d !== this.state && (this.state = _0x37987d, this.sprite = _0x37987d.SPRITE[0x0], this.anim = 0x0);
-};
-FireballObject.prototype.draw = function(_0x12ec20) {
-    _0x12ec20.push({
-        'pos': vec2.add(this.pos, FireballObject.SOFFSET),
-        'reverse': false,
-        'index': this.sprite.INDEX,
-        'skin': this.skin,
-        'mode': 0x0
-    });
-};
-FireballObject.prototype.play = GameObject.prototype.play;
-GameObject.REGISTER_OBJECT(FireballObject);*/
 "use strict";
 
 function FireBreathObject(game, level, zone, pos) {
@@ -8096,8 +7887,8 @@ Display.prototype.drawObject = function () {
             obj.pid !== this.game.pid &&
             obj.pos.x >= leftEdge &&
             obj.pos.x <= rightEdge &&
-            (obj.write && /* !app.settings.disableText &&*/ obj.write(textList),
-                obj.draw && obj.draw(spriteList));
+            (obj.write && !app.settings.disableText && obj.write(textList),
+            obj.draw && obj.draw(spriteList));
     }
     var player = this.game.getPlayer();
     if (player && player.level === zone.level && player.zone === zone.id) {
@@ -8503,7 +8294,9 @@ function Zone(game, level, input) {
     this.fastMusic = this.music ? this.music.replace(".mp3", "_fast.mp3") : "";
     if (this.fastMusic) app.audio.addMusic(this.fastMusic);
     this.winmusic = input.winmusic ? input.winmusic : '';
+    this.victorymusic = input.victorymusic ? input.victorymusic : '';
     if (this.winmusic) app.audio.addMusic(this.winmusic);
+    if (this.victorymusic) app.audio.addMusic(this.victorymusic);
     this.layers = input.layers || [];
     vertical = this.vertical;
     if (input.data) {
@@ -8703,10 +8496,10 @@ Game.COINS_TO_LIFE = 0x1e;
 
 Game.prototype.load = function (data) {
     if (this instanceof LobbyGame) {
-        app.menu.main.winElement.style.display = "";
+        app.menu.main.winElement.style.display = "none";
         document.getElementById("settins-return-lobby").style.display = "none";
     } else {
-        this.lives++
+        app.game.lives++;
         app.menu.main.winElement.style.display = "none";
         document.getElementById("settins-return-lobby").style.display = "";
     }
@@ -8843,7 +8636,6 @@ Game.prototype.stopGameTimer = function (touchMode=false) {
 
 /* G13 */
 Game.prototype.gameStartTimer = function (packet) {
-    console.log(this.startTimer, packet)
     if (this.startTimer < 0) { this.play("alert.mp3", 1., 0.); }
     if (packet.time > 0) { this.startTimer = packet.time; this.remain = app.players.length; }
     else { this.doStart(); }
@@ -8907,27 +8699,17 @@ Game.prototype.doNET002 = function (n) {
 };
 
 /* CREATE_PLAYER_OBJECT [0x10] */
-Game.prototype.doNET010 = function (n) {
-    if (n.pid === this.pid) { return; }
+Game.prototype.doNET010 = function(n) {
+    if(n.pid === this.pid) { return; }
     if (this.getGhost(n.pid))
         return;
     var obj = this.createObject(PlayerObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid, n.skin, n.isDev]);
     obj.setState(PlayerObject.SNAME.GHOST);
-    if (n.isDev) obj.name = app.getPlayerInfo(n.pid).name;
-    var filterNames = Cookies.get("text")
-    if (filterNames === 1) {
-        if (this.team) {
-            var playerInfo = app.getPlayerInfo(n.pid);
-            if (playerInfo && playerInfo.id !== this.pid && playerInfo.team === this.team) {
-                var ghost = this.getGhost(playerInfo.id);
-                if (ghost) ghost.name = playerInfo.displayName;
-            }
-        }
-    } else {
-        var playerInfo = app.getPlayerInfo(n.pid);
-        /* if(playerInfo && playerInfo.id !== this.pid) */
+    if(n.isDev) obj.name = app.getPlayerInfo(n.pid).name;
+    var playerInfo = app.getPlayerInfo(n.pid);
+    if (playerInfo && playerInfo.id !== this.pid) {
         var ghost = this.getGhost(playerInfo.id);
-        if (ghost) ghost.name = playerInfo.displayName
+        if (ghost) ghost.name = playerInfo.displayName;
     }
 };
 
@@ -9138,7 +8920,7 @@ Game.prototype.doInput = function (lastInput) {
                 for (var icon of ingameGuiButtons) {
                     if (!icon.padMode || this.input.pad.connected()) {
                         off += HudButtonOffset;
-                        if (icon.click && squar.inside(mouse.pos, vec2.make(canvasWIDTH - (off), 0x28), vec2.make(0x18, 0x18))) icon.click()
+                        if (icon.click && squar.inside(mouse.pos, vec2.make(canvasWIDTH - (off), 0x28), vec2.make(0x18, 0x18))) { icon.click(); }
                     }
                 }
             }
@@ -9238,11 +9020,10 @@ Game.prototype.doMusic = function () {
     else if (player && player.autoTarget && 0x0 >= this.victory)
         app.audio.setMusic(zone.winmusic || "level.mp3", false);
     else if (0x0 < this.victory && !this.victoryMusic) {
-        app.audio.setMusic(zone.winmusic || "castle.mp3", false);
-        this.victoryMusic = true;
+        zone.victorymusic !== '' ? this.victoryMusic = true : /* Skip castle.mp3 if victorymusic is present */ app.audio.setMusic(zone.winmusic || "castle.mp3", false);
+        if (this.victoryMusic !== true) this.victoryMusic = true;
     } else if (0x0 < this.victory && 0x4 > this.victory && this.victoryMusic && !app.audio.music.playing) {
-        if (loopPodium) app.audio.setMusic("victory.mp3", true);
-        else app.audio.setMusic("victory.mp3", false);
+        app.audio.setMusic(zone.victorymusic || "victory.mp3", (loopPodium ? true : false));
     } else if (app.hurryingUp) {
         if ((Date.now() - app.hurryUpStart) < 1000 * app.audio.getAudioLength("hurry.mp3")) {
             app.audio.setMusic("hurry.mp3", false);
