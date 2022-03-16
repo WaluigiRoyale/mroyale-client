@@ -6724,7 +6724,7 @@ App.prototype.close = function() {
 };
 
 window.onbeforeunload = (e) => {
-    if (dirty) {return "Do you want to exit this page?";}
+    return (!dirty || "Do you want to exit this page?");
 }
 
 var app = new App();
