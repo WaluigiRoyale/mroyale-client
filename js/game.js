@@ -1,4 +1,3 @@
-
 const GAMEMODES = ["vanilla", "pvp", "hell"];
 const DEV_SKINS = [0];
 const DEFAULT_PLAYER_NAME = "INFRINGIO"; // TODO Remove
@@ -919,6 +918,34 @@ td32.TILE_PROPERTIES = {
             }
         }
     },
+    /* Lock Camera */
+    30: {
+        COLLIDE: false,
+        HIDDEN: false,
+        ASYNC: false,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch (type) {
+                /* Touch */
+                case 0x00 : {
+                    game.pauseCamera = true;
+                }
+            }
+        }
+    },
+    /* Unlock Camera */
+    31: {
+        COLLIDE: false,
+        HIDDEN: false,
+        ASYNC: false,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch (type) {
+                /* Touch */
+                case 0x00 : {
+                    game.pauseCamera = false;
+                }
+            }
+        }
+    },
     /* Vine Block */
     0x18: {
         COLLIDE: true,
@@ -1116,13 +1143,6 @@ td32.TILE_PROPERTIES = {
                 case 0x01: {
                     if (game.pid === pid) {
                         var ply = game.getPlayer();
-                        var l = game.world.getZone(level, zone).getTile(vec2.make(x - 1, y));
-                        var r = game.world.getZone(level, zone).getTile(vec2.make(x + 1, y));
-
-                        var cx;
-                        if (l.definition === this) { cx = x; }
-                        else if (r.definition === this) { cx = x + 1; }
-                        else { return; }
 
                         ply.pipe(2, td.data, 50);
                     }
@@ -1141,13 +1161,8 @@ td32.TILE_PROPERTIES = {
                 case 0x01: {
                     if (game.pid === pid) {
                         var ply = game.getPlayer();
-                        var l = game.world.getZone(level, zone).getTile(vec2.make(x - 1, y));
-                        var r = game.world.getZone(level, zone).getTile(vec2.make(x + 1, y));
-
-                        var cx;
-                        if (l.definition === this) { cx = x; }
-                        else if (r.definition === this) { cx = x + 1; }
-                        else { return; }
+                        //var l = game.world.getZone(level, zone).getTile(vec2.make(x - 1, y));
+                        //var r = game.world.getZone(level, zone).getTile(vec2.make(x + 1, y));
 
                         ply.pipe(2, td.data, 0);
                     }
@@ -1639,7 +1654,7 @@ function WarnScreen() {
     this.hide();
     this.timeout = undefined;
 }
-WarnScreen.prototype.show = function (msg, imgUrl='', log=false) {
+WarnScreen.prototype.show = function (msg, showImg=true, log=false) {
     imgUrl == false ? this.element.innerHTML = msg : this.element.innerHTML = "<img src='" + showImg == false ? "'" : ASSETS_URL + "img/home/warn.png'" + "class='warn-ico'/> " + msg;
     if (log !== false) console.warn("##WARN## " + msg);
     this.timeout && clearTimeout(this.timeout);
@@ -3334,7 +3349,7 @@ PlayerObject.DAMAGE_TIME = 0x2d;
 PlayerObject.TRANSFORM_TIME = 0x12;
 PlayerObject.TRANSFORM_ANIMATION_RATE = 0x2;
 PlayerObject.STAR_LENGTH = 380;
-PlayerObject.PROJ_OFFSET = vec2.make(0.6, 1.1);
+PlayerObject.PROJ_OFFSET = vec2.make(0.2, 1.1);
 PlayerObject.MAX_CHARGE = 0x3c;
 PlayerObject.ATTACK_DELAY = 0x7;
 PlayerObject.ATTACK_CHARGE = 0x19;
@@ -4203,7 +4218,7 @@ PlayerObject.prototype.warp = function (warpId) {
 };
 PlayerObject.prototype.pipe = function (pipeDir, warp, delay) {
     this.moveSpeed = 0;
-    if (!(0x1 !== pipeDir && 0x2 !== pipeDir)) this.setState(PlayerObject.SNAME.STAND);
+    if (!(0x1 !== pipeDir && 0x2 !== pipeDir)) this.setState(PlayerObject.SNAME.TAUNT);
     var destLevel = this.game.world.getLevel(this.level).getWarp(warp);
     this.pipeWarp = warp;
     this.pipeTimer = 0x1e;
@@ -4211,15 +4226,6 @@ PlayerObject.prototype.pipe = function (pipeDir, warp, delay) {
     this.pipeExt = destLevel.data;
     this.pipeDelayLength = delay;
 };
-PlayerObject.prototype.pipeLevel = function (pipeDir, warp, delay) {
-    this.moveSpeed = 0;
-    if (!(0x1 !== pipeDir && 0x2 !== pipeDir)) this.setState(PlayerObject.SNAME.STAND);
-    this.pipeWarp = warp;
-    this.pipeTimer = 0x1e;
-    this.pipeDir = pipeDir;
-    this.pipeExt = game.levelWarp(warp);
-    this.pipeDelayLength = delay;
-}
 PlayerObject.prototype.weedeat = function () {
     for (var _0x5cc521 = 0x0; _0x5cc521 < this.game.objects.length; _0x5cc521++) {
         var _0x526625 = this.game.objects[_0x5cc521];
@@ -4255,7 +4261,7 @@ PlayerObject.prototype.kill = function () {
     this.deadTimer = PlayerObject.DEAD_TIME;
     this.deadFreezeTimer = PlayerObject.DEAD_FREEZE_TIME;
     this.fallSpeed = PlayerObject.DEAD_UP_FORCE;
-    if (this.game.getPlayer() === this) {
+    if ((this.game.getPlayer() === this) && (this.game instanceof Game)) {
         this.game.stopGameTimer(this.game.touchMode);
         this.game.out.push(NET011.encode());
     }
@@ -8476,6 +8482,7 @@ function Game(data) {
     this.gameTimerStopped = null;
     this.gameTimerStopTime = 0;
     this.poleTimes = 0;
+    this.pauseCamera = false;
     var that = this;
     this.frameReq = requestAnimFrameFunc.call(window, function () {
         that.draw();
@@ -8947,7 +8954,8 @@ Game.prototype.doStep = function () {
         player.show();
         player.invuln();
         this.levelWarpId = undefined;
-        this.resumeGameTimer();
+        this.pauseCamera = false;
+        if (this.game instanceof Game) this.resumeGameTimer();
     }
     player && this.cullSS && !vec2.equals(player.pos, this.cullSS) && this.out.push(NET015.encode());
     player && this.fillSS && this.fillSS !== player.fallSpeed && this.out.push(NET015.encode());
@@ -8963,7 +8971,7 @@ Game.prototype.doStep = function () {
         if (!vertical) return zone.dimensions.y()
         else { return player.pos.y }
     }
-    player && !player.dead && this.display.camera.position(vec2.make(player.pos.x, 0.5 * zone.dimensions().y)); // zone.dimensions().y
+    player && !player.dead && !this.pauseCamera && this.display.camera.position(vec2.make(player.pos.x, 0.5 * zone.dimensions().y)); // zone.dimensions().y
     this.world.step();
     if (app.hurryingUp && app.hurryUpTime <= Date.now() && 0 >= this.levelWarpTimer) {
         app.hurryingUp = false;

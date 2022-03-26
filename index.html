@@ -67,17 +67,21 @@
     <meta name="og:type" content="website" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:site" content="@terminalarch" />
+    <meta name="twitter:site" content="@MarioRoyalePlus" />
   
-    <link rel='stylesheet' type='text/css' href='css/home.css?v=4.2.1'>
-    <link rel='stylesheet' type='text/css' href='css/spinner.css?v=4.2.1'>
-    <link rel='stylesheet' type='text/css' href='css/link.css?v=4.2.1'>
+    <link rel='stylesheet' type='text/css' href='css/home.css?v=4.2.2'>
+    <link rel='stylesheet' type='text/css' href='css/spinner.css?v=4.2.2'>
+    <link rel='stylesheet' type='text/css' href='css/link.css?v=4.2.2'>
     <script>
       /* Prevent phones from zooming screen. The webapp handles this. */
       document.addEventListener('touchmove', function (event) {
         event = event.originalEvent || event;
         if (event.scale !== undefined) { event.preventDefault(); }
       }, false);
+      /* Redirect to HTTPS (https://developer.mozilla.org/en-US/docs/Web/API/Gamepad) */
+      if (location.protocol !== 'https:') {
+        location.replace(`https:${location.href.substring(location.protocol.length)}`);
+      }
     </script>
   
     <div id="log" class='container-center'>
@@ -408,14 +412,14 @@
       </div>
       <div class="link-l">
         <div class="rtfpn2"></div>
-        <div id="link-patch" class="link-patch" onclick="window.open('./patch.html?v=4.2.1')" style="display:none;">v4.2.1 Patch Notes</div>
+        <div id="link-patch" class="link-patch" onclick="window.open('./patch.html?v=4.2.2')" style="display:none;">v4.2.2 Patch Notes</div>
       </div>
       <div class="link-b">
         <div class="rtfpn"></div>
         <div>
           <div class="link-leaderboard" onclick="showLeaderBoard()">Leaderboards</div>
-          <div class="link-editor" onclick="window.open('./editor.html?v=4.2.1')"></div>
-          <div class="link-con" onclick="window.open('./control.html?v=4.2.1')"></div>
+          <div class="link-editor" onclick="window.open('./editor.html?v=4.2.2')"></div>
+          <div class="link-con" onclick="window.open('./control.html?v=4.2.2')"></div>
         </div>
       </div>
       <div class="link-s">
@@ -433,8 +437,7 @@
     <script src='js/lib/cookie/js.cookie.min.js'></script>
   
     <!-- Core -->
-    <script src='js/core.js?v=4.2.1'></script>
+    <script src='js/core.js?v=4.2.2'></script>
   </body>
   
-  </html>
-  
+  </html>  
