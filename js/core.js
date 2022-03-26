@@ -170,6 +170,7 @@ function showLeaderBoard() {
                         }
                         tr.appendChild(td);
                         td = document.createElement("td");
+                        p.nickname = p.nickname.substring(0, 20);
                         td.innerText = ""+p.nickname;
                         td.style["padding-left"] = "10px";
                         td.style["padding-right"] = "10px";
@@ -203,12 +204,10 @@ function hideLeaderBoard() {
     elem.style.display = "none";
 }
 
-var VERSION = (function() {
-    return Date.now(); // Use unix timestamp instead of version so that clearing cache is almost never required
-})();
+var VERSION = Date.now();
 
 var jsons = [ASSETS_URL + "assets/assets.json"]
-var scripts = ["js/server.js", "js/game.js", "js/scripts/plant.js", "js/scripts/firebar.js"]
+var scripts = [ /* DEFAULT SCRIPTS -> */ "js/server.js", "js/game.js", /* OTHER SCRIPTS -> */ "js/scripts/plant.js", "js/scripts/firebar.js", "js/scripts/fireball.js", "js/scripts/spiny.js", "js/scripts/beetle.js"]
 var resources = {}
 
 function loadNext() {
