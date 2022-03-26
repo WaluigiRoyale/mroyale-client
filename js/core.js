@@ -204,10 +204,7 @@ function hideLeaderBoard() {
 }
 
 var VERSION = (function() {
-    var scripts = document.getElementsByTagName('script');
-    var index = scripts.length - 1;
-    var myScript = scripts[index];
-    return myScript.src.split("?v=").slice(-1)[0];
+    return Date.now(); // Use unix timestamp instead of version so that clearing cache is almost never required
 })();
 
 var jsons = [ASSETS_URL + "assets/assets.json"]
