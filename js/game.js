@@ -1655,7 +1655,7 @@ function WarnScreen() {
     this.timeout = undefined;
 }
 WarnScreen.prototype.show = function (msg, showImg=true, log=false) {
-    imgUrl == false ? this.element.innerHTML = msg : this.element.innerHTML = "<img src='" + showImg == false ? "'" : ASSETS_URL + "img/home/warn.png'" + "class='warn-ico'/> " + msg;
+    showImg == false ? this.element.innerHTML = msg : this.element.innerHTML = "<img src='" + ASSETS_URL + "img/home/warn.png'" + "class='warn-ico'/> " + msg;
     if (log !== false) console.warn("##WARN## " + msg);
     this.timeout && clearTimeout(this.timeout);
     var _0x2893b1 = this.element;
