@@ -1,4 +1,3 @@
-
 <!DOCTYPE HTML>
 <html>
 
@@ -42,6 +41,88 @@
 
     <body>
       <div class="chng">
+        <h1>Version 4.3.2.1</h1>
+        2022-04-19 - Editor Patch<br>
+        Warps now show the id they correspond to<br>
+        Added a new tile definition:
+        <div class="note">
+          161 - Flagpole level end warp<br>
+          This is a special type of level warp, in which it can be used only after the player went down the flagpole<br>
+          Can be used as a way to make smb3 levels more accurate or for anticheat, eitherway works
+        </div>
+        <hr>
+
+        <h1>Version 4.3.2</h1>
+        2022-04-17 - Content Patch<br>
+        Added new tile definitons:
+        <div class='note'>
+          13 - Item Note Block<br>
+          It functions the same as it did in SMB3, if you bump it, the powerup goes up, if you bounce on it, the powerup goes down<br>
+          Ice semisolid was previously id 13, but now it is 23
+        </div>
+        Updated note blocks not to vibrate when touching the side of them<br>
+        Update world 5 to use the new spritesheet
+        <hr>
+
+        <h1>Version 4.3.1</h1>
+        2022-04-15 - Content Patch<br>
+        Improved editor user experience
+        <div class='note'>Added dropdown menu to select warp type to the warp menu</div>
+        Updated and optimized worlds
+        <div class="note">
+          These worlds have been updated to use the new spritesheet:
+          <ul>
+            <li>World 1</li>
+            <li>World 2</li>
+            <li>World 3</li>
+            <li>World 4</li>
+            <li>Lost World 8</li>
+            <li>Special 1</li>
+            <li>Special 2</li>
+            <li>Special 3</li>
+          </ul>
+          These worlds have been updated to use progressive item blocks too
+        </div>
+        <hr>
+
+        <h1>Version 4.3.0</h1>
+        2022-04-03 - Content Patch<br>
+        Added option to change the distance of how many blocks the player moves after going down a flagpole
+        <div class='note'>Using negative numbers makes the player go in reverse too!</div>
+        Added option to toggle piranha plant Offset
+        <div class='note'>By default piranha plants are offset by half a tile to fit in 2 tiled pipes<br>Intended for use with single pipes and such</div>
+        Shortened time it takes to transition to a level now that it is possible to change the flagpole auto target<br>
+        Added option to toggle movement of the star powerup
+        <div class='note'>Using 1 as the parameter disables jumping and moving for the star</div>
+        Disabled star killing in the lobby
+        <div class='note'>This was patched for obvious reasons</div>
+        Fixed being able to interact with the corner buttons when in victory state
+        <div class='note'>In short, on the podium the buttons were just hidden and you could still interact with them</div>
+        Updated editor about button to show basic information
+        <div class='note'>Patched since people kept coping about it being a rickroll</div>
+        Fixed weird entrance hitbox of single pipes<br>
+        Replaced leaderboard close button with x button in the top right corner<br>
+        Updated leaderboard interface
+        <div class='note'>In short, added border to whichever leaderboard category is selected for accessibility purposes<br>Also fixed z index layer of leaderboard pop-up</div>
+        Changed some more text in the editor<br>
+        Added auto refresh toggle to leaderboard menu
+        <div class='note'>By default its off to conserve bandwidth<br>If its on, leaderboards can update without reloading the page</div>
+        Improved control rebinding app
+        <div class='note'>Added two buttons to reset keyboard and gamepad controls respectively</div>
+        Added more object icons to editor
+        <div class='note'>Specifically: Spring, Spiny Shell, Buzzy Beetle, Bowser, Hammer Bro, Piranha Plant and a few others</div>
+        Fixed editor occasionally spawning goomba instead of player<br>
+        Added new tile definitions:
+        <div class='note'>
+          89 - Warp Pipe Left Slow<br>
+          Same as warp pipe right slow and fast, but left<br><br>
+
+          90 - Warp Pipe Left Fast<br>
+          Same as warp pipe left slow, but fast
+        </div>
+        Fixed inaccurate direction when exiting a pipe of a different direction
+        <hr>
+
         <h1>Version 4.2.2</h1>
         2022-03-26 - Content Patch<br>
         Added new tile Definitions

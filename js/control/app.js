@@ -95,6 +95,22 @@ App.prototype.init = function() {
   this.step();
 };
 
+App.prototype.reset = function(type) {
+  /* Keyboard Controls */
+  if (type.toLowerCase() === "k") {
+    for (var i=0;i<INPUTS.length;i++) {
+      Cookies.remove("k_" + INPUTS[i]);
+    }
+  /* Gamepad Controls */
+  } else if (type.toLowerCase() === "g") {
+    for (var i=0;i<INPUTS.length;i++) {
+      Cookies.remove("g_" + INPUTS[i]);
+    }
+  }
+
+  app.load();
+};
+
 App.prototype.step = function() {
   this.updatePad();
   

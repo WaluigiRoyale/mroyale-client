@@ -127,8 +127,54 @@ const ASSETS_URL = "https://raw.githubusercontent.com/mroyale/assets/master/";
 })(jQuery);
 
 var currentLeaderBoard = "coins";
+var isPaused = undefined;
+
+function toggleRefresh() {
+    if (Cookies.get("autorefresh") === undefined) {
+        Cookies.set("autorefresh", "false", {expires: 0x1e}); 
+        toggleRefresh(); /* Run function again now that there is a cookie */ 
+    } else {
+        let autorefresh = Cookies.get("autorefresh") === "true";
+
+        let enable = document.getElementById("enableRefresh");
+        let disable = document.getElementById("disableRefresh");
+
+        if (autorefresh) {
+            enable.style.border = "2px solid white";
+            enable.style.cursor = "default";
+            disable.style.border = "";
+            disable.style.cursor = "pointer";
+            isPaused = false;
+        } else {
+            enable.style.border = "";
+            enable.style.cursor = "pointer";
+            disable.style.border = "2px solid white";
+            disable.style.cursor = "default";
+            isPaused = true;
+        }
+    }
+};
+
+function enableRefresh() {
+    Cookies.set("autorefresh", "true", {expires: 0x1e});
+    toggleRefresh();
+};
+
+function disableRefresh() {
+    Cookies.set("autorefresh", "false", {expires: 0x1e})
+    toggleRefresh();
+};
 
 function setLeaderBoard(type) {
+    var currSelect = document.getElementById(currentLeaderBoard);
+    var nextSelect = document.getElementById(type);
+
+    currSelect.style.border = "";
+    currSelect.style.cursor = "pointer";
+
+    nextSelect.style.border = "2px solid white";
+    nextSelect.style.cursor = "default";
+
     var curr = document.getElementById("leaderboard-content-"+currentLeaderBoard);
     curr.style.display = "none";
     var next = document.getElementById("leaderboard-content-"+type);
@@ -138,10 +184,19 @@ function setLeaderBoard(type) {
 
 function showLeaderBoard() {
     var elem = document.getElementById("leaderboard");
-    var leaderBoard;
     elem.style.display = "";
-    setInterval(() => {
-        $.ajax({
+    
+    refreshLeaderBoard();
+    if (isPaused === undefined) /* Make sure refreshing cant happen multiple times due to showing it */ {
+        setInterval(() => {
+            if (!isPaused && !app.ingame()) { refreshLeaderBoard(); };
+        }, 5000);
+    }
+}
+
+function refreshLeaderBoard() {
+    var leaderBoard;
+    $.ajax({
             type: "GET",
             url: "leaderboard.json", 
             success: function(result) {
@@ -157,10 +212,6 @@ function showLeaderBoard() {
                     for (var p of values) {
                         var tr = document.createElement("tr");
                         var td = document.createElement("td");
-                        var div = document.createElement("div");
-                        div.setAttribute("class", "leaderboard-skin")
-                        div.style.backgroundImage = ASSETS_URL + 'img/game/smb_skin' + p.skin + '.png'
-                        var url = '<div class="leaderboard-skin" style="background-image: url("' + ASSETS_URL + 'img/game/smb_skin' + p.skin + '.png");"></div>'
                         td.innerHTML = p.pos;
                         switch(p.pos) {
                             case 1 : {td.style.color = 'yellow';break;}
@@ -194,20 +245,22 @@ function showLeaderBoard() {
             },
             dataType: "json",
             cache: false
-        });
-        return;
-    }, 250)
+    });
+    return;
 }
 
 function hideLeaderBoard() {
     var elem = document.getElementById("leaderboard");
     elem.style.display = "none";
+    isPaused = true;
 }
 
-var VERSION = Date.now();
+var VERSION = (function() {
+    return Date.now();
+})();
 
 var jsons = [ASSETS_URL + "assets/assets.json"]
-var scripts = [ /* DEFAULT SCRIPTS -> */ "js/server.js", "js/game.js", /* OTHER SCRIPTS -> */ "js/scripts/plant.js", "js/scripts/firebar.js", "js/scripts/fireball.js", "js/scripts/spiny.js", "js/scripts/beetle.js"]
+var scripts = [ /* DEFAULT SCRIPTS -> */ "js/server.js", "js/game.js", /* ENEMY SCRIPTS -> */ "js/scripts/plant.js", "js/scripts/firebar.js", "js/scripts/fireball.js", "js/scripts/spiny.js", "js/scripts/beetle.js"]
 var resources = {}
 
 function loadNext() {

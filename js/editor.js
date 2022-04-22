@@ -1,4 +1,3 @@
-
 const emptyTile = 30;
 let dirty = false;
 
@@ -15,7 +14,7 @@ var tileDefs = {
     9:  {'name': 'WATER CURRENT', 'extraDataName': 'Strength (0=full force left, 255=full force right)'},
     10: {'name': 'ICE BLOCK'},
     11: {'name': 'NOTE BLOCK'},
-    12: {'name': 'ICE SEMISOLID'},
+    12: {'name': 'ITEM NOTE BLOCK', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     14: {'name': 'FLIP BLOCK', 'extraDataName': 'Target Data'},
     15: {'name': 'NON-SOLID DAMAGE'},
     13: {'name': 'ICE TILE BLOCK', 'extraDataName': 'Target Tile Data'},
@@ -24,19 +23,25 @@ var tileDefs = {
     18: {'name': 'COIN BLOCK STANDARD'},
     19: {'name': 'COIN BLOCK MULTI', 'extraDataName': 'Coin Count'},
     20: {'name': 'PROGRESSIVE ITEM BLOCK'},
+    23: {'name': 'ICE SEMISOLID'},
     26: {'name': 'PROGRESSIVE ITEM BLOCK INVISIBLE'},
     21: {'name': 'ITEM BLOCK INVISIBLE', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     22: {'name': 'COIN BLOCK INVISIBLE'},
     24: {'name': 'VINE BLOCK', 'extraDataName': 'Target Warp ID'},
     25: {'name': 'ITEM BLOCK INFINITE', 'extraDataName': 'Content', 'extraDataType': 'objId'},
+    30: {'name': 'LOCK X AXIS CAMERA'},
+    31: {'name': 'UNLOCK X AXIS CAMERA'},
     81: {'name': 'WARP TILE', 'extraDataName': 'Target Warp ID'},
     82: {'name': 'WARP PIPE SLOW', 'extraDataName': 'Target Warp ID'},
     83: {'name': 'WARP PIPE RIGHT SLOW', 'extraDataName': 'Target Warp ID'},
     84: {'name': 'WARP PIPE FAST', 'extraDataName': 'Target Warp ID'},
     85: {'name': 'WARP PIPE RIGHT FAST', 'extraDataName': 'Target Warp ID'},
     86: {'name': 'LEVEL END WARP', 'extraDataName': 'Target Level ID'},
+    161: {'name': 'FLAGPOLE LEVEL END WARP', 'extraDataName': 'Target Level ID'},
     87: {'name': 'WARP PIPE SINGLE SLOW', 'extraDataName': 'Target Warp ID'},
     88: {'name': 'WARP PIPE SINGLE FAST', 'extraDataName': 'Target Warp ID'},
+    89: {'name': 'WARP PIPE LEFT SLOW', 'extraDataName': 'Target Warp ID'},
+    90: {'name': 'WARP PIPE LEFT FAST', 'extraDataName': 'Target Warp ID'},
     160:{'name': 'FLAGPOLE', 'extraDataName': 'Award (0=None/1=Coins/2=1UP)'},
     165:{'name': 'VINE'},
     240:{'name': 'VOTE BLOCK'},
@@ -44,38 +49,38 @@ var tileDefs = {
 };
 
 var objDefs = {
-    1:   {'name': 'PLAYER', 'description': 'Creates a dummy player that can interact like a regular player.\nDoesn\'t mark player spawn location! Use the zone tab for that!', 'paramDefs': [{'name': 'skin'},{'name': 'isDev'}]},
-    17:  {'name': 'GOOMBA', 'description': 'Color should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'variant'}]},
-    18:  {'name': 'KOOPA TROOPA GREEN', 'description': 'Fly should be set to 0 or 1. 1 is flying.\nColor should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
-    19:  {'name': 'KOOPA TROOPA RED', 'description': 'Fly should be set to 0 or 1. 1 is flying.\nColor should bet set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
-    21:  {'name': 'FLYING FISH', 'description': 'Delay is a positive integer in seconds for how the fish should wait before jumping again.\nImpulse is a float value for how much force the fish should jump with.', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
-    22:  {'name': 'PIRANHA PLANT', 'description': '- Color should be set to 0 or 1. 0 is the light one, 1 is the dark one.\n- Direction should be 0 or 1. 0 is normal, 1 is upside down.\n- Movement should be 0 or 1. 1 stops the plant from moving. Leave blank for default (0)', 'paramDefs': [{'name': 'variant'}, {'name': 'direction'}, {'name': 'movement'}]},
-    23:  {'name': 'SPINY SHELL', 'description': 'No params.'}, // New
-    24:  {'name': 'BUZZY BEETLE', 'description': 'No params.'},
-    25:  {'name': 'BOWSER', 'description': 'Attack type should be set to 0, 1 or 2.\n0 is only fire breathing, 1 is only hammer throwing, 2 is both.', 'paramDefs': [{'name': 'attackType'}]},
-    33:  {'name': 'FIRE BAR', 'description': 'Phase should be only 0 or 1, only offsets it a bit.\nLength is how many fire balls should spawn\nDefault speed is 23, lower makes it go faster, negative makes it go in reverse.', 'paramDefs': [{'name': 'phase'}, {'name': 'length'}, {'name': 'speed'}]},
-    34:  {'name': 'LAVA BUBBLE', 'description': 'Delay is a positive integer in seconds for how long it takes for it to shoot\nImpulse indicates how much force it should shoot with.', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
-    35:  {'name': 'BILL BLASTER', 'description': 'Delay is a positive integer in seconds for how long it takes for it to shoot.\nDirection indicates which way to go. 0 is left, 1 is right.', 'paramDefs': [{'name': 'delay'}, {'name': 'direction'}]},
-    36:  {'name': 'BULLET', 'description': 'Do not place this. It will not work.', 'paramDefs': [{'name': 'direction'}]},
-    37:  {'name': 'OBJECT SPAWNER', 'description': 'objectType is which object to spawn\nDelay is a positive internet for how long it takes to spawn\nDirection indicates which way to go.', 'paramDefs': [{'name': 'objectType'}, {'name': 'delay'}, {'name': 'direction'}]},
-    49:  {'name': 'HAMMER BRO', 'description': 'Phase should be 0 or 1, indicates which way to go.', 'paramDefs': [{'name': 'phase'}]},
-    81:  {'name': 'MUSHROOM', 'description': 'Makes the player grow into Super Mario.'},
-    82:  {'name': 'FIRE FLOWER', 'description': 'Gives the player the ability to fire.'},
-    83:  {'name': 'ONEUP', 'description': 'Gives the player an extra life.'},
-    84:  {'name': 'STAR', 'description': 'Gives the player a few seconds of immunity\nThe player can also damage other players with the star.'},
-    85:  {'name': 'AXE', 'description': 'Kills any nearby Bowser objects, makes the player win.'},
-    86:  {'name': 'POISON MUSHROOM', 'description': 'Damages the player.'},
-    97:  {'name': 'COIN', 'description': 'Increases coin count by 1'},
-    100: {'name': 'GOLD FLOWER', 'description': '- This should not be manually placed. The game randomly selects a coin block to be replaced with a gold flower, and that gives you 500 coins. This will not.'},
-    145: {'name': 'PLATFORM', 'description': '- Positive int, width of the platform\n- Float, how far to move on x axis\n- Float, how far to move on y axis\n- Float, speed\n- 0 or 1, if set to 1 it will loop instantly instead of returning\n- positive int, inital delay on platform. used to offset 2 platforms moving on same path\n- 0 or 1, starts at end point', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}, {'name': 'loop'}, {'name': 'delay'}, {'name': 'direction'}]},
-    146: {'name': 'BUS PLATFORM', 'description': '- Positive int, width of the platform\n- Float, how far to move on x axis\n- Float, how far to move on y axis\n- Float, speed\n- These are mostly indentical to PLATFORM but they only start once someone lands on them. Then they stop at the end.', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}]},
-    149: {'name': 'SPRING', 'description': 'Boing. Makes the player jump ~2 blocks when not holding, ~10 when holding the jump button.'},
-    161: {'name': 'FIREBALL PROJECTILE', 'description': 'Do not place this, it will not work.', 'paramDefs': [{'name': 'dir'},{'name': 'owner'},{'name': 'skin'}]},
-    162: {'name': 'FIRE BREATH PROJECTILE', 'description': 'Do not place this, it will not work.'},
-    163: {'name': 'HAMMER PROJECTILE', 'description': 'Do not place this, it will not work.', 'paramDefs': [{'name': 'owner'}, {'name': 'delay'}]},
-    177: {'name': 'FLAG', 'description': 'Required for flagpoles, slides down then allows player to proceed to the next level.'},
-    253: {'name': 'TEXT', 'description': '- float, vertical offset for text position\n- float 1.0 = the size of 1 tile\n- html color code, #FFFFFF for white\n- string, just a text string after this', 'paramDefs': [{'name': 'offset'}, {'name': 'size'}, {'name': 'color'}, {'name': 'text'}]},
-    254: {'name': 'CHECKMARK', 'description': 'Do not place this, it will not work.'},
+    1:   {'name': 'PLAYER', 'description': '- Creates a dummy player that can work like a regular player\n- [skin] Skin is the number ID from available skins\n - [isDev] Serves no purpose, but should be 0 or 1.', 'paramDefs': [{'name': 'skin'},{'name': 'isDev'}]},
+    17:  {'name': 'GOOMBA', 'description': '- [variant] Should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'variant'}]},
+    18:  {'name': 'KOOPA TROOPA GREEN', 'description': '- [fly] Should be set to 0 or 1. 1 is flying.\n- [variant] Should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
+    19:  {'name': 'KOOPA TROOPA RED', 'description': "- [fly] Should be set to 0 or 1. 1 is flying.\n- [variant] Should be set to 0 or 1. 0 is the light one, 1 is the dark one.", 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
+    21:  {'name': 'FLYING FISH', 'description': '- [delay] Positive integer in seconds for how the fish should wait before jumping again.\n- [float] Value for how much force the fish should jump with.', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
+    22:  {'name': 'PIRANHA PLANT', 'description': '- [color] Should be set to 0 or 1. 0 is the light one, 1 is the dark one.\n- [direction] Should be 0 or 1. 0 is normal, 1 is upside down.\n- [static] Should be 0 or 1. 1 stops the plant from moving. Leave blank for default (0)\n- [noOffset] By default Piranha Plants are offset by half a tile to fit in two tiled pipes. Use 1 to stop that from happening.', 'paramDefs': [{'name': 'variant'}, {'name': 'direction'}, {'name': 'static'}, {'name': 'noOffset'}]},
+    23:  {'name': 'SPINY SHELL', 'description': '- No params.'}, // New
+    24:  {'name': 'BUZZY BEETLE', 'description': '- No params.'},
+    25:  {'name': 'BOWSER', 'description': '- [attackType] Should be set to 0, 1 or 2. 0 is only fire breathing, 1 is only hammer throwing, 2 is both.', 'paramDefs': [{'name': 'attackType'}]},
+    33:  {'name': 'FIRE BAR', 'description': '- [phase] Should be only 0 or 1, only offsets it a bit.\n - [length] Positive integer for how many fire balls should spawn\n[rate] Rate of spinning. Default should be 23, lower is faster, negative is to go in reverse.', 'paramDefs': [{'name': 'phase'}, {'name': 'length'}, {'name': 'rate'}]},
+    34:  {'name': 'LAVA BUBBLE', 'description': '- [delay] Positive integer in seconds for how long it takes for it to shoot\nImpulse indicates how much force it should shoot with.', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
+    35:  {'name': 'BILL BLASTER', 'description': '- [delay] Positive integer in seconds for how long it takes for it to shoot.\nDirection indicates which way to go. 0 is left, 1 is right.', 'paramDefs': [{'name': 'delay'}, {'name': 'direction'}]},
+    36:  {'name': 'BULLET', 'description': '- No params.\n- It is better to use the BILL BLASTER object.', 'paramDefs': [{'name': 'direction'}]},
+    37:  {'name': 'OBJECT SPAWNER', 'description': '- [objectType] Object ID to spawn.\n- [delay] Positive integer for how long the object takes to spawn\n- [direction] Indicates which way to go. Should be 0 or 1.', 'paramDefs': [{'name': 'objectType'}, {'name': 'delay'}, {'name': 'direction'}]},
+    49:  {'name': 'HAMMER BRO', 'description': '- [phase] Should be 0 or 1, indicates which way to go.', 'paramDefs': [{'name': 'phase'}]},
+    81:  {'name': 'MUSHROOM', 'description': '- No params.'},
+    82:  {'name': 'FIRE FLOWER', 'description': '- No params.'},
+    83:  {'name': 'ONEUP', 'description': '- No params.'},
+    84:  {'name': 'STAR', 'description': '- [static] Should be 0 or 1. 0 is normal, 1 is static (does not move).\n- Falling despite static being 1 is intentional.', 'paramDefs': [{'name': 'static'}]},
+    85:  {'name': 'AXE', 'description': '- No params.'},
+    86:  {'name': 'POISON MUSHROOM', 'description': '- No params.\n- Damages the player'},
+    97:  {'name': 'COIN', 'description': '- No params.'},
+    100: {'name': 'GOLD FLOWER', 'description': '- No params.'},
+    145: {'name': 'PLATFORM', 'description': '- [length] Integer which decides how many tiles the platform should be.\n- [offX] Float integer, how far to move on x axis\n- [offY] Float integer, how far to move on y axis\n- [speed] Float, moving speed of the platform\n- [loop] 0 or 1. If it\'s 1, the platform will immediately return to it\'s starting position once done.\n- [delay] Positive int, inital delay on platform. used to offset 2 platforms moving on same path\n- [direction] 0 or 1, starts at end point', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}, {'name': 'loop'}, {'name': 'delay'}, {'name': 'direction'}]},
+    146: {'name': 'BUS PLATFORM', 'description': '- [length] Integer which decides how many tiles the platform should be.\n- [offX] Float, how far to move on x axis\n- [offY] Float, how far to move on y axis\n- [speed] Float, moving speed of the moving platform.\n- These are mostly indentical to PLATFORM but they only start once someone lands on them. Then they stop at the end.', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}]},
+    149: {'name': 'SPRING', 'description': '- No params.'},
+    161: {'name': 'FIREBALL PROJECTILE', 'description': '- This object will not work properly.', 'paramDefs': [{'name': 'dir'},{'name': 'owner'},{'name': 'skin'}]},
+    162: {'name': 'FIRE BREATH PROJECTILE', 'description': '- This object will not work properly.'},
+    163: {'name': 'HAMMER PROJECTILE', 'description': '- This object will not work properly.', 'paramDefs': [{'name': 'owner'}, {'name': 'delay'}]},
+    177: {'name': 'FLAG', 'description': '- No params.\n- Used for flagpoles so the flag goes down along with the player.'},
+    253: {'name': 'TEXT', 'description': '- [offset] Float, used for vertical offset.\n- [size] Float, used for the font size (example: 0.5)\n- [color] html color code, #FFFFFF for white\n- [text] String, just a text string after this', 'paramDefs': [{'name': 'offset'}, {'name': 'size'}, {'name': 'color'}, {'name': 'text'}]},
+    254: {'name': 'CHECKMARK', 'description': '- No params.'},
 };
 
 var util = {},
@@ -985,7 +990,7 @@ File.prototype.new = function(){
         assets:"assets.json",
         podiumLoop: false,
         resource:[
-            { id: "map", src: "https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_map.png" },
+            { id: "map", src: "https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_map_new.png" },
             { id: "obj", src: "https://raw.githubusercontent.com/mroyale/assets/master/img/game/smb_obj.png" }
         ],
         world:[{
@@ -1170,7 +1175,8 @@ function _0x3f2a38() {
         app.save();
     };
     this.btnAbout.onclick = function() {
-        window.open("https://www.youtube.com/watch?v=oHg5SJYRHA0", "_blank");
+        alert("Original creator: InfernoPlus\nUpdated by: Cyuubi, Eliza, gyorokpeter, terminalarch\n\nNo. I will not be making a whole new editor.\nThis is only here because people kept coping about rickroll.");
+        /* window.open("https://www.youtube.com/watch?v=oHg5SJYRHA0", "_blank"); */ /* Commented in memorial */
     };
 }
 _0x3f2a38.prototype.show = function() {
@@ -1323,8 +1329,8 @@ WorldTool.prototype.load = function() {
     this.valInitial.value = this.editor.world.initial;
     this.valShortname.value = this.editor.world.shortname;
     this.valMode.value = this.editor.world.mode;
-    this.valMusicPath.value = this.editor.world.musicOverridePath;
-    this.valsoundPath.value = this.editor.world.soundOverridePath;
+    this.valMusicPath.value = this.editor.world.musicOverridePath || "music/";
+    this.valsoundPath.value = this.editor.world.soundOverridePath || "sfx/";
     this.element.style.display = "block";
 };
 WorldTool.prototype.save = function() {
@@ -1334,10 +1340,10 @@ WorldTool.prototype.save = function() {
         this.editor.world.initial = initial;
         this.editor.world.shortname = this.valShortname.value;
         this.editor.world.mode = this.valMode.value;
-        this.editor.world.musicOverridePath = this.valmusicPath.value;
+        this.editor.world.musicOverridePath = this.valMusicPath.value;
         this.editor.world.soundOverridePath = this.valsoundPath.value;
     } catch (_0x5286c3) {
-        app.menu.warn.show("Failed to parse value. Changes not applied.");
+        app.menu.warn.show("Failed to parse value. Changes not applied." + _0x5286c3);
     }
     app.menu.list.generate();
 };
@@ -1428,6 +1434,7 @@ function ZoneTool(editor) {
     this.valInitialY.onchange = function() {
         that.update();
     };
+    this.valLevelEndOff = document.getElementById("editor-tool-zone-level-offset");
     this.valColor = document.getElementById("editor-tool-zone-color");
     this.valMusic = document.getElementById("editor-tool-zone-music");
     this.valWinMusic = document.getElementById("editor-tool-zone-winmusic");
@@ -1582,6 +1589,7 @@ ZoneTool.prototype.load = function() {
     var xy = shor2.decode(this.zone.initial);
     this.valInitialX.value = xy.x;
     this.valInitialY.value = xy.y;
+    this.valLevelEndOff.value = this.zone.levelendoff || "10";
     this.valColor.value = this.zone.color;
     this.valMusic.value = this.zone.music;
     this.valWinMusic.value = this.zone.winmusic || "";
@@ -1600,6 +1608,7 @@ ZoneTool.prototype.save = function() {
         this.zone.id = id;
         this.zone.initial = shor2.encode(x,y);
         this.zone.color = this.valColor.value;
+        this.zone.levelendoff = this.valLevelEndOff.value;
         this.zone.music = this.valMusic.value;
         this.zone.winmusic = this.valWinMusic.value;
         this.zone.victorymusic = this.valVicMusic.value;
@@ -1625,6 +1634,7 @@ function TileTool(editor) {
     this.valTileData = document.getElementById("editor-tool-tile-data");
     this.valTileDataName = document.getElementById("editor-tool-tile-data-name");
     this.valTileDataObjId = document.getElementById("editor-tool-tile-data-objid");
+    this.valTileDataWarpId = document.getElementById("editor-tool-tile-data-warpid");
     this.brushChangeWarning = document.getElementById("editor-tool-tile-brush-change-warning");
     var that = this;
     this.valIndex.onchange = function() {
@@ -1655,6 +1665,12 @@ function TileTool(editor) {
         that.valTileData.value = that.valTileDataObjId.value;
         that.update();
     };
+    this.valTileDataWarpId.onchange = function() {
+        that.brushChangeWarning.style.display="";
+        dirty = true;
+        that.valTileData.value = that.valTileDataWarpId.value;
+        that.update();
+    }
     this.brush = emptyTile;
 }
 TileTool.prototype.input = function(lastInput, mouse, keys) {
@@ -1692,14 +1708,14 @@ TileTool.prototype.input = function(lastInput, mouse, keys) {
 };
 TileTool.prototype.update = function() {
     try {
-        var _0x357177 = Math.max(0x0, Math.min(0x7ff, parseInt(this.valIndex.value))),
-            _0x2b097c = Math.max(0x0, Math.min(0xf, parseInt(this.valBump.value))),
-            _0x835d38 = Math.max(0x0, Math.min(0x1, parseInt(this.valDepth.value))),
-            _0x2de802 = Math.max(0x0, Math.min(0xff, parseInt(this.valDef.value))),
-            _0x244c28 = Math.max(0x0, Math.min(0xff, parseInt(this.valTileData.value)));
-        if (isNaN(_0x357177) || isNaN(_0x2b097c) || isNaN(_0x835d38) || isNaN(_0x2de802) || isNaN(_0x244c28)) throw "oof";
-        this.setBrush(td32.encode(_0x357177, _0x2b097c, _0x835d38, _0x2de802, _0x244c28));
-    } catch (_0x379519) {
+        var index = Math.max(0x0, Math.min(0x7ff, parseInt(this.valIndex.value))),
+            bump = Math.max(0x0, Math.min(0xf, parseInt(this.valBump.value))),
+            depth = Math.max(0x0, Math.min(0x1, parseInt(this.valDepth.value))),
+            definition = Math.max(0x0, Math.min(0xff, parseInt(this.valDef.value))),
+            data = Math.max(0x0, Math.min(0xff, parseInt(this.valTileData.value)));
+        if (isNaN(index) || isNaN(bump) || isNaN(depth) || isNaN(definition) || isNaN(data)) throw "oof";
+        this.setBrush(td32.encode(index, bump, depth, definition, data));
+    } catch (e) {
         this.valRaw.classList.add("red");
     }
 };
@@ -1712,9 +1728,17 @@ TileTool.prototype.setBrush = function(newBrush) {
     var def = brushData[0x3];
     this.valDef.value = def;
     this.valTileData.value = brushData[0x4];
-    this.valTileData.style.display = tileDefs[def].extraDataType !== 'objId' ? "" : "none";
+
+    if ((tileDefs[def].extraDataType === 'objId') || tileDefs[def].extraDataType === 'warpId')
+        this.valTileData.style.display = "none";
+    else
+        this.valTileData.style.display = "";
+
     this.valTileDataObjId.value = brushData[0x4];
+    this.valTileDataWarpId.value = brushData[0x4];
+
     this.valTileDataObjId.style.display = tileDefs[def].extraDataType === 'objId' ? "" : "none";
+    this.valTileDataWarpId.style.display = tileDefs[def].extraDataType === 'warpId' ? "" : "none";
     this.valTileDataName.innerText = 'extraDataName' in tileDefs[def] ? tileDefs[def].extraDataName : 'Unused Data';
     this.valRaw.innerHTML = this.brush;
     this.valRaw.classList.remove("red");
@@ -1758,7 +1782,7 @@ function ObjectTool(editor) {
     this.moveTimer = 0x0;
     this.mmbx = false;
     this.obj = {};
-    this.obj.type = 0x11;
+    this.obj.type = 0x1;
     this.obj.param = [];
 }
 ObjectTool.prototype.input = function(lastInput, mouse, keys) {
@@ -1961,11 +1985,12 @@ WarpTool.prototype.input = function(lastInput, mouse, keys) {
             this.mmbx = true;
             var newPos = shor2.encode(absMousePos.x, absMousePos.y);
             var newWarp = {};
-            newWarp.id = parseInt(0xff * Math.random());
+            newWarp.id = this.zone.warp.length;
             newWarp.pos = newPos;
             newWarp.data = 0x0;
             this.zone.warp.push(newWarp);
             this.select(newWarp);
+            this.editor.updWarpOptions();
         } else {
             if (!mouse.mmb) this.mmbx = false;
         }
@@ -1974,9 +1999,10 @@ WarpTool.prototype.input = function(lastInput, mouse, keys) {
 WarpTool.prototype.update = function() {
     try {
         var _0x20fe57 = Math.max(0x0, Math.min(0xff, parseInt(this.valId.value))),
-            _0x17d535 = Math.max(0x0, Math.min(0xff, parseInt(this.valData.value)));
+            _0x17d535 = Math.max(0x0, Math.min(0xff, parseInt(this.valData.selectedIndex)));
         if (isNaN(_0x20fe57) || isNaN(_0x17d535)) throw "oof";
         this.selected && (this.selected.id = _0x20fe57, this.selected.data = _0x17d535);
+        this.editor.updWarpOptions();
     } catch (_0x3e9769) {}
 };
 WarpTool.prototype.select = function(warp) {
@@ -2043,12 +2069,12 @@ function CopyTool(_0x5a4fc6) {
     this.overwrite = void 0x0;
 }
 CopyTool.prototype.input = function(lastInput, mouse, keys) {
-    if (mouse.lmb || mouse.rmb) {
+    if (mouse.lmb || mouse.mmb) {
         var dims = this.zone.dimensions();
         absMousePos = vec2.chop(this.editor.display.camera.unproject(mouse.pos));
         if (0x0 > absMousePos.x || absMousePos.x > dims.x - 0x1 || 0x0 > absMousePos.y || absMousePos.y > dims.y - 0x1) {} else {
             if (mouse.lmb) this.doPaste(absMousePos);
-            else if (mouse.rmb) this.doCopy(absMousePos);
+            else if (mouse.mmb) this.doCopy(absMousePos);
         }
     }
 };
@@ -2145,6 +2171,7 @@ function ReferenceTool(_0x4b0f80) {
     this.valImg = document.getElementById("editor-tool-ref-img");
     this.valX = document.getElementById("editor-tool-ref-x");
     this.valY = document.getElementById("editor-tool-ref-y");
+    this.valOpacity = document.getElementById("editor-tool-ref-opacity");
     var _0x52207c = this;
     this.btnLoad = document.getElementById("editor-tool-ref-load");
     this.btnLoad.onclick = function() {
@@ -2169,18 +2196,21 @@ ReferenceTool.prototype.reload = function() {
 };
 ReferenceTool.prototype.load = function() {
     this.zone = this.editor.currentZone;
-    this.valImg.value = '';
+    this.valImg.value == "" ? this.valImg.value = '' : this.valImg.value = this.valImg.value;
     this.valX.value = this.editor.offsetRef.x;
     this.valY.value = this.editor.offsetRef.y;
+    this.valOpacity.value = this.editor.refOpacity;
     this.element.style.display = "block";
 };
 ReferenceTool.prototype.save = function() {
     try {
-        var _0x3a8d00 = parseInt(this.valX.value),
-            _0x27e93a = parseInt(this.valY.value);
-        if (isNaN(_0x3a8d00) || isNaN(_0x27e93a)) throw "oof";
-        this.editor.offsetRef = vec2.make(_0x3a8d00, _0x27e93a);
-    } catch (_0x1fe389) {
+        var offsetX = parseInt(this.valX.value),
+            offsetY = parseInt(this.valY.value),
+            opacity = parseFloat(this.valOpacity.value);
+        if (isNaN(offsetX) || isNaN(offsetY)) throw "oof";
+        this.editor.offsetRef = vec2.make(offsetX, offsetY);
+        this.editor.refOpacity = opacity;
+    } catch (e) {
         app.menu.warn.show("Failed to parse value. Changes not applied.");
     }
 };
@@ -3213,10 +3243,7 @@ _0xcb6c5.SPRITE = {};
 _0xcb6c5.SPRITE_LIST = [{
     'NAME': "FLY0",
     'ID': 0x0,
-    'INDEX': [
-        [0x68],
-        [0x58]
-    ]
+    'INDEX': 0x67
 }, {
     'NAME': "FLY1",
     'ID': 0x1,
@@ -3449,10 +3476,7 @@ _0x28400d.SPRITE = {};
 _0x28400d.SPRITE_LIST = [{
     'NAME': "FLY0",
     'ID': 0x0,
-    'INDEX': [
-        [0x64],
-        [0x54]
-    ]
+    'INDEX': 0x63
 }, {
     'NAME': "FLY1",
     'ID': 0x1,
@@ -3655,10 +3679,7 @@ _0x451da7.SPRITE = {};
 _0x451da7.SPRITE_LIST = [{
     'NAME': "IDLE0",
     'ID': 0x0,
-    'INDEX': [
-        [0x6a],
-        [0x5a]
-    ]
+    'INDEX': 91
 }, {
     'NAME': "IDLE1",
     'ID': 0x1,
@@ -3908,10 +3929,7 @@ _0x34a9a5.SPRITE = {};
 _0x34a9a5.SPRITE_LIST = [{
     'NAME': "IDLE0",
     'ID': 0x0,
-    'INDEX': [
-        [0x6e],
-        [0x5e]
-    ]
+    'INDEX': 0x5c
 }, {
     'NAME': "IDLE1",
     'ID': 0x1,
@@ -4090,10 +4108,7 @@ _0x31c6a5.SPRITE = {};
 _0x31c6a5.SPRITE_LIST = [{
     'NAME': "RUN0",
     'ID': 0x0,
-    'INDEX': [
-        [0xc4, 0xc5],
-        [0xb4, 0xb5]
-    ]
+    'INDEX': 0xb0
 }, {
     'NAME': "RUN1",
     'ID': 0x1,
@@ -4372,10 +4387,7 @@ _0x3ea684.SPRITE = {};
 _0x3ea684.SPRITE_LIST = [{
     'NAME': "STAGE0",
     'ID': 0x0,
-    'INDEX': [
-        [0xa1],
-        [0x91]
-    ]
+    'INDEX': 0xa2
 }, {
     'NAME': "STAGE1",
     'ID': 0x1,
@@ -5295,6 +5307,42 @@ _0x2358ba.prototype.setState = _0x179ca2.prototype.setState;
 _0x2358ba.prototype.draw = _0x179ca2.prototype.draw;
 GameObject.REGISTER_OBJECT(_0x2358ba);
 "use strict";
+function SpinyObject(_0x3e22cc, _0x2e5ea9, _0x329264, _0x5d111d, _0x36bf4f) {
+    _0x179ca2.call(this, _0x3e22cc, _0x2e5ea9, _0x329264, _0x5d111d, _0x36bf4f)
+    this.state = SpinyObject.STATE.IDLE
+    this.sprite = this.state.SPRITE[0x0];
+}
+SpinyObject.ASYNC = false;
+SpinyObject.ID = 0x17;
+SpinyObject.SPRITE = {};
+SpinyObject.SPRITE_LIST = [{
+    'NAME': "IDLE0",
+    'ID': 0x0,
+    'INDEX': 166
+}]
+for (_0x2ea890 = 0x0; _0x2ea890 < SpinyObject.SPRITE_LIST.length; _0x2ea890++) SpinyObject.SPRITE[SpinyObject.SPRITE_LIST[_0x2ea890].NAME] = SpinyObject.SPRITE_LIST[_0x2ea890], SpinyObject.SPRITE[SpinyObject.SPRITE_LIST[_0x2ea890].ID] = SpinyObject.SPRITE_LIST[_0x2ea890];
+GameObject.REGISTER_OBJECT(SpinyObject);
+
+"use strict";
+
+function BeetleObject(_0x3e22cc, _0x2e5ea9, _0x329264, _0x5d111d, _0x36bf4f) {
+    _0x179ca2.call(this, _0x3e22cc, _0x2e5ea9, _0x329264, _0x5d111d, _0x36bf4f)
+    this.state = BeetleObject.STATE.IDLE
+    this.sprite = this.state.SPRITE[0x0];
+}
+BeetleObject.ASYNC = false;
+BeetleObject.ID = 0x18;
+BeetleObject.SPRITE = {};
+BeetleObject.SPRITE_LIST = [{
+    'NAME': "IDLE0",
+    'ID': 0x0,
+    'INDEX': 0x7d
+}]
+for (_0x2ea890 = 0x0; _0x2ea890 < BeetleObject.SPRITE_LIST.length; _0x2ea890++) BeetleObject.SPRITE[BeetleObject.SPRITE_LIST[_0x2ea890].NAME] = SpinyObject.SPRITE_LIST[_0x2ea890], BeetleObject.SPRITE[BeetleObject.SPRITE_LIST[_0x2ea890].ID] = BeetleObject.SPRITE_LIST[_0x2ea890];
+GameObject.REGISTER_OBJECT(BeetleObject);
+
+
+"use strict";
 
 function GoldFlowerObject(_0x3e22cc, _0x2e5ea9, _0x329264, _0x5d111d, _0x36bf4f) {
     _0x179ca2.call(this, _0x3e22cc, _0x2e5ea9, _0x329264, _0x5d111d, _0x36bf4f);
@@ -5968,7 +6016,7 @@ Resource.prototype.loadTexture = function (_0x1a5f56) {
         _0x38fab9.cache[_0x1a5f56.id] = _0x24d029;
         _0x38fab9.load--;
       };
-      _0x24d029.src = _0x1a5f56.src + '?v=3.8.9';
+      _0x24d029.src = _0x1a5f56.src + '?v=2.1.0';
       _0x38fab9.load++;
     }
 };
@@ -6211,10 +6259,11 @@ EditorDisplay.prototype.draw = function() {
     }
 };
 EditorDisplay.prototype.drawReference = function() {
-    var _0x2f7f82 = this.context;
+    var context = this.context;
     if (this.game.reference && this.game.showRef) {
-        var _0x1582a2 = this.resource.getTexture(this.game.reference);
-        _0x1582a2 && _0x2f7f82.drawImage(_0x1582a2, 0x0, 0x0, _0x1582a2.width, _0x1582a2.height, this.game.offsetRef.x, this.game.offsetRef.y, _0x1582a2.width, _0x1582a2.height);
+        var texture = this.resource.getTexture(this.game.reference);
+        context.globalAlpha = this.game.refOpacity;
+        texture && context.drawImage(texture, 0x0, 0x0, texture.width, texture.height, this.game.offsetRef.x, this.game.offsetRef.y, texture.width, texture.height) && context.restore();
     }
 };
 EditorDisplay.prototype.drawMap = Display.prototype.drawMap;
@@ -6300,9 +6349,13 @@ EditorDisplay.prototype.drawWarp = function() {
         var zone = this.game.getZone();
         for (var i = 0x0; i < zone.warp.length; i++) {
             var warp = zone.warp[i],
-                pos = shor2.decode(warp.pos);
+                pos = shor2.decode(warp.pos),
+                id = zone.warp[i].id.toString();
             context.fillStyle = warp === this.game.tool.selected ? "rgba(0,0,255,0.5)" : "rgba(255,0,0,0.5)";
             context.fillRect(pos.x * Display.TEXRES, (zone.height() - pos.y - 0x1) * Display.TEXRES, Display.TEXRES, Display.TEXRES);
+            context.fillStyle = 'white';
+            context.font = '8px Arial';
+            context.fillText(`${id}`, pos.x * Display.TEXRES + Display.TEXRES / 2, (zone.height() - pos.y - 0.4) * Display.TEXRES);
         }
     }
 };
@@ -6393,6 +6446,7 @@ function Zone(game, level, data) {
     this.music = data.music ? data.music : '';
     this.winmusic = data.winmusic ? data.winmusic : '';
     this.victorymusic = data.victorymusic ? data.victorymusic : '';
+    this.levelendoff = data.levelendoff ? data.levelendoff : '10';
     this.layers = data.layers || [];
     if (data.data) {
         for (var i=0; i<this.layers.length && this.layers[i].z < 0; i++);
@@ -6505,13 +6559,7 @@ function Editor(data) {
     this.middle = document.getElementById("editor-middle");
     this.container = document.getElementById("editor-display");
     this.canvas = document.getElementById("editor-display-canvas");
-    var tileDef = document.getElementById("editor-tool-tile-def");
-    for (var x in tileDefs) {
-        var elem = document.createElement("option");
-        elem.value = x;
-        elem.innerText = x+" - "+tileDefs[x].name;
-        tileDef.appendChild(elem);
-    }
+    this.updateTiles();
     var tileDataObjId = document.getElementById("editor-tool-tile-data-objid");
     var objToolObjId = document.getElementById("editor-tool-object-type");
     for (var list of [tileDataObjId,objToolObjId]) {
@@ -6554,13 +6602,43 @@ function Editor(data) {
     this.dataRaw = data;
     this.showRef = false;
     this.offsetRef = vec2.make(0x0, 0x0);
+    this.refOpacity = 1;
     this.reference = void 0x0;
     var _0x5f5a9a = this;
     this.frameReq = FrameReq.call(window, function() {
         _0x5f5a9a.draw();
     });
-}
-Editor.TICK_RATE = 0x21;
+};
+Editor.prototype.updateTiles = function() {
+    var tileDef = document.getElementById("editor-tool-tile-def");
+
+    if (tileDef.options.length > 0) {
+        if (tileDef == null || tileDef.options == null) return;
+	    tileDef.options.length = 0;
+    }
+
+    for (var x in tileDefs) {
+        var elem = document.createElement("option");
+        elem.value = x;
+        elem.innerText = x+" - "+tileDefs[x].name;
+        tileDef.appendChild(elem);
+    }
+};
+Editor.prototype.updWarpOptions = function() {
+    var tileDataWarpId = document.getElementById("editor-tool-tile-data-warpid");
+    if (tileDataWarpId.options.length > 1) tileDataWarpId.options.length = 1;
+
+    var list = tileDataWarpId;
+    this.currentZone.warp.forEach(x => {
+        var elem = document.createElement("option");
+        var pos = JSON.stringify(shor2.decode(x.pos));
+        pos = JSON.parse(pos);
+        elem.value = x.id;
+        elem.innerText = "ID: " + x.id + " / X: " + pos.x + " Y: " + pos.y;
+        list.appendChild(elem);
+    });
+};
+Editor.TICK_RATE = 0x1;
 Editor.prototype.load = function(data) {
     this.world = new World(this, data);
     this.ready = true;
@@ -6589,6 +6667,7 @@ Editor.prototype.compile = function() {
                 outZone = {};
             outZone.id = zone.id;
             outZone.initial = zone.initial;
+            outZone.levelendoff = zone.levelendoff;
             outZone.color = zone.color;
             outZone.music = zone.music;
             outZone.winmusic = zone.winmusic;
@@ -6626,6 +6705,7 @@ Editor.prototype.setTool = function(toolType) {
         case "object":
             this.tool = new ObjectTool(this);
             this.tool.load();
+            this.tool.updParamTools();
             showLayers = false;
             break;
         case "warp":
@@ -6662,6 +6742,7 @@ Editor.prototype.doInput = function() {
 Editor.prototype.doStep = function() {};
 Editor.prototype.setZone = function(zone) {
     this.currentZone = zone;
+    this.updWarpOptions();
     this.tool && this.tool.reload();
     var dims = zone.dimensions();
     this.display.camera.position(vec2.scale(dims, 0.5));
@@ -6724,7 +6805,7 @@ App.prototype.close = function() {
 };
 
 window.onbeforeunload = (e) => {
-    return (!dirty || "Do you want to exit this page?");
+    if (dirty) {return "Do you want to exit this page?";}
 }
 
 var app = new App();

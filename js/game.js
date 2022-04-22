@@ -395,6 +395,11 @@ td32.bump = function (/* td32 */ a, /*4bit unsigned integer*/ b) {
     return (a & 0b11111111111111111000011111111111) | ((b << 11) & 0b00000000000000000111100000000000);
 };
 
+td32.underbump = function (/* td32 */ a, /*4bit unsigned integer*/ b) {
+    let res = td32.bump(a, b);
+    return -res;
+};
+
 td32.data = function (/* td32 */ a, /*1 byte uint*/ b) {
     return (a & 0x00FFFFFF) | ((b << 24) & 0xFF000000);
 };
@@ -410,6 +415,7 @@ td32.TRIGGER = {
         PUSH: 0x02,
         FIREBALL: 0x03,
         SHELL: 0x04,
+        STAND: 0x05,
         SMALL_BUMP: 0x10,
         BIG_BUMP: 0x11
     }
@@ -438,6 +444,10 @@ td32.GEN_FUNC.BUMP = function (game, pid, td, level, zone, x, y, type) {
             }
         }
     }
+};
+
+td32.GEN_FUNC.UNDERBUMP = function (game, pid, td, level, zone, x, y, type) {
+    game.world.getZone(level, zone).underbump(x, y);
 };
 
 
@@ -643,21 +653,17 @@ td32.TILE_PROPERTIES = {
         ASYNC: true,
         TRIGGER: function (game, pid, td, level, zone, x, y, type) {
             switch (type) {
-                /* Touch */
-                case 0x00: {
-                    if (game.pid === pid) {
-                        PlayerObject.ANIMATION_RATE = 3
-                        PlayerObject.MOVE_SPEED_ACCEL = 0.0125
-                        PlayerObject.MOVE_SPEED_DECEL = 0.0225
-                        PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025
-                    }
-                }
-                case 0x10: {
-                    if (game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x, y), type)); }
+                /* Stand */
+                case 0x05: {
+                    if (game.pid === pid) { game.getPlayer().bounce(); game.out.push(NET030.encode(level, zone, shor2.encode(x, y), type)); }
                     td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
                     break;
                 }
-                case 0x11: {
+
+                /* Small Bump */
+                /* Big Bump */
+                case 0x10 :
+                case 0x11 : {
                     if (game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x, y), type)); }
                     td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
                     break;
@@ -665,13 +671,48 @@ td32.TILE_PROPERTIES = {
             }
         }
     },
-    /* Semisolid Ice */
+    /* Item Note Block */
     12: {
         COLLIDE: true,
-        PLATFORM: "ICE",
         HIDDEN: false,
         ASYNC: true,
-        TRIGGER: function (game, pid, td, level, zone, x, y, type) { }
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
+            switch (type) {
+                /* Stand */
+                /* Shell */
+                case 0x05 :
+                case 0x04 : {
+                    if (game.pid === pid) { game.getPlayer().bounce(); game.out.push(NET030.encode(level, zone, shor2.encode(x, y), type)); }
+
+                    var rep = td32.encode(td.index, 0, td.depth, 0xb, 0); // Replacement td32 data for tile.
+                    game.world.getZone(level, zone).replace(x, y, rep);
+
+                    if (td.data === 84 /* StarObject */) {
+                        game.createObject(td.data, level, zone, vec2.make(x, y), [shor2.encode(x, y), false, true]);
+                    } else {
+                        game.createObject(td.data, level, zone, vec2.make(x, y), [shor2.encode(x, y), true]);
+                    }
+
+                    td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+                    game.world.getZone(level, zone).play(x, y, "item.mp3", 1., 0.04);
+                    break;
+                }
+
+                /* Small bump */
+                /* Big bump */
+                case 0x10:
+                case 0x11: {
+                    if (game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x, y), type)); }
+                    var rep = td32.encode(td.index, 0, td.depth, 0xb, 0); // Replacement td32 data for tile.
+                    game.world.getZone(level, zone).replace(x, y, rep);
+                    game.createObject(td.data, level, zone, vec2.make(x, y), [shor2.encode(x,y), static=false, note=false]);
+
+                    td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
+                    game.world.getZone(level, zone).play(x, y, "item.mp3", 1., 0.04);
+                    break;
+                }
+            }
+        }
     },
     /* Flip Block */
     14: {
@@ -744,6 +785,15 @@ td32.TILE_PROPERTIES = {
                 }
             }
         }
+    },
+
+    /* Ice Semisolid */
+    23: {
+        COLLIDE: true,
+        HIDDEN: false,
+        PLATFORM: "ICE",
+        ASYNC: false,
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) {}
     },
 
     /* Item Block Standard */
@@ -1132,6 +1182,24 @@ td32.TILE_PROPERTIES = {
             }
         }
     },
+    /* Flagpole Level End Warp */
+    0xA1: {
+        COLLIDE: false,
+        HIDDEN: false,
+        ASYNC: true,
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
+            switch (type) {
+                /* Touch */
+                case 0x00: {
+                    if (game.pid === pid) {
+                        var ply = game.getPlayer();
+
+                        if (ply.autoTarget) game.levelWarp(td.data);
+                    }
+                }
+            }
+        }
+    },
     /* Warp Pipe Single Slow */
     87: {
         COLLIDE: true,
@@ -1164,7 +1232,39 @@ td32.TILE_PROPERTIES = {
                         //var l = game.world.getZone(level, zone).getTile(vec2.make(x - 1, y));
                         //var r = game.world.getZone(level, zone).getTile(vec2.make(x + 1, y));
 
-                        ply.pipe(2, td.data, 0);
+                        if (parseInt(ply.pos.x) === x || ply.pos.x + 0.1 === x || ply.pos.x - 0.1 === x) ply.pipe(2, td.data, 0);
+                    }
+                }
+            }
+        }
+    },
+    /* Warp Pipe Left Slow */
+    89: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: true,
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
+            switch (type) {
+                /* Push */
+                case 0x02 : {
+                    if (game.pid === pid) {
+                        game.getPlayer().pipe(3, td.data, 50);
+                    }
+                }
+            }
+        }
+    },
+    /* Warp Pipe Left Fast */
+    90: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: true,
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
+            switch (type) {
+                /* Push */
+                case 0x02 : {
+                    if (game.pid === pid) {
+                        game.getPlayer().pipe(3, td.data, 0);
                     }
                 }
             }
@@ -1914,7 +2014,7 @@ MainAsMemberScreen.prototype.show = function (data) {
     this.linkElement = document.getElementById("link");
     this.linkElement.style.display = "";
     this.element.style.display = "block";
-    if (app.goToLobby) {
+    if (app.goToLobby || app.inviteCode !== null) {
         this.launch();
     } else {
         setUpdatePlayerNumber(this);
@@ -1939,7 +2039,13 @@ MainAsMemberScreen.prototype.getSkins = function () {
 };
 
 MainAsMemberScreen.prototype.launch = function () {
-    app.join(this.nickname, this.squad, this.isPrivate, this.skin, this.gameMode);
+    var nickname = this.nickname;
+    var squad = app.inviteCode && app.inviteMode ? app.inviteCode : this.squad;
+    var priv = app.inviteCode && app.inviteMode ? true : this.isPrivate;
+    var skin = this.skin;
+    var gm = app.inviteCode && app.inviteMode ? parseInt(app.inviteMode) || 0 : this.gameMode
+    
+    app.join(nickname, squad, priv, skin, gm);
 };
 
 MainAsMemberScreen.prototype.showProfile = function () {
@@ -2466,11 +2572,11 @@ ShopScreen.prototype.show = function () {
 ShopScreen.prototype.purchase = function (skin) {
     const formatted = this.order();
 
-    if (_0x592fa2.includes(skin)) return this.purchased(`You already own ${formatted[skin]['name']}`);
-    if (_0x28f1ca < formatted[skin]['coins']) return this.error('Not enough coins for skin');
+    if (_0x592fa2.includes(skin)) return this.purchased(`You already have this skin.`);
+    if (_0x28f1ca < formatted[skin]['coins']) return this.error('You do not have enough coins.');
 
     app.net.send({ 'type': 'prc', 'skin': skin, 'coins': formatted[skin]['coins'] });
-    this.success(`Purchased ${formatted[skin]['name']} successfully`, formatted[skin]['id']);
+    this.success(`Purchased ${formatted[skin]['name']} successfully`);
 };
 
 ShopScreen.prototype.getSkin = function () {
@@ -2483,7 +2589,7 @@ ShopScreen.prototype.error = function (msg) {
     shopResult.style.color = 'rgb(255, 0, 0)';
 };
 
-ShopScreen.prototype.success = function (msg, skin) {
+ShopScreen.prototype.success = function (msg) {
     let shopResult = document.getElementById('shopResult');
     shopResult.innerText = msg;
     shopResult.style.color = '#68BC00';
@@ -3876,10 +3982,20 @@ PlayerObject.prototype.step = function () {
                     case 0x3:
                         this.pos.x -= 1.74;
                         this.setState(PlayerObject.SNAME.RUN);
+                        this.reverse = false;
                         break;
                     case 0x4:
                         this.pos.x += 1.74;
                         this.setState(PlayerObject.SNAME.RUN);
+                        this.reverse = true;
+                        break;
+                    case 0x5:
+                        this.pos.y -= 1.74;
+                        this.setState(PlayerObject.SNAME.STAND);
+                        break;
+                    case 0x06:
+                        this.pos.y += 1.74;
+                        this.setState(PlayerObject.SNAME.STAND);
                         break;
                     default:
                         return;
@@ -3911,7 +4027,13 @@ PlayerObject.prototype.control = function() {
     if (this.grounded) this.btnBg = this.btnB;
     if (this.isState(PlayerObject.SNAME.DOWN) && this.collisionTest(this.pos, this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.power).DIM)) {
         if (- 0x1 !== this.btnD[0x1] && !this.btnA) this.moveSpeed = 0.5 * (this.moveSpeed + PlayerObject.STUCK_SLIDE_SPEED);
-        
+        if (this.btnA) {
+            if ((this.grounded || this.underWater) && !this.btnAHot) {
+                this.jumping = 0x0;
+                this.play(this.underWater ? "swim.mp3" : 0x0 < this.power ? "jump1.mp3" : "jump0.mp3", 0.7, 0.04);
+                this.btnAHot = true;
+            }
+        };
         this.moveSpeed = Math.sign(this.moveSpeed) * Math.max(Math.abs(this.moveSpeed) - PlayerObject.MOVE_SPEED_DECEL, 0x0);
         return;
     } else {
@@ -3993,7 +4115,7 @@ PlayerObject.prototype.physics = function () {
     var tilePlatform = [];
     tilePlatformColliding = [];
     var _0x27521c = [];
-    var _0x27c16e = [];
+    var _0x27c16e = []; // standing on tiles
     var _0x346d1d = [];
     var _0x50b7b9 = [];
     var _0x535e81 = [];
@@ -4089,6 +4211,9 @@ PlayerObject.prototype.physics = function () {
     if (this.isState(PlayerObject.SNAME.RUN))
         for (_0x5b32b0 = 0x0; _0x5b32b0 < _0x346d1d.length; _0x5b32b0++) obj = _0x346d1d[_0x5b32b0], obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, td32.TRIGGER.TYPE.PUSH);
     for (_0x5b32b0 = 0x0; _0x5b32b0 < _0x50b7b9.length; _0x5b32b0++) obj = _0x50b7b9[_0x5b32b0], obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, 0x0 < this.power ? td32.TRIGGER.TYPE.BIG_BUMP : td32.TRIGGER.TYPE.SMALL_BUMP), this.jumping = -0x1, this.fallSpeed = -PlayerObject.BLOCK_BUMP_THRESHOLD;
+    _0x27c16e.forEach(tile => {
+        tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.STAND);
+    });
 };
 
 /* God bless OSS */
@@ -4108,11 +4233,11 @@ PlayerObject.prototype.interaction = function () {
     for (var i = 0x0; i < this.game.objects.length; i++) {
         var obj = this.game.objects[i];
         if (obj !== this && !this.dead && obj.level === this.level && obj.zone === this.zone && obj.isTangible() && squar.intersection(obj.pos, obj.dim, this.pos, this.dim)) {
-            if (0x0 < this.starTimer && obj.bonk) {
+            if (0x0 < this.starTimer && obj.bonk && this.game instanceof Game) {
                 obj.bonk();
                 this.game.out.push(NET020.encode(obj.level, obj.zone, obj.oid, 0x1));
             }
-            if (obj instanceof PlayerObject && 0x0 < obj.starTimer && !this.autoTarget) {
+            if (obj instanceof PlayerObject && 0x0 < obj.starTimer && !this.autoTarget && this.game instanceof Game) {
                 this.damage(obj);
                 if (this.dead) this.game.out.push(NET017.encode(obj.pid));
             }
@@ -6412,9 +6537,10 @@ HammerObject.prototype.draw = function (_0x4db511) {
 GameObject.REGISTER_OBJECT(HammerObject);
 "use strict";
 
-function PowerUpObject(game, level, zone, pos, oid) {
+function PowerUpObject(game, level, zone, pos, oid, note=false) {
     GameObject.call(this, game, level, zone, pos);
     this.oid = oid;
+    this.note = note;
     this.anim = 0x0;
     this.dim = vec2.make(0x1, 0.9);
     this.fallSpeed = this.moveSpeed = 0x0;
@@ -6467,7 +6593,7 @@ PowerUpObject.prototype.physics = function () {
 
         if (!this.rise) { return; }
 
-        this.pos.y += PowerUpObject.RISE_RATE;
+        this.pos.y += this.note ? -PowerUpObject.RISE_RATE : PowerUpObject.RISE_RATE;
         return;
     }
 
@@ -6568,8 +6694,8 @@ PowerUpObject.prototype.draw = function (_0x2ea1b4) {
 };
 "use strict";
 
-function MushroomObject(game, level, zone, pos, oid) {
-    PowerUpObject.call(this, game, level, zone, pos, oid);
+function MushroomObject(game, level, zone, pos, oid, note=false) {
+    PowerUpObject.call(this, game, level, zone, pos, oid, note);
     this.state = MushroomObject.STATE.IDLE;
     this.sprite = this.state.SPRITE[0x0];
 }
@@ -6609,9 +6735,10 @@ MushroomObject.prototype.draw = PowerUpObject.prototype.draw;
 GameObject.REGISTER_OBJECT(MushroomObject);
 "use strict";
 
-function FlowerObject(game, level, zone, pos, oid) {
+function FlowerObject(game, level, zone, pos, oid, note=false) {
     PowerUpObject.call(this, game, level, zone, pos, oid);
     this.state = FlowerObject.STATE.IDLE;
+    this.note = note;
     this.sprite = this.state.SPRITE[0x0];
 }
 FlowerObject.ASYNC = false;
@@ -6658,9 +6785,10 @@ FlowerObject.prototype.draw = PowerUpObject.prototype.draw;
 GameObject.REGISTER_OBJECT(FlowerObject);
 "use strict";
 
-function GoldFlowerObject(game, level, zone, pos, oid) {
+function GoldFlowerObject(game, level, zone, pos, oid, note=false) {
     PowerUpObject.call(this, game, level, zone, pos, oid);
     this.state = GoldFlowerObject.STATE.IDLE;
+    this.note = note;
     this.sprite = this.state.SPRITE[0x0];
 }
 GoldFlowerObject.ASYNC = false;
@@ -6713,11 +6841,13 @@ GoldFlowerObject.prototype.draw = PowerUpObject.prototype.draw;
 GameObject.REGISTER_OBJECT(GoldFlowerObject);
 "use strict";
 
-function StarObject(game, level, zone, pos, oid) {
+function StarObject(game, level, zone, pos, oid, static=0, note=false) {
     PowerUpObject.call(this, game, level, zone, pos, oid);
     this.state = StarObject.STATE.IDLE;
     this.sprite = this.state.SPRITE[0x0];
+    this.note = note;
     this.groundTimer = 0x0;
+    this.static = (() => { if (static == "0") return false; else return true; })();
 }
 StarObject.ASYNC = false;
 StarObject.ID = 0x54;
@@ -6754,8 +6884,8 @@ for (_0x1bec55 = 0x0; _0x1bec55 < StarObject.STATE_LIST.length; _0x1bec55++) Sta
 StarObject.prototype.update = PowerUpObject.prototype.update;
 StarObject.prototype.step = PowerUpObject.prototype.step;
 StarObject.prototype.control = function () {
-    this.moveSpeed = this.dir ? -StarObject.MOVE_SPEED_MAX : StarObject.MOVE_SPEED_MAX;
-    this.grounded && ++this.groundTimer >= StarObject.JUMP_DELAY ? this.jump = 0x0 : this.jump > StarObject.JUMP_LENGTH && (this.jump = -0x1, this.groundTimer = 0x0);
+    this.moveSpeed = this.dir ? (!this.static ? -StarObject.MOVE_SPEED_MAX : 0) : (!this.static ? StarObject.MOVE_SPEED_MAX: 0);
+    if (!this.static) this.grounded && ++this.groundTimer >= StarObject.JUMP_DELAY ? this.jump = 0x0 : this.jump > StarObject.JUMP_LENGTH && (this.jump = -0x1, this.groundTimer = 0x0);
 };
 StarObject.prototype.physics = PowerUpObject.prototype.physics;
 StarObject.prototype.bounce = PowerUpObject.prototype.bounce;
@@ -6770,9 +6900,10 @@ StarObject.prototype.draw = PowerUpObject.prototype.draw;
 GameObject.REGISTER_OBJECT(StarObject);
 "use strict";
 
-function LifeObject(game, level, zone, pos, oid) {
+function LifeObject(game, level, zone, pos, oid, note) {
     PowerUpObject.call(this, game, level, zone, pos, oid);
     this.state = LifeObject.STATE.IDLE;
+    this.note = note;
     this.sprite = this.state.SPRITE[0x0];
 }
 LifeObject.ASYNC = false;
@@ -8082,6 +8213,7 @@ Display.prototype.drawUI = function () {
         );
     var sprite, txt, txtWIDTH, vectoryTex, vicTexW, vicTexH, scale, vicAnim;
     if (0x3 >= this.game.victory && 0 !== this.game.victory && !this.game.touchMode && !app.compactMode) {
+        HudButtonOffset = -200;
         victoryTex = this.resource.getTexture("ui");
         vicTexW = Math.min(victoryTex.width, canvasWIDTH);
         vicTexH = parseInt(vicTexW * 0.196);
@@ -8293,8 +8425,8 @@ function Zone(game, level, input) {
     this.id = input.id;
     this.level = level;
     this.initial = input.initial;
+    this.levelendoff = input.levelendoff || 10;
     this.color = input.color;
-    this.vertical = input.color || false;
     this.music = input.music ? input.music : '';
     if (this.music) app.audio.addMusic(this.music);
     this.fastMusic = this.music ? this.music.replace(".mp3", "_fast.mp3") : "";
@@ -8320,6 +8452,8 @@ function Zone(game, level, input) {
     this.effects = [];
     this.vines = [];
     this.sounds = [];
+
+    PlayerObject.LEVEL_END_MOVE_OFF["x"] = parseInt(this.levelendoff);
 }
 Zone.prototype.update = function (game, pid, level, zone, x, y, type) {
     var y2 = this.dimensions().y - 0x1 - y,
@@ -8358,6 +8492,15 @@ Zone.prototype.tile = function (x, y) {
 Zone.prototype.bump = function (x, y) {
     var y2 = this.dimensions().y - 0x1 - y;
     this.mainLayer.data[y2][x] = td32.bump(this.mainLayer.data[y2][x], 0xf);
+    this.bumped.push({
+        'x': x,
+        'y': y2
+    });
+    this.play(x, y, "bump.mp3", 0.5, 0.04);
+};
+Zone.prototype.underbump = function (x, y) {
+    var y2 = this.dimensions().y + 0x1 + y;
+    this.mainLayer.data[y2][x] = td32.underbump(this.mainLayer.data[y2][x], 0xf);
     this.bumped.push({
         'x': x,
         'y': y2
@@ -8483,6 +8626,7 @@ function Game(data) {
     this.gameTimerStopTime = 0;
     this.poleTimes = 0;
     this.pauseCamera = false;
+    this.overrideCameraPos = false;
     var that = this;
     this.frameReq = requestAnimFrameFunc.call(window, function () {
         that.draw();
@@ -8496,18 +8640,16 @@ Game.TICK_RATE = 28;
 Game.FDLC_TARGET = 0x3;
 Game.FDLC_MAX = Game.FDLC_TARGET + 0x2;
 
-Game.LEVEL_WARP_TIME = 160;
-Game.GAME_OVER_TIME = 120;
+Game.LEVEL_WARP_TIME = 110;
+Game.GAME_OVER_TIME = 140;
 
 Game.COINS_TO_LIFE = 0x1e;
 
 Game.prototype.load = function (data) {
+    app.menu.main.winElement.style.display = "none";
     if (this instanceof LobbyGame) {
-        app.menu.main.winElement.style.display = "none";
         document.getElementById("settins-return-lobby").style.display = "none";
     } else {
-        app.game.lives++;
-        app.menu.main.winElement.style.display = "none";
         document.getElementById("settins-return-lobby").style.display = "";
     }
 
@@ -8516,11 +8658,11 @@ Game.prototype.load = function (data) {
     /* Load world data */
     this.world = new World(this, data);
     var reloadAudio = false;
-    if (data.soundOverridePath) {
+    if (data.soundOverridePath && data.soundOverridePath !== "undefined") {
         app.audio.setCustomSoundPrefix(data.soundOverridePath);
         reloadAudio = true;
     }
-    if (data.musicOverridePath) {
+    if (data.musicOverridePath && data.musicOverridePath !== "undefined") {
         app.audio.setCustomMusicPrefix(data.musicOverridePath);
         reloadAudio = true;
     }
@@ -8559,6 +8701,8 @@ Game.prototype.load = function (data) {
         try { maxZoom = data.maxZoom; }
         catch { minZoom = 0x8; app.menu.warn.show("Cannot set max zoom, fallback initialized"); }
     }
+
+    this.lifeage(true);
 
     if (reloadAudio)
         app.audio.initWebAudio(app);
@@ -8955,7 +9099,8 @@ Game.prototype.doStep = function () {
         player.invuln();
         this.levelWarpId = undefined;
         this.pauseCamera = false;
-        if (this.game instanceof Game) this.resumeGameTimer();
+        this.overrideCameraPos = undefined;
+        if (!(this.game instanceof LobbyGame))this.resumeGameTimer();
     }
     player && this.cullSS && !vec2.equals(player.pos, this.cullSS) && this.out.push(NET015.encode());
     player && this.fillSS && this.fillSS !== player.fallSpeed && this.out.push(NET015.encode());
@@ -8967,11 +9112,7 @@ Game.prototype.doStep = function () {
     this.cullSS = player ? vec2.copy(player.pos) : undefined;
     this.fillSS = player ? player.fallSpeed : undefined;
     var zone = this.getZone();
-    var cmera = function () {
-        if (!vertical) return zone.dimensions.y()
-        else { return player.pos.y }
-    }
-    player && !player.dead && !this.pauseCamera && this.display.camera.position(vec2.make(player.pos.x, 0.5 * zone.dimensions().y)); // zone.dimensions().y
+    player && !player.dead && !this.pauseCamera && this.display.camera.position(vec2.make(this.overrideCameraPos ? this.overrideCameraPos.x : player.pos.x, 0.5 * zone.dimensions().y)); // zone.dimensions().y
     this.world.step();
     if (app.hurryingUp && app.hurryUpTime <= Date.now() && 0 >= this.levelWarpTimer) {
         app.hurryingUp = false;
@@ -9156,13 +9297,13 @@ Game.prototype.addCoin = function (jackpot, visual) {
     }
 };
 
-Game.prototype.lifeage = function () {
+Game.prototype.lifeage = function (noSound) {
     this.lives = Math.min(0x63, this.lives + 0x1);
-    this.play("life.mp3", 0x1, 0x0);
+    if (!noSound) this.play("life.mp3", 0x1, 0x0);
 };
 
 firstLoop = true;
-/*Game.prototype.loop = function () {
+Game.prototype.loop = function () {
     try {
         if (this.ready && undefined !== this.startDelta) {
             var time = util.time.now(),
@@ -9185,60 +9326,19 @@ firstLoop = true;
     this.loopReq = setTimeout(function () {
         game.loop();
     }, 0x2);
-};*/
+};
 
-Game.prototype.loop = function() {
-    try {
-        if (this.ready && undefined !== this.startDelta) {
-            var e = util.time.now()
-              , t = parseInt((e - this.startDelta) / Game.TICK_RATE);
-            if (t > this.frame) {
-                for (var i = true; this.buffer.length > Game.FDLC_TARGET || i && 0 < this.buffer.length; ) {
-                    var s = this.buffer.shift();
-                    this.doUpdate(s);
-                    i = false
-                }
-                for (this.doDetermine(); t > this.frame; )
-                    this.doStep();
-                this.doPush();
-                this.delta = e
-            }
-        }
-    } catch (e) {
-        console.error(e)
-    }
-    var o = this;
-    if (!PERFORMANCE_HACK) {
-        this.loopReq = setTimeout((function() {
-            o.loop()
-        }
-        ), 2)
-    }
-}
-
-/*Game.prototype.draw = function () {
+Game.prototype.draw = function () {
     this.lastDraw === this.frame && undefined !== this.startDelta || this.display.draw();
     var _0x19f533 = this;
     this.frameReq = requestAnimFrameFunc.call(window, function () {
         _0x19f533.draw();
     });
-};*/
-
-Game.prototype.draw = function() {
-    if (PERFORMANCE_HACK) {
-        this.loop()
-    }
-    this.lastDraw === this.frame && undefined !== this.startDelta || this.display.draw();
-    var e = this;
-    this.frameReq = requestAnimFrameFunc.call(window, (function() {
-        e.draw()
-    }
-    ))
 };
 
-Game.prototype.destroy = function () {
+Game.prototype.destroy = function() {
     _0x2a6b41.call(window, this.frameReq);
-    if(!PERFORMANCE_HACK) clearTimeout(this.loopReq);
+    clearTimeout(this.loopReq);
     this.input.destroy();
     this.display.destroy();
     for (var obj of this.objects) obj.destroy && obj.destroy();
@@ -9369,6 +9469,15 @@ function App() {
     this.goToLobby = Cookies.get("go_to_lobby") === "1";
     if (this.goToLobby)
         Cookies.remove("go_to_lobby");
+    
+    var params = new URLSearchParams(window.location.search);
+
+    this.inviteCode = params.get("code");
+    this.inviteMode = params.get("mode");
+    window.history.replaceState(null, null, window.location.pathname);
+
+    if (this.inviteCode !== null && this.inviteMode !== null) this.goToLobby = true;
+
     this.session = Cookies.get("session");
 
     this.audioElement = document.createElement('audio');
@@ -9402,7 +9511,7 @@ App.prototype.init = function () {
     document.getElementById("log").style.display = "none";
     document.getElementById("link-patch").style.display = "";
     document.getElementById("main-number").style.display = "";
-    if (!this.goToLobby)
+    if (!this.goToLobby || this.inviteCode === null)
         this.menu.disclaim.show();
     var that = this;
     setTimeout(function () {
@@ -9411,16 +9520,16 @@ App.prototype.init = function () {
         if (that.goToLobby && that.session === undefined) {
             that.menu.main.updateStatsBar();
             var name = Cookies.get("name");
-            var team = Cookies.get("team");
-            var priv = Cookies.get("priv");
+            var team = that.inviteCode || Cookies.get("team");
+            var priv = that.inviteCode !== null && that.inviteMode !== null ? true : Cookies.get("priv") === "true";
             var skin = Cookies.get("skin");
-            var gm = Cookies.get("gamemode");
-            that.join(name ? name : "", team ? team : "", priv === "true", skin ? parseInt(skin) : 0, gm ? parseInt(gm) : 0);
+            var gm = that.inviteMode !== null ? that.inviteMode : Cookies.get("gamemode");
+            that.join(name ? name : "", team ? team : "", priv, skin ? parseInt(skin) : 0, gm ? parseInt(gm) : 0);
             return;
         }
 
         that.menu.main.show();
-    }, this.goToLobby ? 100 : DISCLAIMER_SCREEN_TIMEOUT);
+    }, this.goToLobby || this.inviteCode !== null ? 100 : DISCLAIMER_SCREEN_TIMEOUT);
 };
 App.prototype.load = function (data) {
     app.menu.name.setAutoMove(app.autoMove);
