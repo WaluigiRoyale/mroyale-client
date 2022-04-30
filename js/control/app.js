@@ -43,7 +43,7 @@ function App() {
   this.gTitle = document.getElementById("g-title");
   
   this.testPadId = document.getElementById("test-pad-id");
-  this.testAnalouge = document.getElementById("test-analogue");
+  this.testAnalouge = document.getElementById("test-analog");
   
   this.test = {};
   for(var i=0;i<INPUTS.length;i++) {
