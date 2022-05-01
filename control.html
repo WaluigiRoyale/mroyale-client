@@ -1,21 +1,11 @@
 <html lang="en-US">
   <head>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FCY9L8C0PD"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-FCY9L8C0PD');
-    </script>
-
     <title>Controls - Mario Royale</title>
     <meta name="og:title" content="Mario Royale Controls" />
     <meta property="og:title" content="Mario Royale Controls" />
     <meta name="twitter:title" content="Mario Royale Controls" />
 
-    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta charset="UTF-8">
     <meta name="viewport" id="meta-zoom" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -26,7 +16,7 @@
     <meta property="og:description" content="The controller settings for Mario Royale, a competitive online battle where up to 99 players compete for glory!" />
     <meta name="twitter:description" content="The controller settings for Mario Royale, a competitive online battle where up to 99 players compete for glory!" />
 
-    <link rel='icon' href='https://raw.githubusercontent.com/mroyale/assets/master/img/home/icon.ico'>
+    <link rel="icon" href="https://raw.githubusercontent.com/mroyale/assets/master/img/home/icon.ico">
     <link rel="shortcut icon" type="image/x-icon" href="https://raw.githubusercontent.com/mroyale/assets/master/img/home/icon.ico" />
     <link rel="apple-touch-icon" sizes="192x192" href="https://raw.githubusercontent.com/mroyale/assets/master/img/home/android-chrome-192x192.png">
     <meta name="og:image" content="https://raw.githubusercontent.com/mroyale/assets/master/img/home/android-chrome-192x192.png">
@@ -56,57 +46,64 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@MRoyalePlus" />
 
-    <link rel='stylesheet' type='text/css' href='css/control.css?v=4.3.2.1'>
+    <link rel="stylesheet" type="text/css" href="css/control.css?v=4.3.2.1">
     </head>
 
-    <body id='body' class="b">
-      <div class="t" id="k-title">Keyboard Controls</div>
-      <div class="a">
-        <div><span class="n">Up</span> <button class="i" onclick="app.setK('up')">Set</button> <span class="v" id="key-up"></span></div>
-        <div><span class="n">Down</span> <button class="i" onclick="app.setK('down')">Set</button> <span class="v" id="key-down"></span></div>
-        <div><span class="n">Left</span> <button class="i" onclick="app.setK('left')">Set</button> <span class="v" id="key-left"></span></div>
-        <div><span class="n">Right</span> <button class="i" onclick="app.setK('right')">Set</button> <span class="v" id="key-right"></span></div>
-        <div><span class="n">A</span> <button class="i" onclick="app.setK('a')">Set</button> <span class="v" id="key-a"></span></div>
-        <div><span class="n">Turbo A</span> <button class="i" onclick="app.setK('ta')">Set</button> <span class="v" id="key-ta"></span></div>
-        <div><span class="n">B</span> <button class="i" onclick="app.setK('b')">Set</button> <span class="v" id="key-b"></span></div>      </div>
-      <button class="i" onclick="app.reset('K')">Reset Keyboard Controls</button>
-      <div class="s"></div>
-      
-      <div class="t" id="g-title">Gamepad Controls</div>
-      <div class="a">
-        <div><span class="n">Up</span> <button class="i" onclick="app.setG('up')">Set</button> <span class="v" id="pad-up"></span></div>
-        <div><span class="n">Down</span> <button class="i" onclick="app.setG('down')">Set</button> <span class="v" id="pad-down"></span></div>
-        <div><span class="n">Left</span> <button class="i" onclick="app.setG('left')">Set</button> <span class="v" id="pad-left"></span></div>
-        <div><span class="n">Right</span> <button class="i" onclick="app.setG('right')">Set</button> <span class="v" id="pad-right"></span></div>
-        <div><span class="n">A</span> <button class="i" onclick="app.setG('a')">Set</button> <span class="v" id="pad-a"></span></div>
-        <div><span class="n">Turbo A</span> <button class="i" onclick="app.setG('ta')">Set</button> <span class="v" id="pad-ta"></span></div>
-        <div><span class="n">B</span> <button class="i" onclick="app.setG('b')">Set</button> <span class="v" id="pad-b"></span></div>
-      </div>
-      <button class="i" onclick="app.reset('G')">Reset Gamepad Controls</button>
-      <div class="s"></div>
-      
-      <div class="t">Test</div>
-      <div class="a">
-        <div>
-          <div class="d">Gamepad ID <span class="i" id="test-pad-id"></span></div>
-          <div class="d">Gamepad Analog <span class="i" id="test-analog"></span></div>
-          <div class="s"></div>
-          <span class="n" id="test-up">Up</span>
-          <span class="n" id="test-down">Down</span>
-          <span class="n" id="test-left">Left</span>
-          <span class="n" id="test-right">Right</span>
-          <span class="n" id="test-a">A</span>
-          <span class="n" id="test-ta">TA</span>
-          <span class="n" id="test-b">B</span>
+    <body id="body" class="b">
+      <p><a href="javascript:close();">Back to Mario Royale</a></p>
+      <center>
+        <div id="container">
+          <div class="container">
+          <div class="t" id="k-title">Keyboard Controls</div>
+          <div class="a">
+            <div><span class="n">Up</span> <button class="i" onclick="app.setK('up')">Set</button> <span class="v" id="key-up"></span></div>
+            <div><span class="n">Down</span> <button class="i" onclick="app.setK('down')">Set</button> <span class="v" id="key-down"></span></div>
+            <div><span class="n">Left</span> <button class="i" onclick="app.setK('left')">Set</button> <span class="v" id="key-left"></span></div>
+            <div><span class="n">Right</span> <button class="i" onclick="app.setK('right')">Set</button> <span class="v" id="key-right"></span></div>
+            <div><span class="n">A</span> <button class="i" onclick="app.setK('a')">Set</button> <span class="v" id="key-a"></span></div>
+            <div><span class="n">Turbo A</span> <button class="i" onclick="app.setK('ta')">Set</button> <span class="v" id="key-ta"></span></div>
+            <div><span class="n">B</span> <button class="i" onclick="app.setK('b')">Set</button> <span class="v" id="key-b"></span></div>      </div>
+          <button class="i" onclick="app.reset('K')">Reset Keyboard Controls</button>
+          </div>
+
+          <div class="container">
+          <div class="t" id="g-title">Gamepad Controls</div>
+          <div class="a">
+            <div><span class="n">Up</span> <button class="i" onclick="app.setG('up')">Set</button> <span class="v" id="pad-up"></span></div>
+            <div><span class="n">Down</span> <button class="i" onclick="app.setG('down')">Set</button> <span class="v" id="pad-down"></span></div>
+            <div><span class="n">Left</span> <button class="i" onclick="app.setG('left')">Set</button> <span class="v" id="pad-left"></span></div>
+            <div><span class="n">Right</span> <button class="i" onclick="app.setG('right')">Set</button> <span class="v" id="pad-right"></span></div>
+            <div><span class="n">A</span> <button class="i" onclick="app.setG('a')">Set</button> <span class="v" id="pad-a"></span></div>
+            <div><span class="n">Turbo A</span> <button class="i" onclick="app.setG('ta')">Set</button> <span class="v" id="pad-ta"></span></div>
+            <div><span class="n">B</span> <button class="i" onclick="app.setG('b')">Set</button> <span class="v" id="pad-b"></span></div>
+          </div>
+          <button class="i" onclick="app.reset('G')">Reset Gamepad Controls</button>
+          </div>
+
+          <div class="t">Test</div>
+          <div class="a">
+            <div>
+              <div class="d">Gamepad ID <span class="i" id="test-pad-id"></span></div>
+              <div class="d">Gamepad Analog <span class="i" id="test-analog"></span></div>
+              <div class="s"></div>
+              <span class="n" id="test-up">Up</span>
+              <span class="n" id="test-down">Down</span>
+              <span class="n" id="test-left">Left</span>
+              <span class="n" id="test-right">Right</span>
+              <span class="n" id="test-a">A</span>
+              <span class="n" id="test-ta">TA</span>
+              <span class="n" id="test-b">B</span>
+            </div>
+          </div>
         </div>
-      </div>
+      </center>
 
       <!-- Libs -->
-      <script src='js/lib/jquery/jquery-3.1.1.min.js'></script>
-      <script src='js/lib/cookie/js.cookie.min.js'></script>
+      <script src="js/lib/jquery/jquery-3.1.1.min.js"></script>
+      <script src="js/lib/cookie/js.cookie.min.js"></script>
       
       <!-- App -->
-      <script src='js/control/app.js?v=4.2.3'></script>
+      <script src="js/control/app.js?v=4.2.3"></script>
       
     </body>        
 </html>
