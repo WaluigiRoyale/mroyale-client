@@ -4211,9 +4211,10 @@ PlayerObject.prototype.physics = function () {
     if (this.isState(PlayerObject.SNAME.RUN))
         for (_0x5b32b0 = 0x0; _0x5b32b0 < _0x346d1d.length; _0x5b32b0++) obj = _0x346d1d[_0x5b32b0], obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, td32.TRIGGER.TYPE.PUSH);
     for (_0x5b32b0 = 0x0; _0x5b32b0 < _0x50b7b9.length; _0x5b32b0++) obj = _0x50b7b9[_0x5b32b0], obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, 0x0 < this.power ? td32.TRIGGER.TYPE.BIG_BUMP : td32.TRIGGER.TYPE.SMALL_BUMP), this.jumping = -0x1, this.fallSpeed = -PlayerObject.BLOCK_BUMP_THRESHOLD;
-    _0x27c16e.forEach(tile => {
+    for (var i=0x0; i<_0x27c16e.length; i++) {
+        var tile = _0x27c16e[i];
         tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.STAND);
-    });
+    };
 };
 
 /* God bless OSS */
