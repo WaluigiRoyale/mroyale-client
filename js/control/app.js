@@ -172,13 +172,13 @@ App.prototype.draw = function() {
   this.testPadId.innerHTML = this.pad?this.pad.id:"No gamepad detected.";
   this.testAnalouge.innerHTML = this.analogue.x + ", " + this.analogue.y;
   
-  this.kTitle.style.color = this.settingK?"#0000FF":"#000000";
-  this.gTitle.style.color = this.settingG?"#0000FF":"#000000";
+  this.kTitle.style.color = this.settingK?"#00009E":"#FFFFFF";
+  this.gTitle.style.color = this.settingG?"#00009E":"#FFFFFF";
   
   for(var i=0;i<INPUTS.length;i++) {
     var ktest = this.keys[this.assignK[INPUTS[i]]];
     if(this.pad) { var gtest = this.pad.buttons[this.assignG[INPUTS[i]]].pressed; }
-    this.test[INPUTS[i]].style.color = ktest||gtest?"#00FF00":"#FF0000";
+    this.test[INPUTS[i]].style.color = ktest||gtest?"#00FF00":"#AE2F28";
   }
   
   for(var i=0;i<INPUTS.length;i++) {
