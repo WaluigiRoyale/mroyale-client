@@ -49,17 +49,17 @@ var tileDefs = {
 };
 
 var objDefs = {
-    1:   {'name': 'PLAYER', 'description': '- Creates a dummy player that can work like a regular player\n- [skin] Skin is the number ID from available skins\n - [isDev] Serves no purpose, but should be 0 or 1.', 'paramDefs': [{'name': 'skin'},{'name': 'isDev'}]},
-    17:  {'name': 'GOOMBA', 'description': '- [variant] Should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'variant'}]},
-    18:  {'name': 'KOOPA TROOPA GREEN', 'description': '- [fly] Should be set to 0 or 1. 1 is flying.\n- [variant] Should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
-    19:  {'name': 'KOOPA TROOPA RED', 'description': "- [fly] Should be set to 0 or 1. 1 is flying.\n- [variant] Should be set to 0 or 1. 0 is the light one, 1 is the dark one.", 'paramDefs': [{'name': 'fly'}, {'name': 'variant'}]},
-    21:  {'name': 'FLYING FISH', 'description': '- [delay] Positive integer in seconds for how the fish should wait before jumping again.\n- [float] Value for how much force the fish should jump with.', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
-    22:  {'name': 'PIRANHA PLANT', 'description': '- [color] Should be set to 0 or 1. 0 is the light one, 1 is the dark one.\n- [direction] Should be 0 or 1. 0 is normal, 1 is upside down.\n- [static] Should be 0 or 1. 1 stops the plant from moving. Leave blank for default (0)\n- [noOffset] By default Piranha Plants are offset by half a tile to fit in two tiled pipes. Use 1 to stop that from happening.', 'paramDefs': [{'name': 'variant'}, {'name': 'direction'}, {'name': 'static'}, {'name': 'noOffset'}]},
+    1:   {'name': 'PLAYER', 'description': '- Creates a dummy player that can work like a regular player\n- [skin] Skin is the number ID from available skins\n - [isDev] Serves no purpose, but should be 0 or 1.', 'paramDefs': [{'name': 'skin','type': 'int'},{'name': 'isDev', 'type': 'bool'}]},
+    17:  {'name': 'GOOMBA', 'description': '- [variant] Should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'variant','type':'bool'}]},
+    18:  {'name': 'KOOPA TROOPA GREEN', 'description': '- [fly] Should be set to 0 or 1. 1 is flying.\n- [variant] Should be set to 0 or 1. 0 is the light one, 1 is the dark one.', 'paramDefs': [{'name': 'fly','type':'bool'}, {'name': 'variant','type':'bool'}]},
+    19:  {'name': 'KOOPA TROOPA RED', 'description': "- [fly] Should be set to 0 or 1. 1 is flying.\n- [variant] Should be set to 0 or 1. 0 is the light one, 1 is the dark one.", 'paramDefs': [{'name': 'fly','type':'bool'}, {'name': 'variant','type':'bool'}]},
+    21:  {'name': 'FLYING FISH', 'description': '- [delay] Positive integer in seconds for how the fish should wait before jumping again.\n- [float] Value for how much force the fish should jump with.', 'paramDefs': [{'name': 'delay','type':'int'}, {'name': 'impulse','type':'float'}]},
+    22:  {'name': 'PIRANHA PLANT', 'description': '- [color] Should be set to 0 or 1. 0 is the light one, 1 is the dark one.\n- [direction] Should be 0 or 1. 0 is normal, 1 is upside down.\n- [static] Should be 0 or 1. 1 stops the plant from moving. Leave blank for default (0)\n- [noOffset] By default Piranha Plants are offset by half a tile to fit in two tiled pipes. Use 1 to stop that from happening.', 'paramDefs': [{'name': 'variant','type':'bool'}, {'name': 'direction','type':'bool'}, {'name': 'static','type':'bool'}, {'name': 'noOffset','type':'bool'}]},
     23:  {'name': 'SPINY SHELL', 'description': '- No params.'}, // New
     24:  {'name': 'BUZZY BEETLE', 'description': '- No params.'},
-    25:  {'name': 'BOWSER', 'description': '- [attackType] Should be set to 0, 1 or 2. 0 is only fire breathing, 1 is only hammer throwing, 2 is both.', 'paramDefs': [{'name': 'attackType'}]},
-    33:  {'name': 'FIRE BAR', 'description': '- [phase] Should be only 0 or 1, only offsets it a bit.\n - [length] Positive integer for how many fire balls should spawn\n[rate] Rate of spinning. Default should be 23, lower is faster, negative is to go in reverse.', 'paramDefs': [{'name': 'phase'}, {'name': 'length'}, {'name': 'rate'}]},
-    34:  {'name': 'LAVA BUBBLE', 'description': '- [delay] Positive integer in seconds for how long it takes for it to shoot\nImpulse indicates how much force it should shoot with.', 'paramDefs': [{'name': 'delay'}, {'name': 'impulse'}]},
+    25:  {'name': 'BOWSER', 'description': '- [attackType] Should be set to 0, 1 or 2. 0 is only fire breathing, 1 is only hammer throwing, 2 is both.', 'paramDefs': [{'name': 'attackType','type':'int'}]},
+    33:  {'name': 'FIRE BAR', 'description': '- [phase] Should be only 0 or 1, only offsets it a bit.\n - [length] Positive integer for how many fire balls should spawn\n[rate] Rate of spinning. Default should be 23, lower is faster, negative is to go in reverse.', 'paramDefs': [{'name': 'phase','type':'bool'}, {'name': 'length','type':'int'}, {'name': 'rate','type':'int'}]},
+    34:  {'name': 'LAVA BUBBLE', 'description': '- [delay] Positive integer in seconds for how long it takes for it to shoot\n- [impulse] Indicates how much force it should shoot with.', 'paramDefs': [{'name': 'delay', 'type':'int'}, {'name': 'impulse','type':'float'}]},
     35:  {'name': 'BILL BLASTER', 'description': '- [delay] Positive integer in seconds for how long it takes for it to shoot.\nDirection indicates which way to go. 0 is left, 1 is right.', 'paramDefs': [{'name': 'delay'}, {'name': 'direction'}]},
     36:  {'name': 'BULLET', 'description': '- No params.\n- It is better to use the BILL BLASTER object.', 'paramDefs': [{'name': 'direction'}]},
     37:  {'name': 'OBJECT SPAWNER', 'description': '- [objectType] Object ID to spawn.\n- [delay] Positive integer for how long the object takes to spawn\n- [direction] Indicates which way to go. Should be 0 or 1.', 'paramDefs': [{'name': 'objectType'}, {'name': 'delay'}, {'name': 'direction'}]},
@@ -1283,6 +1283,7 @@ function WorldTool(editor) {
     this.valMode = document.getElementById("editor-tool-world-mode");
     this.valMusicPath = document.getElementById("editor-tool-world-musicPath");
     this.valsoundPath = document.getElementById("editor-tool-world-soundPath");
+    this.valAssetsPath = document.getElementById("editor-tool-world-assets");
     this.btnNew = document.getElementById("editor-tool-world-new");
     var _0x1bb7eb = this;
     this.btnApply = document.getElementById("editor-tool-world-apply");
@@ -1331,6 +1332,7 @@ WorldTool.prototype.load = function() {
     this.valMode.value = this.editor.world.mode;
     this.valMusicPath.value = this.editor.world.musicOverridePath || "music/";
     this.valsoundPath.value = this.editor.world.soundOverridePath || "sfx/";
+    this.valAssetsPath.value = this.editor.world.assets || "assets.json";
     this.element.style.display = "block";
 };
 WorldTool.prototype.save = function() {
@@ -1342,6 +1344,7 @@ WorldTool.prototype.save = function() {
         this.editor.world.mode = this.valMode.value;
         this.editor.world.musicOverridePath = this.valMusicPath.value;
         this.editor.world.soundOverridePath = this.valsoundPath.value;
+        this.editor.world.assets = this.valAssetsPath.value || "assets.json";
     } catch (_0x5286c3) {
         app.menu.warn.show("Failed to parse value. Changes not applied." + _0x5286c3);
     }
@@ -6377,6 +6380,7 @@ function World(editor, data) {
     this.shortname = data.shortname;
     this.musicOverridePath = data.musicOverridePath;
     this.soundOverridePath = data.soundOverridePath;
+    this.assets = data.assets;
     this.levels = [];
     for (var i = 0x0; i < data.world.length; i++) this.levels.push(new Level(editor, data.world[i]));
 }
