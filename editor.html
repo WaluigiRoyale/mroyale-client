@@ -50,7 +50,7 @@
     <link rel='stylesheet' type='text/css' href='css/editor.css?v=4.3.2.1'>
     </head>
     
-    <body id='body' style='display: none;'>
+    <body id='body' style='display: none'>
       <!-- Warning -->
       <div id='warn' class='warn' style='display:none'></div>
       
@@ -102,7 +102,7 @@
             </div>
             <div id='editor-display' class='panel-left unselectable' oncontextmenu="return false">
               <canvas id="editor-display-canvas" width="320" height="240">
-                Your browser doesn't appear to support the <code>&lt;canvas&gt;</code> element.
+                Your browser doesn’t appear to support the <code>&lt;canvas&gt;</code> element.
               </canvas>
             </div>
         </div>
@@ -186,7 +186,7 @@
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div class='tool-var'>Color</div><div class='tool-type'>html color</div>
+              <div class='tool-var'>Color</div><div class='tool-type'>HTML color</div>
               <input id='editor-tool-zone-color' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
@@ -296,7 +296,7 @@
             <div class='tool-div'></div>
             <div class='tool-box' id='editor-tool-object-params'></div>
             <div class='tool-div'></div>
-            <div class='tool-box'>
+            <div class='tool-box' style='font-size: 80%'>
               <div>Left-click selects, middle-click creates new, WASD keys to move, delete to delete.</div>
               <div class="tool-val-im" id='editor-tool-object-info'></div>
             </div>
@@ -327,8 +327,8 @@
               </select>
             </div>
             <div class='tool-div'></div>
-            <div class='tool-box'>
-              <div>Left-click selects, middle-click creates new, WASD keys to move, delete to delete.</div>
+            <div class='tool-box' style='font-size: 80%'>
+              <div>Left-click selects, middle-click creates a new warp, WASD keys to move, delete to delete.</div>
               <div>For tiles that have a warp, the extra data of that tile should match the ID of the warp point.</div>
               <div>For example, a warp pipe with extra data 32 will warp to the warp point in that level with the ID 32.</div>
               <div>The extra data of the warp point defines the animation state.</div>
@@ -359,8 +359,8 @@
             <div class='tool-div'></div>
             <div class='tool-box'>
               <div>Middle-click to copy an area, left-click to paste.</div>
-              <div>Pasting will only overwrite tiles with the given ovewrite value if it’s not empty.</div>
-              <div>The default td32 value for air is 30, so generally set overwrite to 30.</div>
+              <div>Pasting will only overwrite tiles with the given overwrite value if it’s not empty.</div>
+              <div>The default td32 value for AIR is 30, so overwrite should generally be set to 30.</div>
             </div>
           </div>
           
@@ -411,7 +411,7 @@
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div>Press G to show or hide your reference image.</div>
+              <div>Press G to show or hide the reference image.</div>
             </div>
           </div>
         </div>

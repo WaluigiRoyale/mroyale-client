@@ -15,6 +15,14 @@ html, body {
   width: 100%
 }
 
+ul {
+  margin-top: -0.75px
+}
+
+li {
+  margin-left: -20px
+}
+
 #file {
   margin: 10px
 }
@@ -22,7 +30,7 @@ html, body {
 .file-error {
   font-size: 75%;
   background-color: #999;
-  border: 1px #EbE3E3 solid
+  border: 1px #EBE3E3 solid
 }
 
 .box {
@@ -51,19 +59,17 @@ html, body {
 }
 
 .panel-left {
-    background-color: #444;
     overflow: auto
 }
 
 .panel-right {
     width: 250px;
     float: right;
-    overflow-y: scroll;
-    border-left: 1px solid #EbE3E3
+    overflow-y: scroll
 }
 
 .panel-top {
-  border-bottom: 1px solid #EbE3E3;
+  border-bottom: 1px solid #EBE3E3;
   margin: 0;
   padding: 0
 }
@@ -79,12 +85,12 @@ html, body {
   cursor: pointer
 }
 
-.toolbar-button-top:hover {
-  background-color: #F0E8E8;
+.toolbar-button-top:hover, .list-zone:hover {
+  background-color: #F0E8E8
 }
 
-.toolbar-button-top:active {
-  background-color: #F3EAED;
+.toolbar-button-top:active, .list-zone:active {
+  background-color: #F3EAED
 }
 
 .left {
@@ -105,7 +111,7 @@ html, body {
 .list-world {
   font-weight: bold;
   background-color: #F9F1F0;
-  border-bottom: 1px solid #EbE3E3;
+  border-bottom: 1px solid #EBE3E3;
   margin: 0;
   padding: 0 12px 0 8px;
   cursor: default
@@ -113,20 +119,15 @@ html, body {
 
 .list-zone {
   background-color: #F9F1F0;
-  border-bottom: 1px solid #EbE3E3;
+  border-bottom: 1px solid #EBE3E3;
   margin: 0;
   padding: 0 12px 0 24px;
   cursor: pointer
 }
 
-.list-zone:hover {
-  color: #FFF;
-  background-color: #444
-}
-
 .list-zone-current {
   background-color: #FF0;
-  border-bottom: 1px solid #757575;
+  border-bottom: 1px solid #999;
   margin: 0;
   padding: 0 12px 0 24px;
   cursor: pointer
@@ -158,18 +159,18 @@ html, body {
 .tool-val {
   display: block;
   background-color: #FFF;
-  border: 1px solid #757575
+  border: 1px solid #999
 }
 
 .tool-val-im {
-  display: block;
+  display: block
 }
 
 .tool-div {
   display: block;
   height: 1px;
-  border-top: 1px solid #757575;
-  margin-top: 8px;
+  border-top: 1px solid #EBE3E3;
+  margin-top: 8px
 }
 
 .red {
@@ -188,7 +189,7 @@ html, body {
 
 .tool-button:hover {
   background-color: #F6F6F9;
-  box-shadow: 1px 1px 1px #CACCD1;
+  box-shadow: 1px 1px 1px #CACCD1
 }
 
 /*
@@ -253,12 +254,4 @@ html, body {
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
   white-space: nowrap
-}
-
-ul {
-  margin-top: -0.75px
-}
-
-li {
-  margin-left: -20px
 }
