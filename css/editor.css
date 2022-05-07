@@ -1,3 +1,11 @@
+* {
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none
+}
+
 html, body {
   background-color: #F9F9F9;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -5,6 +13,10 @@ html, body {
   padding: 0;
   height: 100%;
   width: 100%
+}
+
+#file {
+  margin: 10px
 }
 
 .file-error {
@@ -56,19 +68,12 @@ html, body {
   padding: 0
 }
 
-.unselectable {
-   -moz-user-select: -moz-none;
-   -khtml-user-select: none;
-   -webkit-user-select: none;
-   -ms-user-select: none;
-   user-select: none
-}
-
 #editor-top {
   background: #F9F1F0
 }
 
 .toolbar-button-top {
+  border-radius: 3px;
   margin: 3px;
   padding: 0 12px 0 12px;
   cursor: pointer
@@ -76,7 +81,10 @@ html, body {
 
 .toolbar-button-top:hover {
   background-color: #F0E8E8;
-  border-radius: 3px
+}
+
+.toolbar-button-top:active {
+  background-color: #F3EAED;
 }
 
 .left {
@@ -155,7 +163,6 @@ html, body {
 
 .tool-val-im {
   display: block;
-  background-color: #999
 }
 
 .tool-div {
@@ -169,21 +176,22 @@ html, body {
   color: darkred
 }
 
-/*
 .tool-button {
-  font-weight: bold;
-  background-color: #999;
-  border: 1px solid #444;
+  background-color: #FBFBFD;
+  border: 1px solid #E6E4E9;
+  border-radius: 3px;
+  box-shadow: 1px 1px 1px #CCCBD0;
   margin: 0;
-  padding: 0 12px 0 12px;
+  padding: 3px 12px 3px 12px;
   cursor: pointer
 }
 
 .tool-button:hover {
-  color: #FFF;
-  background-color: #444
+  background-color: #F6F6F9;
+  box-shadow: 1px 1px 1px #CACCD1;
 }
 
+/*
 .tool-header {
   font-weight: bold;
   margin: 0;
@@ -245,4 +253,12 @@ html, body {
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
   white-space: nowrap
+}
+
+ul {
+  margin-top: -0.75px
+}
+
+li {
+  margin-left: -20px
 }

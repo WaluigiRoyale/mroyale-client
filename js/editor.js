@@ -1175,7 +1175,7 @@ function _0x3f2a38() {
         app.save();
     };
     this.btnAbout.onclick = function() {
-        alert("Original creator: InfernoPlus\nUpdated by: Cyuubi, Eliza, gyorokpeter, terminalarch\n\nNo. I will not be making a whole new editor.\nThis is only here because people kept coping about rickroll.");
+        alert("Mario Royale Editor v4.4.0\n\nMade by InfernoPlus\nUpdated by Cyuubi, Eliza, gyorokpeter, terminalarch, and Nightcat\n\n(No, I will not be making a whole new editor. This is only here because people kept coping about rickroll.)");
         /* window.open("https://www.youtube.com/watch?v=oHg5SJYRHA0", "_blank"); */ /* Commented in memorial */
     };
 }

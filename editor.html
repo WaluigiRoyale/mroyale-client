@@ -1,14 +1,5 @@
 <html lang="en-US">
   <head>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FCY9L8C0PD"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-FCY9L8C0PD');
-    </script>
 
     <title>Editor - Mario Royale</title>
     <meta name="og:title" content="Mario Royale Editor" />
@@ -70,27 +61,25 @@
       
       <!-- File -->
       <div id="file" style='display:none'>
-        <span id='file-new' class="toolbar-button-top left">New Empty Level...</span><br><br>
+        <span id='file-new' class="tool-button">New Empty Level...</span><br><br>
         <b>Open Game File...</b>
-        <div><input type="file" id="file-input" accept=".json,.txt"/></div>
+        <div><input type="file" id="file-input" accept=".json,.txt"/></div><br>
         <div class="file-error" id="file-error">...</div>
-        <div class="ek-info">
-          <b>This EK is provided as is for anyone interested in it.</b><br>
-          You can download and open any of these existing worlds by clicking on the hyperlinks:<br>
-          <a href="https://marioroyale.tk/game/world-1.json" download="world-1.json">https://marioroyale.tk/game/world-1.json</a> <br>
-          <a href="https://marioroyale.tk/game/world-l1.json" download="world-l1.json">https://marioroyale.tk/game/world-l1.json</a> <br>
-          <a href="https://marioroyale.tk/game/world-p.json" download="world-p.json">https://marioroyale.tk/game/world-p.json</a> <br>
-          <a href="https://marioroyale.tk/game/world-special.json" download="world-special.json">https://marioroyale.tk/game/world-special.json</a> <br>
-          You can also press the "New Empty Level" button to create a new blank level<br>
-          <del><a>http://www.infernoplus.com/royale/game/blank</a><br><br></del>
+          You can download and open any of these existing worlds by clicking on the hyperlinks:
+          <ul>
+            <li><a href="game/world-1.json" download="world-1.json">world-1.json</a></li>
+            <li><a href="game/world-l1.json" download="world-l1.json">world-l1.json</a></li>
+            <li><a href="game/world-p.json" download="world-p.json">world-p.json</a></li>
+            <li><a href="game/world-special.json" download="world-special.json">world-special.json</a></li>
+        </ul>
+          You can also press the “New Empty Level” button to create a new blank level.<br>
           This EK is intended for those somewhat knowledgeable of programming/modding.<br>
-          All values listed as 'byte' or 'bit' are in unsigned decimal format.<br>
+          All values listed as “byte” or “bit” are in unsigned decimal format.<br>
           Which means a byte is a value from 0 to 255 and so on.<br><br>
           All zones should have a height of 16. This is a general style rule for the game.<br>
           If you plan to try and make a map, please study the existing maps carefully!<br><br>
           If you manage to make a level that looks solid, you can share it in <a href="https://discord.gg/kV72ezsQwt">our Discord server</a>!<br>
-          We will only be adding the best ones. Remember to save often and good luck!
-        </div>
+          We will only be adding the W. Remember to save often and good luck!
       </div>
       
       <!-- Editor -->
@@ -106,7 +95,6 @@
           <span id='editor-top-rep' class="toolbar-button-top left">Replace</span>
           <span id='editor-top-ref' class="toolbar-button-top left">Reference</span>
           <span id='editor-top-about' class="toolbar-button-top right">About</span>
-          <span id='editor-top-settings' class="toolbar-button-top right">Settings</span>
           <span id='editor-top-save' class="toolbar-button-top right">Save</span>
         </div>
         <div id='editor-middle' class="row content">
@@ -143,13 +131,15 @@
               <input id='editor-tool-world-soundPath' type='text' class='tool-val'/>
             </div>
             <div class='tool-box'>
-              <div class='tool-var'>Assets Path</div><div class="tool-type">string path/url</div>
+              <div class='tool-var'>Assets Path</div><div class="tool-type">string path/URL</div>
               <input id="editor-tool-world-assets" type="text" class="tool-val"/>
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div id='editor-tool-world-apply' class="toolbar-button-top">Apply</div>
-              <div id='editor-tool-world-new' class="toolbar-button-top">+ Level</div>
+              <div id='editor-tool-world-apply' class="tool-button">Apply</div>
+            </div>
+            <div class='tool-box'>
+              <div id='editor-tool-world-new' class="tool-button">New</div>
             </div>
           </div>
           
@@ -169,8 +159,10 @@
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div id='editor-tool-level-apply' class="toolbar-button-top">Apply</div>
-              <div id='editor-tool-level-new' class="toolbar-button-top">+ Zone</div>
+              <div id='editor-tool-level-apply' class="tool-button">Apply</div>
+            </div>
+            <div class='tool-box'>
+              <div id='editor-tool-level-new' class="tool-button">New</div>
             </div>
           </div>
           
@@ -189,7 +181,7 @@
               <input id='editor-tool-zone-initial-y' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
-              <div class='tool-var'>Level End Move Distance</div><div class='tool-type'>(optional) int</div>
+              <div class='tool-var'>Level End Move Distance</div><div class='tool-type'>int (opt)</div>
               <input id='editor-tool-zone-level-offset' type='text' class="tool-val"/>
             </div>
             <div class='tool-div'></div>
@@ -202,11 +194,11 @@
               <input id='editor-tool-zone-music' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
-              <div class='tool-var'>Flagpole Music</div><div class='tool-type'>(optional) string path</div>
+              <div class='tool-var'>Flagpole Music</div><div class='tool-type'>string path (opt)</div>
               <input id='editor-tool-zone-winmusic' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
-              <div class='tool-var'>Victory Music</div><div class='tool-type'>(optional) string path</div>
+              <div class='tool-var'>Victory Music</div><div class='tool-type'>string path (opt)</div>
               <input id='editor-tool-zone-victorymusic' type='text' class="tool-val"/>
             </div>
             <div class='tool-div'></div>
@@ -219,30 +211,30 @@
               <input id='editor-tool-zone-height' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
-              <div id='editor-tool-zone-resize' class="toolbar-button-top">Resize</div>
+              <div id='editor-tool-zone-resize' class="tool-button">Resize</div>
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div id='editor-tool-zone-shiftx' class="toolbar-button-top">Shift X</div>
+              <div id='editor-tool-zone-shiftx' class="tool-button">Shift X</div>
             </div>
             <div class='tool-box'>
-              <div id='editor-tool-zone-unshiftx' class="toolbar-button-top">Unshift X</div>
+              <div id='editor-tool-zone-unshiftx' class="tool-button">Unshift X</div>
             </div>
             <div class='tool-box'>
-              <div id='editor-tool-zone-shifty' class="toolbar-button-top">Shift Y</div>
+              <div id='editor-tool-zone-shifty' class="tool-button">Shift Y</div>
             </div>
             <div class='tool-box'>
-              <div id='editor-tool-zone-unshifty' class="toolbar-button-top">Unshift Y</div>
+              <div id='editor-tool-zone-unshifty' class="tool-button">Unshift Y</div>
             </div>
             <div class='tool-box'>
-              <div id='editor-tool-zone-addlayer' class="toolbar-button-top">Add Layer</div>
+              <div id='editor-tool-zone-addlayer' class="tool-button">Add Layer</div>
             </div>
             <div class='tool-box'>
-              <div id='editor-tool-zone-dellayer' class="toolbar-button-top">Delete Layer</div>
+              <div id='editor-tool-zone-dellayer' class="tool-button">Delete Layer</div>
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div id='editor-tool-zone-apply' class="toolbar-button-top">Apply</div>
+              <div id='editor-tool-zone-apply' class="tool-button">Apply</div>
             </div>
           </div>
           
@@ -254,11 +246,11 @@
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div class='tool-var'>Sprite Index</div><div class='tool-type'>11bit int</div>
+              <div class='tool-var'>Sprite Index</div><div class='tool-type'>11-bit int</div>
               <input id='editor-tool-tile-index' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
-              <div class='tool-var'>Bump State</div><div class='tool-type'>4bit int</div>
+              <div class='tool-var'>Bump State</div><div class='tool-type'>4-bit int</div>
               <input id='editor-tool-tile-bump' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
@@ -278,17 +270,16 @@
               </select>
             </div>
             <div class='tool-box'>
-              <div id="editor-tool-tile-brush-change-warning" class='tool-warning' style="display:none">Modified tile not placed</div>
+              <div id="editor-tool-tile-brush-change-warning" class='tool-warning' style="display:none">Modified tile not placed!</div>
             </div>
             <div class='tool-div'></div>
             <div class='tool-box' style='font-size: 80%'>
-              <div class="tool-val-im">Middle click copies a tiles data, left click paints</div>
-              <div class="tool-val-im">Sprite index defines the visual of the tile.</div>
-              <div class="tool-val-im">Bump state should always be 0 unless you have some insane reason.</div>
-              <div class="tool-val-im">Depth 0 is background, Depth 1 is foreground. Warp pipe/item blocks should generally be foreground.</div>
-              <div class="tool-val-im">Tile Definition defines the physical/interactive properties of a tile. Solid ground is 1, item block is 17, etc...</div>
-              <div class="tool-val-im">Some blocks need 'extra data' to function. An item block for example, needs the extra data 81 to put a mushroom in it.</div>
-              <div class="tool-val-im">See doc for more info: <a href='./tile.txt'>tile.txt</a></div>
+              <div>Middle-click copies a tile’s data, left-click paints.</div>
+              <div>Sprite index defines the visual of the tile.</div>
+              <div>Bump state should always be 0 unless you have some insane reason.</div>
+              <div>Depth 0 is background, Depth 1 is foreground. Warp pipes and item blocks should generally be foreground.</div>
+              <div>Tile definition defines the physical/interactive properties of a tile. Solid ground is 1, item block is 17, etc.</div>
+              <div>Some blocks need extra data to function. For example, an item block needs the extra data 81 to put a mushroom in it.</div>
             </div>
           </div>
           
@@ -306,9 +297,8 @@
             <div class='tool-box' id='editor-tool-object-params'></div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div class="tool-val-im">Left click selects, middle click creates new, wasd keys to move, delete to delete.</div>
+              <div>Left-click selects, middle-click creates new, WASD keys to move, delete to delete.</div>
               <div class="tool-val-im" id='editor-tool-object-info'></div>
-              <!--<div class="tool-val-im">See doc for more info: <a href='./object.txt'>object.txt</a></div>-->
             </div>
           </div>
             
@@ -338,19 +328,19 @@
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div class="tool-val-im">Left click selects, middle click creates new, wasd keys to move, delete to delete.</div>
-              <div class="tool-val-im">For tiles that have a warp, the extra data of that tile should match the id of the warp point.</div>
-              <div class="tool-val-im">Example: A warp pipe with extra data 32 will warp to the warp point in that level with the id 32.</div>
-              <div class="tool-val-im">The extra data of the warp point defines the animation state.</div>
-              <div class="tool-val-im">0 is default, (1, 2, 3, 4) are warp pipe (up, down, left, right) respectively.</div>
-              <div class="tool-val-im">You can also use 5 and 6 to use up and down (respectively) without the player being offset by half a tile</div>
+              <div>Left-click selects, middle-click creates new, WASD keys to move, delete to delete.</div>
+              <div>For tiles that have a warp, the extra data of that tile should match the ID of the warp point.</div>
+              <div>For example, a warp pipe with extra data 32 will warp to the warp point in that level with the ID 32.</div>
+              <div>The extra data of the warp point defines the animation state.</div>
+              <div>0 is default. 1, 2, 3, and 4 are warp pipe up, down, left and right respectively.</div>
+              <div>You can also use 5 and 6 to use up and down respectively without the player being offset by half a tile.</div>
             </div>
           </div>
           
           <!-- Copy Tool -->
           <div id='editor-tool-copy' class='tool-container' style='display: none'>
             <div class='tool-box'>
-              <div class='tool-var'>Copy Data</div><div class='tool-type'>td32[]</div>
+              <div class='tool-var'>Copy Data</div><div class='tool-type'>td32</div>
               <div id='editor-tool-copy-raw' class="tool-val-im"></div>
             </div>
             <div class='tool-div'></div>
@@ -368,9 +358,9 @@
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div class="tool-val-im">Middle click to copy an area, left click to paste.</div>
-              <div class="tool-val-im">Pasting will only overwrite tiles with the given 'ovewrite value' if it's not empty.</div>
-              <div class="tool-val-im">Default td32 value for air is 30 so set overwrite to 30 generally.</div>
+              <div>Middle-click to copy an area, left-click to paste.</div>
+              <div>Pasting will only overwrite tiles with the given ovewrite value if it’s not empty.</div>
+              <div>The default td32 value for air is 30, so generally set overwrite to 30.</div>
             </div>
           </div>
           
@@ -386,30 +376,30 @@
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div id='editor-tool-rep-apply' class="toolbar-button-top">Apply</div>
+              <div id='editor-tool-rep-apply' class="tool-button">Apply</div>
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div class="tool-val-im">Replaces all tiles that match the td32 of 'target' with 'replacement'.</div>
+              <div>Replaces all tiles that match the td32 of “target” with “replacement”.</div>
             </div>
           </div>
           
           <!-- Ref Tool -->
           <div id='editor-tool-ref' class='tool-container' style='display: none'>
             <div class='tool-box'>
-              <div class='tool-var'>IMG Url</div><div class='tool-type'>string url</div>
+              <div class='tool-var'>Image</div><div class='tool-type'>string URL</div>
               <input id='editor-tool-ref-img' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
-              <div id='editor-tool-ref-load' class="toolbar-button-top">Load</div>
+              <div id='editor-tool-ref-load' class="tool-button">Load</div>
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div class='tool-var'>Offset X</div><div class='tool-type'>int pixels</div>
+              <div class='tool-var'>Offset X</div><div class='tool-type'>int px</div>
               <input id='editor-tool-ref-x' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
-              <div class='tool-var'>Offset Y</div><div class='tool-type'>int pixels</div>
+              <div class='tool-var'>Offset Y</div><div class='tool-type'>int px</div>
               <input id='editor-tool-ref-y' type='text' class="tool-val"/>
             </div>
             <div class='tool-box' style='display:none;'>
@@ -417,11 +407,11 @@
               <input id='editor-tool-ref-opacity' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
-              <div id='editor-tool-ref-apply' class="toolbar-button-top">Apply</div>
+              <div id='editor-tool-ref-apply' class="tool-button">Apply</div>
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div class="tool-val-im">Press G to show or hide your reference image.</div>
+              <div>Press G to show or hide your reference image.</div>
             </div>
           </div>
         </div>
