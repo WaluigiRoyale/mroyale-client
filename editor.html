@@ -56,7 +56,7 @@
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:site" content="@MRoyalePlus" />
 
-    <link rel='stylesheet' type='text/css' href='css/editor.css?v=4.3.3'>
+    <link rel='stylesheet' type='text/css' href='css/editor.css?v=4.3.2.1'>
     </head>
     
     <body id='body' style='display: none;'>
@@ -106,6 +106,7 @@
           <span id='editor-top-rep' class="toolbar-button-top left">Replace</span>
           <span id='editor-top-ref' class="toolbar-button-top left">Reference</span>
           <span id='editor-top-about' class="toolbar-button-top right">About</span>
+          <span id='editor-top-settings' class="toolbar-button-top right">Settings</span>
           <span id='editor-top-save' class="toolbar-button-top right">Save</span>
         </div>
         <div id='editor-middle' class="row content">
@@ -118,6 +119,7 @@
             </div>
         </div>
         <div id='editor-bottom' class="row footer">
+
           <!-- World Tool -->
           <div id='editor-tool-world' class='tool-container' style='display: none'>
             <div class='tool-box'>
@@ -139,6 +141,10 @@
             <div class='tool-box'>
               <div class='tool-var'>SFX Path</div><div class='tool-type'>string path</div>
               <input id='editor-tool-world-soundPath' type='text' class='tool-val'/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Assets Path</div><div class="tool-type">string path/url</div>
+              <input id="editor-tool-world-assets" type="text" class="tool-val"/>
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
@@ -425,7 +431,7 @@
       <script src='js/lib/jquery/jquery-3.1.1.min.js?v=3.9.0'></script>
       
       <!-- Core -->
-      <script src='js/editor.js?v=4.3.3'></script>
+      <script src='js/editor.js?v=4.3.0'></script>
 
     </body>
 </html>
