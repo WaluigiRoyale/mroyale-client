@@ -2,75 +2,12 @@ const GAMEMODES = ["vanilla", "pvp", "hell"];
 const DEV_SKINS = [0];
 const DEFAULT_PLAYER_NAME = "INFRINGIO"; // TODO Remove
 let levelSelectors = [];    //received from server
-
 let TILE_ANIMATION_FILTERED = {};
 let OBJ_ANIMATION_FILTERED = {};
-
-let LOBBY_MUSIC_URL = ASSETS_URL + "audio/music/lobby.mp3";
-let MENU_MUSIC_URL = ASSETS_URL + "audio/music/menu.mp3";
-
-let SKIN_MUSIC_URL = {};
-let skins = {}
-
-let TILE_ANIMATION = {};
-let OBJ_ANIMATION = {};
-let BLOCK_DATA = {};
-
 let loopPodium = false;
-let vertical = false;
-
 let minZoom = 0x8;
 let maxZoom = 0x1;
-
-let _0x28f1ca; // coins
-let _0x592fa2; // skins
-
-let SKINCOUNT = 1
-let assetData = resources[`${ASSETS_URL}assets/assets.json`];
-
-let PERFORMANCE_HACK = true;
-
-(function () {
-    if (assetData.skins.count != undefined)
-        SKINCOUNT = assetData.skins.count;
-    for (i in assetData.skins.properties) {
-        var prop = assetData.skins.properties;
-        var music = prop[i].music;
-        if (music != undefined)
-            SKIN_MUSIC_URL[prop[i].id] = music;
-    }
-    if (assetData.skins.shop) {
-        skins = assetData.skins.shop;
-    }
-    if (assetData.tileAnim) {
-        for (var anim of assetData.tileAnim) {
-            var obj = {};
-            obj.tiles = anim.tiles;
-            obj.delay = anim.delay;
-            obj.tilesets = anim.tilesets || [];
-            TILE_ANIMATION[anim.startTile] = obj;
-        }
-    }
-    if (assetData.objAnim) {
-        for (var anim of assetData.objAnim) {
-            var obj = {};
-            obj.tiles = anim.tiles;
-            obj.delay = anim.delay;
-            obj.tilesets = anim.tilesets || [];
-            OBJ_ANIMATION[anim.startTile] = obj;
-        }
-    }
-    if (assetData.tileData) {
-        for (var td of assetData.tileData) {
-            var obj = {}
-            obj.id = td.id;
-            obj.name = td.name
-            obj.tileData = td.tileData;
-            obj.flipData = td.flipData;
-            BLOCK_DATA[obj.id] = obj;
-        }
-    }
-})();
+let ghostname = null;
 
 var util = {},
     vec2 = {
@@ -338,11 +275,11 @@ util.intersection.lineNearestPoint = function (_0x5a6af6, _0x4deaa7) {
 util.time.now = function () {
     return Date.now();
 };
-util.sprite.getSprite = function (spriteMap, index) {
+util.sprite.getSprite = function (spriteMap, index, x32=false) {
     var WIDTH = spriteMap.width;
     var height = spriteMap.height;
-    index *= Display.TEXRES;
-    var row = parseInt(Math.floor(index / WIDTH) * Display.TEXRES);
+    index *= (x32 ? Display.TEXRES : Display.TEXRES);
+    var row = parseInt(Math.floor(index / WIDTH) * (Display.TEXRES));
     return row > height ? [0x0, 0x0] : [index % WIDTH, row];
 };
 var requestAnimFrameFunc = function () {
@@ -488,19 +425,7 @@ td32.TILE_PROPERTIES = {
         COLLIDE: true,
         HIDDEN: false,
         ASYNC: true,
-        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
-            switch (type) {
-                /* Touch */
-                case 0x00: {
-                    if (game.pid === pid) {
-                        PlayerObject.ANIMATION_RATE = 3
-                        PlayerObject.MOVE_SPEED_ACCEL = 0.0125
-                        PlayerObject.MOVE_SPEED_DECEL = 0.0225
-                        PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025
-                    }
-                }
-            }
-        }
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) { }
     },
     /* Solid Bumpable */
     0x02: {
@@ -567,19 +492,7 @@ td32.TILE_PROPERTIES = {
         PLATFORM: true,
         HIDDEN: false,
         ASYNC: true,
-        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
-            switch (type) {
-                /* Touch */
-                case 0x00: {
-                    if (game.pid === pid) {
-                        PlayerObject.ANIMATION_RATE = 3
-                        PlayerObject.MOVE_SPEED_ACCEL = 0.0125
-                        PlayerObject.MOVE_SPEED_DECEL = 0.0225
-                        PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025
-                    }
-                }
-            }
-        }
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) { }
     },
     /* Semisolid Weak */
     0x06: {
@@ -587,19 +500,7 @@ td32.TILE_PROPERTIES = {
         PLATFORM: "WEAK",
         HIDDEN: false,
         ASYNC: true,
-        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
-            switch (type) {
-                /* Touch */
-                case 0x00: {
-                    if (game.pid === pid) {
-                        PlayerObject.ANIMATION_RATE = 3
-                        PlayerObject.MOVE_SPEED_ACCEL = 0.0125
-                        PlayerObject.MOVE_SPEED_DECEL = 0.0225
-                        PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025
-                    }
-                }
-            }
-        }
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) { }
     },
     /* Water Standard */
     7: {
@@ -631,10 +532,11 @@ td32.TILE_PROPERTIES = {
         COLLIDE: true,
         HIDDEN: false,
         ASYNC: true,
+        ICE: 2,
         TRIGGER: function (game, pid, td, level, zone, x, y, type) {
             switch (type) {
-                /* Touch */
-                case 0x00: {
+                /* Stand */
+                case 0x05: {
                     if (game.pid === pid) {
                         PlayerObject.MOVE_SPEED_ACCEL = 1
                         PlayerObject.MOVE_SPEED_ACCEL_AIR = 1
@@ -643,7 +545,6 @@ td32.TILE_PROPERTIES = {
                     }
                 }
             }
-
         }
     },
     /* Note Block */
@@ -758,11 +659,12 @@ td32.TILE_PROPERTIES = {
         HIDDEN: false,
         ASYNC: false,
         ICE: true,
-        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
+        TRIGGER: function (game, pid, td, level, zone, x, y, type, obj) {
             switch (type) {
                 /* Fireball */
                 case 0x03: {
                     game.world.getZone(level, zone).replace(x, y, td.data);
+                    obj.kill();
                     break;
                 }
             }
@@ -774,13 +676,14 @@ td32.TILE_PROPERTIES = {
         HIDDEN: false,
         ASYNC: false,
         ICE: true,
-        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
+        TRIGGER: function (game, pid, td, level, zone, x, y, type, obj) {
             switch (type) {
                 /* Fireball */
                 case 0x03: {
                     var rep = 30; // td32 replacement tile
                     game.world.getZone(level, zone).replace(x, y, rep);
                     game.createObject(td.data, level, zone, vec2.make(x, y), [shor2.encode(x, y)]);
+                    obj.kill();
                     break;
                 }
             }
@@ -890,7 +793,8 @@ td32.TILE_PROPERTIES = {
                     if (td.data > 1) {
                         var raw = game.world.getZone(level, zone).tile(x, y);
                         var rep = td32.data(raw, td.data - 1);    // Replacement td32 data for tile.
-                        game.world.getZone(level, zone).replace(x, y, rep);
+                        var rep2 = td32.encode(td.index, td.bump, td.depth, 1, 0);      // Replacement td32 data for cooldown.
+                        game.world.getZone(level, zone).cooldown(x, y, rep2, rep);
                         game.world.getZone(level, zone).coin(x, y + 1);
                         td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
                     }
@@ -1449,6 +1353,7 @@ NET012.decode = function (/* NET012_SERV */ a) {
     var b2 = new Uint8Array([a[8], a[9], a[10], a[11]]);
     var v1 = new DataView(b1.buffer);
     var v2 = new DataView(b2.buffer);
+    var y = v2.getFloat32(0);
 
     return {
         designation: NET012.DESIGNATION,
@@ -1457,7 +1362,8 @@ NET012.decode = function (/* NET012_SERV */ a) {
         zone: a[3],
         pos: vec2.make(v1.getFloat32(0), v2.getFloat32(0)),
         sprite: a[12],
-        reverse: a[13] !== 0
+        reverse: a[13] !== 0,
+        spectator: y === -1 ? true : false
     };
 };
 
@@ -1997,7 +1903,6 @@ MainAsMemberScreen.prototype.show = function (data) {
     var savedPriv = Cookies.get("mpriv");
     var savedGm = Cookies.get("gamemode");
     this.coins = data.coins || 0;
-    _0x28f1ca = this.coins
     this.kills = data.kills || 0;
     this.wins = data.wins || 0;
     this.deaths = data.deaths || 0;
@@ -2005,7 +1910,6 @@ MainAsMemberScreen.prototype.show = function (data) {
     this.squad = data.squad;
     this.skin = data.skin;
     this.skins = data.skins;
-    _0x592fa2 = this.skins;
     this.isPrivate = savedPriv ? (savedPriv == "true") : false;
     this.gameMode = savedGm ? parseInt(savedGm) : 0;
     this.updPrivatebtn();
@@ -2264,7 +2168,7 @@ NameScreen.prototype.selectLevel = function (levelKey) {
 
 NameScreen.prototype.updateLevelSelectButton = function (name) {
     if (this.currLevelSelectButton != undefined) {
-        this.currLevelSelectButton.style["border-color"] = "black";
+        this.currLevelSelectButton.style["border-color"] = "#EA9E22";
     }
     if (name == "custom") {
         elem = document.getElementById("levelSelectCustom");
@@ -2442,7 +2346,6 @@ function ProfileScreen() {
     }
     this.savebtn.onclick = function () {
         that.save();
-        location.reload();
     };
     this.backbtn.onclick = function () {
         that.profileBack();
@@ -2457,12 +2360,13 @@ ProfileScreen.prototype.show = function (data) {
     this.squadInput.value = data["squad"];
     //$("#profile-skin-select div").length === 0;
     document.getElementById('profile-skin-select').innerHTML = "";
-    for (var i in _0x592fa2) {
+    let skins = app.menu.mainAsMember.skins;
+    for (var i in skins) {
         var elem = document.createElement("div");
         elem.setAttribute("class", "skin-select-button");
-        elem.setAttribute("id", 'profile-skin-select-' + _0x592fa2[i]);
-        elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/skins/smb_skin" + _0x592fa2[i] + ".png')";
-        elem.addEventListener("click", (function (a) { return function () { ProfileScreen.prototype.select(a); }; })(_0x592fa2[i]));
+        elem.setAttribute("id", 'profile-skin-select-' + skins[i]);
+        elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/skins/smb_skin" + skins[i] + ".png')";
+        elem.addEventListener("click", (function (a) { return function () { ProfileScreen.prototype.select(a); }; })(skins[i]));
         document.getElementById('profile-skin-select').appendChild(elem);
     }
     this.selectSkin(data["skin"]);
@@ -2485,12 +2389,19 @@ ProfileScreen.prototype.hide = function () {
     this.element.style.display = "none";
 };
 ProfileScreen.prototype.save = function () {
-    app.net.send({
-        "type": "lpr",
-        "nickname": this.nicknameInput.value,
-        "squad": this.squadInput.value,
-        "skin": skinSel
-    });
+    if (this.nicknameInput.value.length <= 3) {
+        return this.reportError("Nickname is too short");
+    } else if (this.nicknameInput.value.length > 20) {
+        return this.reportError("Nickname is too long");
+    } else {
+        app.net.send({
+            "type": "lpr",
+            "nickname": this.nicknameInput.value,
+            "squad": this.squadInput.value,
+            "skin": skinSel
+        });
+        location.reload();
+    }
 }
 ProfileScreen.prototype.onBack = function () {
     this.save();
@@ -2571,16 +2482,14 @@ ShopScreen.prototype.show = function () {
 
 ShopScreen.prototype.purchase = function (skin) {
     const formatted = this.order();
+    const coins = app.menu.mainAsMember.coins;
+    const skins = app.menu.mainAsMember.skins;
 
-    if (_0x592fa2.includes(skin)) return this.purchased(`You already have this skin.`);
-    if (_0x28f1ca < formatted[skin]['coins']) return this.error('You do not have enough coins.');
+    if (skins.includes(skin)) return this.purchased(`You already have this skin.`);
+    if (coins < formatted[skin]['coins']) return this.error('You do not have enough coins.');
 
     app.net.send({ 'type': 'prc', 'skin': skin, 'coins': formatted[skin]['coins'] });
     this.success(`Purchased ${formatted[skin]['name']} successfully`);
-};
-
-ShopScreen.prototype.getSkin = function () {
-    return this.skinSelected;
 };
 
 ShopScreen.prototype.error = function (msg) {
@@ -2603,12 +2512,12 @@ ShopScreen.prototype.purchased = function (msg) {
 
 ShopScreen.prototype.handleCoins = function (data) {
     let winElement = document.getElementById('winCoins');
-    winElement.innerText = data;
-    _0x28f1ca = data;
+    let coins = app.menu.mainAsMember.coins;
+
+    winElement.innerText = data, coins = data;
 };
 
 ShopScreen.prototype.return = function () {
-    //location.reload();
     app.menu.mainAsMember.show();
 };
 
@@ -3146,7 +3055,7 @@ InputState.prototype.handleUpdProfileResult = function (data) {
 };
 InputState.prototype.handleSkinResult = function (data) {
     ShopScreen.prototype.handleCoins(data.coins);
-    _0x592fa2 = data.skins;
+    app.menu.mainAsMember.skins = data.skins;
 };
 InputState.prototype.handleLoginResult = function (data) {
     if (data.status) {
@@ -3403,6 +3312,7 @@ function PlayerObject(game, level, zone, pos, pid, skin, isDev) {
     this.fallSpeed = this.moveSpeed = 0x0;
     this.jumping = -0x1;
     this.grounded = this.isSpring = this.isBounce = false;
+    this.spectator = false;
     this.underWater = 0;    //0:no, 1:standard, 2:surface
     this.name = undefined;
     this.starTimer = this.power = 0x0;
@@ -3440,6 +3350,7 @@ PlayerObject.MOVE_SPEED_DECEL = 0.0225;
 PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025;
 PlayerObject.STUCK_SLIDE_SPEED = 0.09;
 PlayerObject.FALL_SPEED_MAX = 0.45;
+PlayerObject.SWIM_FALL_SPEED_MAX = 0.3;
 PlayerObject.FALL_SPEED_ACCEL = 0.085;
 PlayerObject.BOUNCE_LENGTH_MIN = 0x1;
 PlayerObject.SPRING_LENGTH_MIN = 0x5;
@@ -3512,6 +3423,14 @@ PlayerObject.SPRITE_LIST = [{
     'NAME': "S_FALL",
     'ID': 0x5,
     'INDEX': 0x8
+}, {
+    'NAME': "S_SWIMFALL0",
+    'ID': 0x9,
+    'INDEX': 95
+}, {
+    'NAME': "S_SWIMFALL1",
+    'ID': 0xa,
+    'INDEX': 94
 }, {
     'NAME': "S_CLIMB0",
     'ID': 0x6,
@@ -3699,6 +3618,8 @@ PlayerObject.SNAME.CROUCHJUMP = "CROUCHJUMP";
 PlayerObject.SNAME.RUN = "RUN";
 PlayerObject.SNAME.SLIDE = "SLIDE";
 PlayerObject.SNAME.FALL = "FALL";
+PlayerObject.SNAME.SWIM = "SWIM";
+PlayerObject.SNAME.SWIMFALL = "SWIMFALL";
 PlayerObject.SNAME.POLE = "POLE";
 PlayerObject.SNAME.CLIMB = "CLIMB";
 PlayerObject.SNAME.ATTACK = "ATTACK";
@@ -3741,6 +3662,11 @@ PlayerObject.STATE = [{
     'ID': 0x4,
     'DIM': DIM0,
     'SPRITE': [PlayerObject.SPRITE.S_FALL]
+}, {
+    'NAME': PlayerObject.SNAME.SWIMFALL,
+    'ID': 0x9,
+    'DIM': DIM0,
+    'SPRITE': []
 }, {
     'NAME': PlayerObject.SNAME.TRANSFORM,
     'ID': 0x5,
@@ -3895,9 +3821,23 @@ PlayerObject.prototype.update = function (data) {
         this.pos = data.pos;
         this.sprite = PlayerObject.SPRITE[data.sprite];
         this.reverse = data.reverse;
+        this.spectator = data.spectator;
     }
 };
+PlayerObject.prototype.spectate = function () {
+    this.setState(PlayerObject.SNAME.HIDE);
+
+    var queue = this.game.getAlivePlayers();
+    if (this.game.spectatorID === undefined) this.game.spectatorID = queue[0];
+    this.spectator = true;
+
+    DIM0 = vec2.make(0x0, 0x0);
+    DIM1 = vec2.make(0x0, 0x0);
+    this.dim = vec2.make(0x0, 0x0);
+};
 PlayerObject.prototype.trigger = function (_0x121f75) {
+    if (this.spectator) return;
+
     switch (_0x121f75) {
         case 0x1:
             this.attack();
@@ -3909,7 +3849,7 @@ PlayerObject.prototype.trigger = function (_0x121f75) {
 PlayerObject.prototype.step = function () {
     0x0 < this.starTimer && (this.starTimer--, 20 < this.starTimer || (this.starMusic && (this.starMusic.stop(), this.starMusic = undefined)));
     if (this.isState(PlayerObject.SNAME.GHOST)) this.sound();
-    else if (!this.isState(PlayerObject.SNAME.HIDE))
+    else if (!this.isState(PlayerObject.SNAME.HIDE) || !this.spectator)
         if (this.isState(PlayerObject.SNAME.POLE))
             if (0x0 < this.poleTimer && !this.poleWait) this.poleTimer--;
             else {
@@ -3935,7 +3875,7 @@ PlayerObject.prototype.step = function () {
                 _0x4d4e5b.pos.y - 0.25 >= this.pos.y ? _0x4d4e5b.pos.y -= 0.25 : (_0x4d4e5b.pos.y = this.pos.y, this.poleWait = false);
             }
         else if (this.isState(PlayerObject.SNAME.RUN) ? this.anim += Math.max(0.5, Math.abs(0x5 * this.moveSpeed)) : this.anim++, this.sprite = this.state.SPRITE[parseInt(parseInt(this.anim) / PlayerObject.ANIMATION_RATE) % this.state.SPRITE.length], this.isState(PlayerObject.SNAME.CLIMB)) this.pos.y += PlayerObject.CLIMB_SPEED, this.pos.y >= this.game.world.getZone(this.level, this.zone).dimensions().y && (this.warp(this.vineWarp), this.setState(PlayerObject.SNAME.FALL));
-        else if (this.isState(PlayerObject.SNAME.DEAD) || this.isState(PlayerObject.SNAME.DEADGHOST)) 0x0 < this.deadFreezeTimer ? this.deadFreezeTimer-- : 0x0 < this.deadTimer ? (this.deadTimer--, this.pos.y += this.fallSpeed, this.fallSpeed = Math.max(this.fallSpeed - 0.085, -0.45)) : this.destroy();
+        else if (this.isState(PlayerObject.SNAME.DEAD) || this.isState(PlayerObject.SNAME.DEADGHOST)) 0x0 < this.deadFreezeTimer ? this.deadFreezeTimer-- : 0x0 < this.deadTimer ? (this.deadTimer--, this.pos.y += this.fallSpeed, this.fallSpeed = Math.max(this.fallSpeed - 0.06, -0.3)) : this.destroy();
         else if (this.isState(PlayerObject.SNAME.TRANSFORM))
             if (0x0 < --this.tfmTimer) switch (_0x4d4e5b = parseInt(this.anim / PlayerObject.TRANSFORM_ANIMATION_RATE) % 0x3, _0x280236 = this.power > this.tfmTarget ? this.power : this.tfmTarget, _0x4d4e5b) {
                 case 0x0:
@@ -4024,6 +3964,7 @@ PlayerObject.prototype.autoMove = function () {
 };
 
 PlayerObject.prototype.control = function() {
+    if (this.isState(PlayerObject.SNAME.HIDE) || this.spectator) return;
     if (this.grounded) this.btnBg = this.btnB;
     if (this.isState(PlayerObject.SNAME.DOWN) && this.collisionTest(this.pos, this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.power).DIM)) {
         if (- 0x1 !== this.btnD[0x1] && !this.btnA) this.moveSpeed = 0.5 * (this.moveSpeed + PlayerObject.STUCK_SLIDE_SPEED);
@@ -4042,7 +3983,7 @@ PlayerObject.prototype.control = function() {
                 this.moveSpeed += PlayerObject.MOVE_SPEED_DECEL * this.btnD[0x0];
                 this.setState(PlayerObject.SNAME.SLIDE);
             } else {
-                this.moveSpeed = this.btnD[0x0] * Math.min(Math.abs(this.moveSpeed) + 0.0125, this.underWater ? 0.200 : this.btnBg ? 0.315 : 0.215);
+                this.moveSpeed = this.btnD[0x0] * Math.min(Math.abs(this.moveSpeed) + 0.0125, this.underWater ? 0.200 : this.btnBg ? PlayerObject.RUN_SPEED_MAX : PlayerObject.MOVE_SPEED_MAX);
                 this.setState(PlayerObject.SNAME.RUN);
             }
             if (this.grounded || this.underWater) this.reverse = 0x0 <= this.btnD[0x0];
@@ -4097,13 +4038,13 @@ PlayerObject.prototype.control = function() {
 
 PlayerObject.prototype.physics = function () {
     if (-0x1 !== this.jumping) {
-        this.fallSpeed = (this.underWater == 1 ? 0.3 : 0.45) - 0.005 * this.jumping;
+        this.fallSpeed = (this.underWater == 1 ? PlayerObject.SWIM_FALL_SPEED_MAX : PlayerObject.FALL_SPEED_MAX) - 0.005 * this.jumping;
         this.jumping++;
         this.grounded = false;
     } else {
         this.isSpring = this.isBounce = false;
         if (this.grounded) this.fallSpeed = 0x0;
-        this.fallSpeed = Math.max(this.fallSpeed + (this.underWater == 1 ? -0.03 : -0.085), -0.45);
+        this.fallSpeed = Math.max(this.fallSpeed + (this.underWater == 1 ? -0.03 : -PlayerObject.FALL_SPEED_ACCEL), -PlayerObject.FALL_SPEED_MAX);
     }
     var newPos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
     var tilePosMin = vec2.make(this.pos.x + Math.min(0x0, this.moveSpeed), this.pos.y + Math.min(0x0, this.fallSpeed));
@@ -4205,16 +4146,26 @@ PlayerObject.prototype.physics = function () {
     this.grounded = grounded;
     this.pos = newPos;
     _0x3f505e && _0x3f505e.riding(this);
-    for (_0x5b32b0 = 0x0; _0x5b32b0 < tiles.length; _0x5b32b0++) obj = tiles[_0x5b32b0], squar.intersection(obj.pos, oneByOne, newPos, this.dim) && obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, td32.TRIGGER.TYPE.TOUCH);
+    for (var i = 0x0; i < tiles.length; i++) {
+        var obj = tiles[i];
+        if(squar.intersection(obj.pos, oneByOne, newPos, this.dim)) {
+            if (obj.definition.ICE === undefined) {
+                PlayerObject.ANIMATION_RATE = 3
+                PlayerObject.MOVE_SPEED_ACCEL = 0.0125
+                PlayerObject.MOVE_SPEED_DECEL = 0.0225
+                PlayerObject.MOVE_SPEED_ACCEL_AIR = 0.0025
+            }
+            obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, td32.TRIGGER.TYPE.TOUCH);
+        }
+    }
     if (this.isState(PlayerObject.SNAME.DOWN) && 0.05 > Math.abs(this.moveSpeed))
         for (_0x5b32b0 = 0x0; _0x5b32b0 < _0x27c16e.length; _0x5b32b0++) obj = _0x27c16e[_0x5b32b0], obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, td32.TRIGGER.TYPE.DOWN);
     if (this.isState(PlayerObject.SNAME.RUN))
         for (_0x5b32b0 = 0x0; _0x5b32b0 < _0x346d1d.length; _0x5b32b0++) obj = _0x346d1d[_0x5b32b0], obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, td32.TRIGGER.TYPE.PUSH);
     for (_0x5b32b0 = 0x0; _0x5b32b0 < _0x50b7b9.length; _0x5b32b0++) obj = _0x50b7b9[_0x5b32b0], obj.definition.TRIGGER(this.game, this.pid, obj, this.level, this.zone, obj.pos.x, obj.pos.y, 0x0 < this.power ? td32.TRIGGER.TYPE.BIG_BUMP : td32.TRIGGER.TYPE.SMALL_BUMP), this.jumping = -0x1, this.fallSpeed = -PlayerObject.BLOCK_BUMP_THRESHOLD;
-    for (var i=0x0; i<_0x27c16e.length; i++) {
-        var tile = _0x27c16e[i];
+    _0x27c16e.forEach(tile => {
         tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.STAND);
-    };
+    });
 };
 
 /* God bless OSS */
@@ -4231,6 +4182,8 @@ PlayerObject.prototype.collisionTest = function (pos, dim) {
     return false;
 };
 PlayerObject.prototype.interaction = function () {
+    if (this.spectator) return;
+
     for (var i = 0x0; i < this.game.objects.length; i++) {
         var obj = this.game.objects[i];
         if (obj !== this && !this.dead && obj.level === this.level && obj.zone === this.zone && obj.isTangible() && squar.intersection(obj.pos, obj.dim, this.pos, this.dim)) {
@@ -4243,18 +4196,24 @@ PlayerObject.prototype.interaction = function () {
                 if (this.dead) this.game.out.push(NET017.encode(obj.pid));
             }
             if (this.lastPos.y > obj.pos.y + 0.66 * obj.dim.y - Math.max(0x0, obj.fallSpeed)) {
-                if (obj.playerStomp) obj.playerStomp(this);
+                if (obj.playerStomp) 
+                    if (!this.spectator)
+                        obj.playerStomp(this);
             } else {
                 if (this.lastPos.y < obj.pos.y) {
                     if (obj.playerBump) obj.playerBump(this)
                 } else {
-                    if (obj.playerCollide) obj.playerCollide(this);
+                    if (obj.playerCollide)
+                        if(!this.spectator)
+                            obj.playerCollide(this);
                 }
             }
         }
     }
 };
 PlayerObject.prototype.arrow = function () {
+    if (this.spectator) return;
+
     for (var _0x37a11c = 0x0, _0x389b03 = 0x0; _0x389b03 < this.game.objects.length; _0x389b03++) {
         var _0x2c4088 = this.game.objects[_0x389b03];
         _0x2c4088 !== this && _0x2c4088 instanceof PlayerObject && _0x2c4088.level === this.level && _0x2c4088.zone === this.zone && (_0x37a11c += 0x1 - Math.min(PlayerObject.ARROW_RAD_OUT, Math.max(0x0, vec2.distance(this.pos, _0x2c4088.pos) - PlayerObject.ARROW_RAD_IN)) / PlayerObject.ARROW_RAD_OUT);
@@ -4263,6 +4222,8 @@ PlayerObject.prototype.arrow = function () {
 };
 PlayerObject.prototype.sound = GameObject.prototype.sound;
 PlayerObject.prototype.attack = function () {
+    if (this.spectator) return;
+
     this.attackTimer = PlayerObject.ATTACK_DELAY;
     this.attackCharge -= PlayerObject.ATTACK_CHARGE;
     var dir = this.reverse ? vec2.add(this.pos, PlayerObject.PROJ_OFFSET) : vec2.add(this.pos, vec2.multiply(PlayerObject.PROJ_OFFSET, vec2.make(-0x1, 0x1)));
@@ -4274,6 +4235,7 @@ PlayerObject.prototype.bounce = function () {
     this.isBounce = true;
 };
 PlayerObject.prototype.damage = function (source) {
+    if (this.spectator) return;
     0x0 < this.damageTimer || 0x0 < this.starTimer || this.isState(PlayerObject.SNAME.TRANSFORM) || this.isState(PlayerObject.SNAME.CLIMB) || this.isState(PlayerObject.SNAME.POLE) || this.pipeWarp || 0x0 < this.pipeTimer || 0x0 < this.pipeDelay || this.autoTarget || (0x0 < this.power ? (this.tfm(0x0), this.damageTimer = PlayerObject.DAMAGE_TIME) : this.kill());
 };
 PlayerObject.prototype.invuln = function () {
@@ -4287,6 +4249,8 @@ PlayerObject.prototype.powerupVisual = function (object) {
         this.game.addCoin(true, true);
 };
 PlayerObject.prototype.powerup = function (object) {
+    if (this.spectator) return;
+
     if (object instanceof MushroomObject) {
         if (0x1 > this.power) {
             this.tfm(0x1);
@@ -4317,16 +4281,22 @@ PlayerObject.prototype.powerup = function (object) {
         this.damage(object);
 };
 PlayerObject.prototype.axe = function (_0x5050d5) {
+    if (this.spectator) return;
+
     (_0x5050d5 = this.game.getText(this.level, this.zone, _0x5050d5.toString())) || (_0x5050d5 = this.game.getText(this.level, this.zone, "too bad"));
     var axe = this.game.getAxe(this.level, this.zone);
     _0x5050d5 && (this.moveSpeed = 0, this.pos = vec2.copy(axe.pos), this.autoTarget = vec2.add(_0x5050d5.pos, vec2.make(0x0, -1.6)));
 };
 PlayerObject.prototype.star = function () {
+    if (this.spectator) return;
+
     this.starMusic && (this.starMusic.stop(), this.starMusic = undefined);
     this.starTimer = PlayerObject.STAR_LENGTH;
     (this.starMusic = this.play("star.mp3", 0x1, 0.04)) && this.starMusic.loop(true);
 };
 PlayerObject.prototype.tfm = function (_0x538c99) {
+    if (this.spectator) return;
+
     this.power < _0x538c99 ? this.play("powerup.mp3", 0x1, 0.04) : this.play("powerdown.mp3", 0x1, 0.04);
     this.tfmTarget = _0x538c99;
     this.tfmTimer = PlayerObject.TRANSFORM_TIME;
@@ -4381,6 +4351,8 @@ PlayerObject.prototype.show = function () {
     this.setState(PlayerObject.SNAME.STAND);
 };
 PlayerObject.prototype.kill = function () {
+    if (this.isState(PlayerObject.SNAME.HIDE)) return;
+
     this.starMusic && (this.starMusic.stop(), this.starMusic = undefined, this.starTimer = 0x0);
     this.isState(PlayerObject.SNAME.GHOST) ? this.setState(PlayerObject.SNAME.DEADGHOST) : this.setState(PlayerObject.SNAME.DEAD);
     this.dead = true;
@@ -4422,8 +4394,8 @@ PlayerObject.prototype.draw = function (spriteList) {
     if (!(this.isState(PlayerObject.SNAME.HIDE) || 0x0 < this.pipeDelay || 0x0 < this.damageTimer && 0x1 < this.damageTimer % 0x3 && !this.isState(PlayerObject.SNAME.POLE))) {
         var mode;
         if(this.starTimer > 0) { mode = 0x02; }
-        else if(this.isState(PlayerObject.SNAME.GHOST) || this.isState(PlayerObject.SNAME.DEADGHOST)) { mode = 0x01; }
-        else if(this.isState(PlayerObject.SNAME.POLE)) { mode = 0x00; }
+        else if(this.isState(PlayerObject.SNAME.GHOST) || this.isState(PlayerObject.SNAME.DEADGHOST)) { this.pid === this.game.spectatorID ? mode = 0x00 : mode = 0x01; }
+        else if(this.isState(PlayerObject.SNAME.POLE) && !this.spectator) { mode = 0x00; }
         else { mode = 0x00; }
         if (this.sprite.INDEX instanceof Array)
             for (var _0x5814e0 = this.sprite.INDEX, _0x3f6b38 = 0x0; _0x3f6b38 < _0x5814e0.length; _0x3f6b38++)
@@ -4466,6 +4438,7 @@ PlayerObject.prototype.draw = function (spriteList) {
     }
 };
 PlayerObject.prototype.write = function (_0x239cf4) {
+    if (this.spectator || this.isState(PlayerObject.SNAME.HIDE)) return;
     0x0 < this.arrowFade ? _0x239cf4.push({
         'pos': vec2.add(vec2.add(this.pos, vec2.make(0x0, this.dim.y)), PlayerObject.TEXT_OFFSET),
         'size': PlayerObject.TEXT_SIZE,
@@ -5283,7 +5256,7 @@ FlyingFishObject.DELAY_DEFAULT = 0x96;
 FlyingFishObject.IMPULSE = vec2.make(0.225, 0.335);
 FlyingFishObject.DRAG = 0.996;
 FlyingFishObject.FALL_SPEED_ACCEL = 0.0055;
-FlyingFishObject.SOFFSET = vec2.make(0.15, 0.15);
+FlyingFishObject.SOFFSET = vec2.make(0.15, 0.15)
 FlyingFishObject.SPRITE = {};
 FlyingFishObject.SPRITE_LIST = [{
     'NAME': "IDLE0",
@@ -5686,7 +5659,7 @@ BowserObject.prototype.step = function () {
 };
 BowserObject.prototype.control = function () {
     this.grounded ? (BowserObject.JUMP_DELAY < this.groundTimer++ && (this.groundTimer = this.jumpTimer = 0x0), this.pos.x > this.loc[0x0] ? this.reverse = true : this.pos.x < this.loc[0x1] && (this.reverse = false)) : this.jumpTimer > BowserObject.JUMP_LENGTH && (this.jumpTimer = -0x1);
-    this.moveSpeed = 0.75 * this.moveSpeed + 0.25 * (this.reverse ? -BowserObject.MOVE_SPEED_MAX : BowserObject.MOVE_SPEED_MAX);
+    this.moveSpeed = (0.75 * this.moveSpeed + 0.25 * (this.reverse ? -BowserObject.MOVE_SPEED_MAX : BowserObject.MOVE_SPEED_MAX));
 };
 BowserObject.prototype.physics = function () {
     -0x1 !== this.jumpTimer ? (this.fallSpeed = BowserObject.FALL_SPEED_MAX - this.jumpTimer * BowserObject.JUMP_DECEL, this.jumpTimer++, this.grounded = false) : (this.grounded && (this.fallSpeed = 0x0), this.fallSpeed = Math.max(this.fallSpeed - BowserObject.FALL_SPEED_ACCEL, -BowserObject.FALL_SPEED_MAX));
@@ -7749,6 +7722,10 @@ SpatialSoundFile.prototype.done = SoundFile.prototype.done;
 function Audio(app) {
     this.soundPrefix = ["sfx"];
     this.musicPrefix = ["music"];
+    this.musicList = [
+        "main0.mp3", "main1.mp3", "main2.mp3", "main3.mp3", "level.mp3", // STANDARD
+        "castle.mp3", "victory.mp3", "star.mp3", "dead.mp3", "gameover.mp3", "hurry.mp3"
+    ];
     this.initWebAudio(app) || this.initFallback();
 }
 Audio.FALLOFF_MIN = 0x1;
@@ -7757,12 +7734,16 @@ Audio.FALLOFF_MAX = 0x18;
 Audio.prototype.setCustomSoundPrefix = function (val) {
     this.customSoundPrefix = val;
     this.soundPrefix = [val, "sfx"];
-}
+};
 
 Audio.prototype.setCustomMusicPrefix = function (val) {
     this.customMusicPrefix = val;
     this.musicPrefix = [val, "music"];
-}
+};
+
+Audio.prototype.setCustomMusicList = function (val) {
+    this.musicList = val;
+};
 
 Audio.prototype.initWebAudio = function (app) {
     try {
@@ -7932,10 +7913,15 @@ function Display(game, container, canvas, resource) {
     resource.push({ id: "skin0", src: ASSETS_URL + "img/skins/smb_skin0.png" });
     //add ui texture
     resource.push({ id: "ui", src: ASSETS_URL + "img/game/smb_ui.png" });
+    // add spectator textures
+    resource.push({ id: "spec_ui", src: ASSETS_URL + "img/game/spec_ui.png" });
+    resource.push({ id: "spec_left", src: ASSETS_URL + "img/game/spec_left.png" });
+    resource.push({ id: "spec_right", src: ASSETS_URL + "img/game/spec_right.png" });
     this.resource = new Resource(resource);
     this.camera = new Camera(this);
 }
 Display.TEXRES = 0x10;
+Display.TEXRES_32X = 0x10;
 Display.prototype.ensureSkin = function (skin) {
     var spriteMap = this.resource.getTexture("skin" + skin);
     if (spriteMap === undefined) {
@@ -7997,13 +7983,13 @@ Display.prototype.drawMap = function (data, depth) {
                     var anim = TILE_ANIMATION_FILTERED[ti];
                     var delay = anim.delay;
                     var frame = Math.floor(this.game.frame % (anim.tiles.length * delay) / delay);
-                    sprite = util.sprite.getSprite(mapTexture, anim.tiles[frame]);
+                    sprite = util.sprite.getSprite(mapTexture, anim.tiles[frame], true);
                 } else
-                    sprite = util.sprite.getSprite(mapTexture, ti);
+                    sprite = util.sprite.getSprite(mapTexture, ti, true);
                 var t = 0x0,
                     high = Math.max(0x0, tile.bump - 0x7);
                 0x0 < high && (t = 0.22 * Math.sin((0x1 - (high - 0x2) / 0x8) * Math.PI));
-                context.drawImage(mapTexture, sprite[0x0], sprite[0x1], Display.TEXRES, Display.TEXRES, Display.TEXRES * j, Display.TEXRES * (i - t), Display.TEXRES, Display.TEXRES);
+                context.drawImage(mapTexture, sprite[0x0], sprite[0x1], Display.TEXRES_32X, Display.TEXRES_32X, Display.TEXRES * j, Display.TEXRES * (i - t), Display.TEXRES, Display.TEXRES);
             }
         }
     }
@@ -8182,7 +8168,7 @@ Display.prototype.drawUI = function () {
         canvasWIDTH = this.canvas.width,
         canvasHeight = this.canvas.height,
         coinIconIndices = [0xf0, 0xf1, 0xf2, 0xf1],
-        coinIconIndex = coinIconIndices[parseInt(this.game.frame / 0x3) % coinIconIndices.length],
+        coinIconIndex = coinIconIndices[parseInt(this.game.frame / CoinObject.ANIMATION_RATE) % coinIconIndices.length],
         objTexture = this.resource.getTexture("obj"),
         skinTexture = this.game.skin != undefined ? this.resource.getTexture("skin" + this.game.skin) : objTexture;
     if (this.game.skin && skinTexture === undefined) skinTexture = this.resource.getTexture("skin0");
@@ -8253,19 +8239,57 @@ Display.prototype.drawUI = function () {
         context.font = "32px SmbWeb";
         context.textAlign = "center";
         context.fillText("TOO BAD #" + this.game.victory, 0.5 * canvasWIDTH, 0x28);
+    } else if (this.game.spectatorID !== undefined) {
+        spectateUI = this.resource.getTexture("spec_ui");
+        spectateLeft = this.resource.getTexture("spec_left");
+        spectateRight = this.resource.getTexture("spec_right");
+
+        spectateW = Math.min(spectateUI.width, canvasWIDTH);
+        spectateH = parseInt(spectateW * 0.17);
+
+        specLW = Math.min(spectateLeft.width, canvasWIDTH);
+        specLH = parseInt(specLW * 1);
+        specLX = (canvasWIDTH / 2) - ( ((spectateW * 0.5) - (specLW / 100) + specLW ) + (specLW * 0.5) * 0.3 ); /* What the fuck */ //0.35 * canvasWIDTH - specLW * 0.5;
+        specLY = 0.8 * canvasHeight + 24;
+        
+        specRW = Math.min(spectateRight.width, canvasWIDTH);
+        specRH = parseInt(specRW * 1);
+        specRX = (canvasWIDTH / 2) + (((spectateW * 0.5) - (specRW / 100) + specRW ) + ((specRW / 4 - specRW) - (specRW / 10))); /* What the fuck part 2 */ //0.65 * canvasWIDTH - specRW * 0.5;
+        specRY = 0.8 * canvasHeight + 24;
+
+        specLXS = specRX + spectateRight.width;
+        specRXS = specLX + spectateLeft.width;
+
+        context.drawImage(spectateUI, 0.5 * canvasWIDTH - spectateW * 0.5, 0.8 * canvasHeight + 24, spectateW, spectateH);
+        context.drawImage(spectateLeft, specLX, specLY, specLW, specLH);
+        context.drawImage(spectateRight, specRX, specRY, specRW, specRH);
+
+        context.fillStyle = "white";
+        context.font = "16px SmbWeb";
+        context.textAlign = "center";
+        if (app.getPlayerInfo(this.game.spectatorID) !== undefined || this.game.getGhost(this.game.spectatorID) !== undefined)
+            try {
+                ghostname = app.getPlayerInfo(this.game.spectatorID).name;
+            } catch {
+                ghostname = app.game.getGhost(app.game.spectatorID).name;
+            }
+        else
+            ghostname = "";
+        context.fillText(ghostname, (canvasWIDTH / 2), 0.8 * canvasHeight + 60)
     } else {
         context.fillStyle = "white";
         context.font = "24px SmbWeb";
         context.textAlign = "left";
         context.fillText(playerInfo ? playerInfo.displayName : DEFAULT_PLAYER_NAME, 0x8, 0x20);
         sprite = util.sprite.getSprite(objTexture, coinIconIndex);
-        txt = 'x' + (0x9 >= this.game.coins ? '0' + this.game.coins : this.game.coins);
+        txt = (app.compactMode ? '' : 'x') + (0x9 >= this.game.coins ? '0' + this.game.coins : this.game.coins);
         context.drawImage(objTexture, sprite[0x0], sprite[0x1], Display.TEXRES, Display.TEXRES, 0x4, 0x28, 0x18, 0x18);
         context.fillText(txt, 0x1e, 0x40);
         sprite = util.sprite.getSprite(skinTexture, 0xd);
         txtWIDTH = context.measureText(txt).width + 0x1e;
         context.drawImage(skinTexture, sprite[0x0], sprite[0x1], Display.TEXRES, Display.TEXRES, 0x4 + txtWIDTH + 0x10, 0x28, 0x18, 0x18);
-        context.fillText('x' + (0x9 >= this.game.lives ? '0' + this.game.lives : this.game.lives), 0x4 + txtWIDTH + 0x10 + 0x1a, 0x40);
+        
+        context.fillText((app.compactMode ? '' : 'x') + (0x9 >= this.game.lives ? '0' + this.game.lives : this.game.lives), 0x4 + txtWIDTH + 0x10 + 0x1a, 0x40);
         if (this.game instanceof Game) {
             //timer
             txt = this.game.getGameTimer((app.compactMode ? app.compactMode : this.game.touchMode));
@@ -8282,7 +8306,7 @@ Display.prototype.drawUI = function () {
         } else if (this.game instanceof LobbyGame) {
             var pc = app.players.length;
             if (pc < 2 && app.net.gameMode == 1) {
-                txt = this.game.touchMode || app.compactMode ? pc : "P:" + "<2" + "/" + app.maxPlayers + " V:" + (pc < app.minPlayers ? "<" + app.minPlayers + "P" : Math.floor(100 * app.votes / pc) + "/" + Math.floor(100 * app.voteRateToStart) + "%") + " T:" + app.ticks;
+                txt = this.game.touchMode || app.compactMode ? pc : "P:" + pc + "/" + app.maxPlayers + " V:" + (pc < app.minPlayers ? "<" + app.minPlayers + "P" : Math.floor(100 * app.votes / pc) + "/" + Math.floor(100 * app.voteRateToStart) + "%") + " T:" + "<" + 2 + "P";
             } else {
                 txt = this.game.touchMode || app.compactMode ? pc : "P:" + pc + "/" + app.maxPlayers + " V:" + (pc < app.minPlayers ? "<" + app.minPlayers + "P" : Math.floor(100 * app.votes / pc) + "/" + Math.floor(100 * app.voteRateToStart) + "%") + " T:" + app.ticks;
             }
@@ -8314,7 +8338,7 @@ Display.prototype.drawUI = function () {
     }
 };
 Display.prototype.drawTouch = function () {
-    if (this.game.touchMode) {
+    if (this.game.touchMode && this.game.spectatorID === undefined) {
         var context = this.context,
             WIDTH = this.canvas.width,
             HEIGHT = this.canvas.height;
@@ -8340,11 +8364,6 @@ Display.prototype.drawTouch = function () {
     }
 };
 Display.prototype.drawLoad = function () {
-    /*
-         _0x37f267 = context
-         _0x8de60e = canvas WIDTH
-         _0x131b2f = canvas height
-     */
     var canvas = this.context,
         WIDTH = this.canvas.width,
         height = this.canvas.height;
@@ -8434,6 +8453,7 @@ function Zone(game, level, input) {
     if (this.fastMusic) app.audio.addMusic(this.fastMusic);
     this.winmusic = input.winmusic ? input.winmusic : '';
     this.victorymusic = input.victorymusic ? input.victorymusic : '';
+    this.loopPodium = input.loopPodium ? input.loopPodium : false;
     if (this.winmusic) app.audio.addMusic(this.winmusic);
     if (this.victorymusic) app.audio.addMusic(this.victorymusic);
     this.layers = input.layers || [];
@@ -8518,7 +8538,14 @@ Zone.prototype.replaceFlip = function (x, y, rep) {
     setTimeout(() => {
         this.mainLayer.data[y][x] = BLOCK_DATA[rep]['tileData']
     }, 5000);
-}
+};
+Zone.prototype.cooldown = function (x, y, solid, original) {
+    y = this.height() - 0x1 - y;
+    this.mainLayer.data[y][x] = solid;
+    setTimeout(() => {
+        this.mainLayer.data[y][x] = original;
+    }, 270);
+};
 Zone.prototype.grow = function (_0x34397d, _0x27a117, _0x5e09da) {
     _0x27a117 = this.dimensions().y - 0x1 - _0x27a117;
     this.vines.push({
@@ -8628,6 +8655,9 @@ function Game(data) {
     this.poleTimes = 0;
     this.pauseCamera = false;
     this.overrideCameraPos = false;
+    this.spectatorID = undefined;
+    this.spectateTimeout = 0;
+    this.spectateOrder = 0;
     var that = this;
     this.frameReq = requestAnimFrameFunc.call(window, function () {
         that.draw();
@@ -8641,8 +8671,9 @@ Game.TICK_RATE = 28;
 Game.FDLC_TARGET = 0x3;
 Game.FDLC_MAX = Game.FDLC_TARGET + 0x2;
 
-Game.LEVEL_WARP_TIME = 110;
-Game.GAME_OVER_TIME = 140;
+Game.LEVEL_WARP_TIME = 100;
+Game.GAME_OVER_TIME = 150;
+Game.SPEC_TIMEOUT_TIME = 50;
 
 Game.COINS_TO_LIFE = 0x1e;
 
@@ -8668,7 +8699,30 @@ Game.prototype.load = function (data) {
         reloadAudio = true;
     }
     if (data.assets) {
-        $.getJSON(ASSETS_URL + "assets/" + data.assets, function (data) {
+        let link = isLink(data.assets);
+        $.getJSON(link ? data.assets : ASSETS_URL + "assets/" + data.assets, function (data) {
+            TILE_ANIMATION = {}
+            TILE_ANIMATION_FILTERED = {}
+            for (var anim of data.tileAnim) {
+                var obj = {};
+                obj.tiles = anim.tiles;
+                obj.delay = anim.delay;
+                obj.tilesets = anim.tilesets || [];
+                TILE_ANIMATION[anim.startTile] = obj;
+                TILE_ANIMATION_FILTERED[anim.startTile] = obj;
+            }
+            if (!data.tileData) return;
+            for (var td of data.tileData) {
+                var obj = {}
+                obj.id = td.id;
+                obj.name = td.name
+                obj.tileData = td.tileData;
+                obj.flipData = td.flipData;
+                BLOCK_DATA[obj.id] = obj;
+            }
+        });
+    } else {
+        $.getJSON(ASSETS_URL + "assets/assets.json", function (data) {
             TILE_ANIMATION = {}
             TILE_ANIMATION_FILTERED = {}
             for (var anim of data.tileAnim) {
@@ -8757,6 +8811,58 @@ Game.prototype.updatePlayerList = function (packet) {
     if (undefined === this.pid) { return; }
     this.updateTeam();
     if (this.isDev) app.menu.game.updatePlayerList(app.players);
+};
+
+Game.prototype.getAlivePlayers = function () {
+    var queue = [];
+    var players = app.players;
+
+    for (var i=0; i<players.length; i++) {
+        var player = players[i];
+
+        var ghost = this.getGhost(player.id);
+        if (ghost && (ghost.pid !== this.getPlayer().pid) && !ghost.spectator) queue.push(ghost.pid);
+    };
+
+    return queue;
+};
+
+Game.prototype.specPrevious = function () {
+    let players = this.getAlivePlayers();
+    let len = players.length;
+    if (len === 0 || len === 1) return;
+
+    if (this.spectateOrder === 0) {
+        this.spectatorID = players[len - 1];
+        this.spectateOrder = len - 1;
+    } else {
+        if (players[this.spectateOrder - 1] !== undefined) {
+            this.spectatorID = players[this.spectateOrder - 1];
+            this.spectateOrder -= 1;
+        } else {
+            this.spectatorID = players[len - 1];
+            this.spectateOrder = len - 1;
+        }
+    }
+};
+
+Game.prototype.specNext = function () {
+    let players = this.getAlivePlayers();
+    let len = players.length;
+    if (len === 0 || len === 1) return;
+
+    if (this.spectateOrder === 0) {
+        this.spectatorID = players[1];
+        this.spectateOrder = 1;
+    } else {
+        if (players[this.spectateOrder + 1] !== undefined) {
+            this.spectatorID = players[this.spectateOrder + 1];
+            this.spectateOrder += 1;
+        } else {
+            this.spectatorID = players[0];
+            this.spectateOrder = 0;
+        }
+    }
 };
 
 Game.prototype.getGameTimer = function (compact) {
@@ -8949,11 +9055,14 @@ Game.prototype.doStart = function () {
 
 Game.prototype.doDetermine = function () {
     var lastInput = this.input.pop();
-    0x0 < lastInput.touch.length ? (
-        this.touchMode = true,
-        app.compactMode = true
-    ) : 0x0 < lastInput.keyboard.length && (this.touchMode = false);
-    this.touchMode ? this.doTouch(lastInput) : this.doInput(lastInput);
+    var ply = this.getPlayer();
+    if (ply) {
+        0x0 < lastInput.touch.length ? (
+            this.touchMode = true,
+            app.compactMode = true
+        ) : 0x0 < lastInput.keyboard.length && (this.touchMode = false);
+        this.touchMode ? this.doTouch(lastInput) : this.doInput(lastInput);
+    }
 };
 
 Game.prototype.doTouch = function (lastInput) {
@@ -8994,24 +9103,53 @@ Game.prototype.doTouch = function (lastInput) {
             game.touchRun = !game.touchRun;
         }
     }];
-    for (var _0x3308c9, _0x174be8 = 0x0; _0x174be8 < inp.touch.pos.length; _0x174be8++) {
-        var _0x182f56 = inp.touch.pos[_0x174be8];
-        if (this.thumbId === _0x182f56.id) _0x3308c9 = _0x182f56, this.thumbId = _0x182f56.id, this.thumbPos = _0x182f56;
+    for (var _0x3308c9, i = 0x0; i < inp.touch.pos.length; i++) {
+        var input = inp.touch.pos[i];
+        if (this.thumbId === input.id) _0x3308c9 = input, this.thumbId = input.id, this.thumbPos = input;
         else
-            for (_0x174be8 = 0x0; _0x174be8 < triggers.length; _0x174be8++) {
-                var _0x287903 = triggers[_0x174be8];
-                squar.inside(_0x182f56, _0x287903.pos, _0x287903.dim) && _0x287903.press && _0x287903.press();
+            for (i = 0x0; i < triggers.length; i++) {
+                var trigger = triggers[i];
+                var off = 0;
+                for (var icon of ingameGuiButtons) {
+                    off += HudButtonOffset;
+                    if (icon.click && squar.inside(input, vec2.make(canvasWIDTH - (off), 0x28), vec2.make(0x18, 0x18))) { icon.click(); }
+
+                    if (this.spectatorID !== undefined) {
+                        if (specLXS !== undefined && specLY !== undefined && specRX !== undefined && specRY !== undefined) {
+                            if (squar.inside(input, vec2.make(canvasWIDTH - (specLXS), specLY), vec2.make(0x38, 0x38))) { this.specPrevious(); }
+                            else if (squar.inside(input, vec2.make(canvasWIDTH - (specRXS), specRY), vec2.make(0x38, 0x38))) { this.specNext(); }
+                        }
+                    }
+                }
+                squar.inside(input, trigger.pos, trigger.dim) && trigger.press && trigger.press();
             }
     }
-    for (_0x174be8 = 0x0; _0x174be8 < lastInput.touch.length; _0x174be8++) {
-        _0x182f56 = lastInput.touch[_0x174be8];
+    for (var i = 0x0; i < lastInput.touch.length; i++) {
+        input = lastInput.touch[i];
         inp = false;
-        for (_0x174be8 = 0x0; _0x174be8 < triggers.length; _0x174be8++)
-            if (_0x287903 = triggers[_0x174be8], squar.inside(_0x182f56, _0x287903.pos, _0x287903.dim)) {
-                inp = true;
-                _0x287903.click && _0x287903.click();
-                break;
-            } _0x3308c9 || inp || (_0x3308c9 = _0x182f56, this.thumbId = _0x182f56.id, this.thumbPos = this.thumbOrigin = _0x182f56);
+
+        if (player.spectator) inp = true;
+
+        for (i = 0x0; i < triggers.length; i++)
+            var off = 0;
+            for (var icon of ingameGuiButtons) {
+                off += HudButtonOffset;
+                if (icon.click && squar.inside(input, vec2.make(canvasWIDTH - (off), 0x28), vec2.make(0x18, 0x18))) {
+                    inp = true;
+                    icon.click && icon.click();
+                    break;
+                }
+            }
+
+            let deadzone = canvasWIDTH / 2;
+            if (input.x > deadzone) inp = true;
+
+            for (_0x174be8 = 0x0; _0x174be8 < triggers.length; _0x174be8++)
+                if (_0x287903 = triggers[_0x174be8], squar.inside(input, _0x287903.pos, _0x287903.dim)) {
+                    //inp = true;
+                    _0x287903.click && _0x287903.click();
+                    break;
+                } _0x3308c9 || inp || (_0x3308c9 = input, this.thumbId = input.id, this.thumbPos = this.thumbOrigin = input);
     }
     var lim;
     if (_0x3308c9 && game.startTimer == -1) {
@@ -9057,11 +9195,6 @@ Game.prototype.doInput = function (lastInput) {
             abtnTA = keys[input.assignK.ta] || pad.button(input.assignG.ta),
             abtnU = keys[input.assignK.up] || pad.button(input.assignG.up);
         mouse.spin && this.display.camera.zoom(mouse.spin);
-        if (this.padReturnToLobby && abtnA) {
-            Cookies.set("go_to_lobby", "1");
-            location.reload();
-            this.padReturnToLobby = false;
-        }
         player.input(abtnD, abtnA, abtnB, abtnTA, abtnU);
         var game = this;
         var canvasWIDTH = this.display.canvas.width;
@@ -9075,15 +9208,17 @@ Game.prototype.doInput = function (lastInput) {
                         if (icon.click && squar.inside(mouse.pos, vec2.make(canvasWIDTH - (off), 0x28), vec2.make(0x18, 0x18))) { icon.click(); }
                     }
                 }
+
+                if (this.spectatorID !== undefined) {
+                    if (specLXS !== undefined && specLY !== undefined && specRX !== undefined && specRY !== undefined) {
+                        if (squar.inside(mouse.pos, vec2.make(canvasWIDTH - (specLXS), specLY), vec2.make(0x38, 0x38))) { game.specPrevious(); }
+                        else if (squar.inside(mouse.pos, vec2.make(canvasWIDTH - (specRXS), specRY), vec2.make(0x38, 0x38))) { game.specNext(); }
+                    }
+                }
             }
         }
     }
 };
-
-Game.prototype.cameraType = function () {
-    if (!vertical) return zone.dimensions.y()
-    else { return player.pos.y }
-}
 
 Game.prototype.doStep = function () {
     var player = this.getPlayer();
@@ -9100,7 +9235,7 @@ Game.prototype.doStep = function () {
         player.invuln();
         this.levelWarpId = undefined;
         this.pauseCamera = false;
-        this.overrideCameraPos = undefined;
+        this.overrideCameraPos = false;
         if (!(this.game instanceof LobbyGame))this.resumeGameTimer();
     }
     player && this.cullSS && !vec2.equals(player.pos, this.cullSS) && this.out.push(NET015.encode());
@@ -9113,6 +9248,36 @@ Game.prototype.doStep = function () {
     this.cullSS = player ? vec2.copy(player.pos) : undefined;
     this.fillSS = player ? player.fallSpeed : undefined;
     var zone = this.getZone();
+    if (player && player.pid !== this.spectatorID && this.getGhost(this.spectatorID) !== undefined && !player.dead && this.lives == -1) {
+        let ghost = this.getGhost(this.spectatorID);
+        if (ghost) {
+            player.pos.x = ghost.pos.x; player.pos.y = -1;
+            if (player.level !== ghost.level) { player.level = ghost.level; player.pos = vec2.copy(ghost.pos); };
+            if (player.zone !== ghost.zone) { player.zone = ghost.zone; player.pos = vec2.copy(ghost.pos); };
+            if (!ghost.isState(PlayerObject.SNAME.HIDE)) this.overrideCameraPos = vec2.make(ghost.pos.x, 0x0)
+        }
+    } else {
+        if (this.lives == -1 && player.spectator === true) {
+            ++this.spectateTimeout;
+
+            if (this.spectateTimeout > Game.SPEC_TIMEOUT_TIME) {
+                if (this.getGhost(this.spectatorID) === undefined) {
+                    let remain = this.getRemain();
+                    if (remain > 0) {
+                        let queue = this.getAlivePlayers();
+                        this.spectatorID = queue[0];
+                        this.spectateTimeout = 0;
+                    } else {
+                        if (!this.gameoverReloading && this.spectateTimeout > Game.SPEC_TIMEOUT_TIME) {
+                            Cookies.set("go_to_lobby", "1");
+                            location.reload();
+                            this.gameoverReloading = true;
+                        }
+                    }
+                }
+            };
+        }
+    };
     player && !player.dead && !this.pauseCamera && this.display.camera.position(vec2.make(this.overrideCameraPos ? this.overrideCameraPos.x : player.pos.x, 0.5 * zone.dimensions().y)); // zone.dimensions().y
     this.world.step();
     if (app.hurryingUp && app.hurryUpTime <= Date.now() && 0 >= this.levelWarpTimer) {
@@ -9127,9 +9292,20 @@ Game.prototype.doStep = function () {
         if (this.gameOver) {
             ++this.gameOverTimer;
             if (this.gameOverTimer > Game.GAME_OVER_TIME && !this.gameoverReloading && !(this.game instanceof JailGame)) {
-                Cookies.set("go_to_lobby", "1");
-                location.reload();
-                this.gameoverReloading = true;
+                var pc = this.getRemain();
+
+                if (pc < 1) { // Don't activate if we're the only player
+                    Cookies.set("go_to_lobby", "1");
+                    location.reload();
+                    this.gameoverReloading = true;
+                } else {
+                    this.gameOver = false;
+                    this.gameOverTimer = 0x0;
+                    this.lives = -1; // Activate spectate mode
+                    
+                    this.doSpawn();
+                    this.getPlayer().spectate();
+                }
             }
         } else
             this.gameOverTimer = 0x0;
@@ -9138,6 +9314,11 @@ Game.prototype.doStep = function () {
         this.doSpawn();
         this.levelWarp(level);
         this.lives--;
+    } else if ((this.lives == -1) && 0x0 >= this.victory && !(this instanceof JailGame)) {
+        var ply = this.getPlayer();
+        var level = this.getZone().level;
+        this.doSpawn();
+        ply.spectate();
     } else if (0x2d < ++this.gameOverTimer && !(this instanceof JailGame)) {
         this.gameOver = true;
         this.gameOverTimer = 0x0;
@@ -9192,11 +9373,11 @@ Game.prototype.doMusic = function () {
 };
 
 Game.prototype.doPush = function () {
-    var _0x47ddfe = this.getPlayer();
-    _0x47ddfe && !_0x47ddfe.dead && this.out.push(NET012.encode(_0x47ddfe.level, _0x47ddfe.zone, _0x47ddfe.pos, _0x47ddfe.sprite.ID, _0x47ddfe.reverse));
-    _0x47ddfe = MERGE_BYTE(this.out);
+    var player = this.getPlayer();
+    player && !player.dead && this.out.push(NET012.encode(player.level, player.zone, player.pos, player.sprite.ID, player.reverse, player.spectator));
+    player = MERGE_BYTE(this.out);
     this.out = [];
-    app.net.sendBinary(_0x47ddfe);
+    app.net.sendBinary(player);
 };
 
 Game.prototype.createObject = function (id, level, zoneId, pos, extraArgs) {
@@ -9267,7 +9448,7 @@ Game.prototype.getZone = function () {
 Game.prototype.getRemain = function () {
     for (var result = 0x0, i = 0x0; i < app.players.length; i++) {
         var ghost = this.getGhost(app.players[i].id);
-        ghost && !ghost.dead && result++;
+        ghost && !ghost.dead && !ghost.spectator && result++;
     }
     return result;
 };
@@ -9279,6 +9460,10 @@ Game.prototype.play = function (path, gainValue, playbackRateDeviation) {
 };
 
 Game.prototype.levelWarp = function (level) {
+    /* For whatever reason in ER1 warping to level 3 warped you back to level 2? I'm hoping this fixes it. */
+    /* 2 minutes later: LET'S FUCKING GO. */
+    if (this.getPlayer().isState(PlayerObject.SNAME.HIDE) || this.levelWarpTimer !== 0) return;
+
     this.levelWarpId = level;
     this.levelWarpTimer = Game.LEVEL_WARP_TIME;
     this.getPlayer().hide();
@@ -9377,6 +9562,9 @@ LobbyGame.prototype.doNET021 = Game.prototype.doNET021;
 LobbyGame.prototype.doNET030 = Game.prototype.doNET030;
 LobbyGame.prototype.doStart = Game.prototype.doStart;
 LobbyGame.prototype.doDetermine = Game.prototype.doDetermine;
+LobbyGame.prototype.getAlivePlayers = Game.prototype.getAlivePlayers;
+LobbyGame.prototype.specPrevious = Game.prototype.specPrevious;
+LobbyGame.prototype.specNext = Game.prototype.specNext;
 LobbyGame.prototype.doInput = Game.prototype.doInput;
 LobbyGame.prototype.doTouch = Game.prototype.doTouch;
 LobbyGame.prototype.doStep = function () {
@@ -9599,8 +9787,19 @@ App.prototype.hurryUp = function (data) {
     }
 };
 function getPlayerDisplayName(player) {
-    return (player.isDev ? "" : "") + (player.isGuest ? "[G]" : "") + player.name;
+    return (player.isDev ? "[DEV]" : "") + (player.isGuest ? "[G]" : "") + player.name;
 }
+function isLink(string) {
+    let url;
+
+    try {
+        url = new URL(string);
+    } catch {
+        return false;
+    }
+
+    return url.protocol === "http:" || url.protocol === "https:"
+};
 App.prototype.enrichPlayers = function (id) {
     this.players.map(x => {
         x.displayName = getPlayerDisplayName(x);
