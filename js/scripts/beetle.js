@@ -24,7 +24,7 @@ BeetleObject.NAME = "BUZZY BEETLE";
 BeetleObject.FLY_DISTANCE = 0x3;
 BeetleObject.FLY_ACCEL = 0.0025;
 BeetleObject.FLY_SPEED_MAX = 0.075;
-BeetleObject.CHECK_DIST = 0.1;
+BeetleObject.CHECK_DIST = 0;
 BeetleObject.SPRITE = {};
 BeetleObject.SPRITE_LIST = [{
     'NAME': "RUN0",
@@ -165,8 +165,8 @@ BeetleObject.prototype.checkGround = function () {
 BeetleObject.prototype.proximity = KoopaObject.prototype.proximity;
 BeetleObject.prototype.enable = KoopaObject.prototype.enable;
 BeetleObject.prototype.disable = KoopaObject.prototype.disable;
-BeetleObject.prototype.damage = function(player) {
-    if (player) return;
+BeetleObject.prototype.damage = function(obj) {
+    if (obj instanceof FireballObject) { return; }
     this.bonk();
 };
 BeetleObject.prototype.bonk = function () {
@@ -177,7 +177,7 @@ BeetleObject.prototype.stomped = function (_0x2f1cbf) {
     else if (this.state === BeetleObject.STATE.RUN) this.setState(BeetleObject.STATE.SHELL), this.transformTimer = KoopaObject.TRANSFORM_TIME;
     else if (this.state === BeetleObject.STATE.SPIN) this.setState(BeetleObject.STATE.SHELL), this.transformTimer = KoopaObject.TRANSFORM_TIME;
     else if (this.state === BeetleObject.STATE.SHELL || this.state === BeetleObject.STATE.TRANSFORM) this.setState(BeetleObject.STATE.SPIN), this.dir = _0x2f1cbf;
-    this.play("stomp.mp3", 0x1, 0.04);
+    this.state === BeetleObject.STATE.SPIN ? this.play("kick.mp3", 0x1, 0.04) : this.play("stomp.mp3", 0x1, 0.04);
 };
 BeetleObject.prototype.playerCollide = function (_0x2665f3) {
     this.dead || this.garbage || (this.state === BeetleObject.STATE.SHELL || this.state === BeetleObject.STATE.TRANSFORM ? (_0x2665f3 = 0x0 < _0x2665f3.pos.x - this.pos.x, this.stomped(_0x2665f3), this.game.out.push(NET020.encode(this.level, this.zone, this.oid, _0x2665f3 ? 0x10 : 0x11)), this.immuneTimer = KoopaObject.PLAYER_IMMUNE_TIME) : 0x0 >= this.immuneTimer && _0x2665f3.damage(this));

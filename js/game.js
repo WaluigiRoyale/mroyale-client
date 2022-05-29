@@ -4875,7 +4875,7 @@ KoopaObject.prototype.stomped = function (_0x45b447) {
     else if (this.state === KoopaObject.STATE.RUN) this.setState(KoopaObject.STATE.SHELL), this.transformTimer = KoopaObject.TRANSFORM_TIME;
     else if (this.state === KoopaObject.STATE.SPIN) this.setState(KoopaObject.STATE.SHELL), this.transformTimer = KoopaObject.TRANSFORM_TIME;
     else if (this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) this.setState(KoopaObject.STATE.SPIN), this.dir = _0x45b447;
-    this.play("stomp.mp3", 0x1, 0.04);
+    this.state === KoopaObject.STATE.SPIN ? this.play("kick.mp3", 0x1, 0.04) : this.play("stomp.mp3", 0x1, 0.04);
 };
 KoopaObject.prototype.playerCollide = function (player) {
     if (!(this.dead || this.garbage)) {
@@ -5178,7 +5178,7 @@ Koopa2Object.prototype.stomped = function (_0x2f1cbf) {
     else if (this.state === Koopa2Object.STATE.RUN) this.setState(Koopa2Object.STATE.SHELL), this.transformTimer = KoopaObject.TRANSFORM_TIME;
     else if (this.state === Koopa2Object.STATE.SPIN) this.setState(Koopa2Object.STATE.SHELL), this.transformTimer = KoopaObject.TRANSFORM_TIME;
     else if (this.state === Koopa2Object.STATE.SHELL || this.state === Koopa2Object.STATE.TRANSFORM) this.setState(Koopa2Object.STATE.SPIN), this.dir = _0x2f1cbf;
-    this.play("stomp.mp3", 0x1, 0.04);
+    this.state === Koopa2Object.STATE.SPIN ? this.play("kick.mp3", 0x1, 0.04) : this.play("stomp.mp3", 0x1, 0.04);
 };
 Koopa2Object.prototype.playerCollide = function (_0x2665f3) {
     this.dead || this.garbage || (this.state === Koopa2Object.STATE.SHELL || this.state === Koopa2Object.STATE.TRANSFORM ? (_0x2665f3 = 0x0 < _0x2665f3.pos.x - this.pos.x, this.stomped(_0x2665f3), this.game.out.push(NET020.encode(this.level, this.zone, this.oid, _0x2665f3 ? 0x10 : 0x11)), this.immuneTimer = KoopaObject.PLAYER_IMMUNE_TIME) : 0x0 >= this.immuneTimer && _0x2665f3.damage(this));
