@@ -2423,6 +2423,7 @@ function ShopScreen() {
     this.backbtn = document.getElementById("shop-return");
     this.skinName = document.getElementById("shop-name");
     this.shopResult = document.getElementById("shopResult");
+    this.coins = 0;
     var that = this;
     this.buybtn.onclick = function () {
         that.purchase(skinSelected);
@@ -2482,11 +2483,11 @@ ShopScreen.prototype.show = function () {
 
 ShopScreen.prototype.purchase = function (skin) {
     const formatted = this.order();
-    const coins = app.menu.mainAsMember.coins;
     const skins = app.menu.mainAsMember.skins;
+    this.coins = app.menu.mainAsMember.coins;
 
     if (skins.includes(skin)) return this.purchased(`You already have this skin.`);
-    if (coins < formatted[skin]['coins']) return this.error('You do not have enough coins.');
+    if (this.coins < formatted[skin]['coins']) return this.error('You do not have enough coins.');
 
     app.net.send({ 'type': 'prc', 'skin': skin, 'coins': formatted[skin]['coins'] });
     this.success(`Purchased ${formatted[skin]['name']} successfully`);
@@ -2512,9 +2513,9 @@ ShopScreen.prototype.purchased = function (msg) {
 
 ShopScreen.prototype.handleCoins = function (data) {
     let winElement = document.getElementById('winCoins');
-    let coins = app.menu.mainAsMember.coins;
 
-    winElement.innerText = data, coins = data;
+    winElement.innerText = data
+    this.coins = data;
 };
 
 ShopScreen.prototype.return = function () {

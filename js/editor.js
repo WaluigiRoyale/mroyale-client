@@ -16,7 +16,7 @@ var tileDefs = {
     11: {'name': 'NOTE BLOCK'},
     12: {'name': 'ITEM NOTE BLOCK', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     14: {'name': 'FLIP BLOCK', 'extraDataName': 'Target Data'},
-    15: {'name': 'NON-SOLID DAMAGE'},
+    15: {'name': 'AIR DAMAGE'},
     13: {'name': 'ICE TILE BLOCK', 'extraDataName': 'Target Tile Data'},
     16: {'name': 'ICE OBJECT BLOCK', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     17: {'name': 'ITEM BLOCK STANDARD', 'extraDataName': 'Content', 'extraDataType': 'objId'},
@@ -965,6 +965,7 @@ File.prototype.open = function(e) {
     var file = e.target.files[0x0];
     var that = this;
     this.lastFileName = file.name;
+    document.title = "Editor - "+this.lastFileName;
     if (file) {
         this.file = void 0x0;
         var reader = new FileReader();
@@ -981,6 +982,7 @@ File.prototype.open = function(e) {
     }
 };
 File.prototype.new = function(){
+    document.title = "Editor - "+this.lastFileName;
     app.load({
         type:"game",
         shortname:"",
@@ -1050,6 +1052,7 @@ File.prototype.save = function(_0x2baf04) {
 function Menu() {
     this.body = document.getElementById("body");
     this.warn = new _0x1ad34e();
+    this.settings = new SettingsScreen();
     this.error = new _0x9e11c1();
     this.editor = document.getElementById("editor");
     this.bar = new _0x3f2a38();
@@ -1087,6 +1090,77 @@ _0x1ad34e.prototype.show = function(_0x2db366) {
     this.element.style.display = "block";
 };
 _0x1ad34e.prototype.hide = function() {
+    this.element.style.display = "none";
+};
+"use strict";
+
+function SettingsScreen() {
+    this.element = document.getElementById("settings");
+    this.exitElement = document.getElementById("settingsExit");
+    this.lightElem = document.getElementById("light");
+    this.darkElem = document.getElementById("dark");
+
+    this.hide();
+    this.getTheme();
+    this.setTheme();
+
+    this.lightElem.onclick = () => {
+        this.updateTheme("0");
+        this.setTheme();
+    };
+
+    this.darkElem.onclick = () => {
+        this.updateTheme("0");
+        this.setTheme();
+    };
+
+    this.exitElement.onclick = () => {
+        this.hide();
+    };
+};
+
+SettingsScreen.prototype.getTheme = function() {
+    const preference = window.matchMedia("(prefers-color-scheme: dark)");
+    let theme = Cookies.get("theme");
+
+    if (theme === undefined /* Use system defaults if no cookies */) {
+        if (preference.matches /* Dark mode */) {
+            this.theme = 0;
+            Cookies.set("theme", "0");
+            this.darkElem.checked = false;
+        } else {
+            this.theme = 0;
+            Cookies.set("theme", "0");
+            this.lightElem.checked = true;
+        }
+    } else {
+        this.theme = parseInt(theme);
+        this.theme == 0 ? this.lightElem.checked = true : this.darkElem.checked = true;
+    }
+};
+
+SettingsScreen.prototype.updateTheme = function(option) {
+    this.theme = parseInt(option);
+    Cookies.set("theme", option);
+};
+
+SettingsScreen.prototype.setTheme = function() {
+    var body = document.body;
+
+    if (this.theme === 1) {
+        body.style["background-color"] = '#231F1D';
+        body.style["color"] = '#FFFFFF';
+    } else if (this.theme === 0) {
+        body.style["backgrond-color"] = '#F9F9F9';
+        body.style["color"] = '#000000';
+    }
+};
+
+SettingsScreen.prototype.show = function() {
+    this.element.style.display = "";
+};
+
+SettingsScreen.prototype.hide = function() {
     this.element.style.display = "none";
 };
 "use strict";
@@ -1280,7 +1354,6 @@ function WorldTool(editor) {
     this.element = document.getElementById("editor-tool-world");
     this.valInitial = document.getElementById("editor-tool-world-initial");
     this.valShortname = document.getElementById("editor-tool-world-shortname");
-    this.valMode = document.getElementById("editor-tool-world-mode");
     this.valMusicPath = document.getElementById("editor-tool-world-musicPath");
     this.valsoundPath = document.getElementById("editor-tool-world-soundPath");
     this.valAssetsPath = document.getElementById("editor-tool-world-assets");
@@ -1329,7 +1402,6 @@ WorldTool.prototype.reload = function() {
 WorldTool.prototype.load = function() {
     this.valInitial.value = this.editor.world.initial;
     this.valShortname.value = this.editor.world.shortname;
-    this.valMode.value = this.editor.world.mode;
     this.valMusicPath.value = this.editor.world.musicOverridePath || "music/";
     this.valsoundPath.value = this.editor.world.soundOverridePath || "sfx/";
     this.valAssetsPath.value = this.editor.world.assets || "assets.json";
@@ -1341,7 +1413,6 @@ WorldTool.prototype.save = function() {
         if (isNaN(initial)) throw "invalid value for initial level";
         this.editor.world.initial = initial;
         this.editor.world.shortname = this.valShortname.value;
-        this.editor.world.mode = this.valMode.value;
         this.editor.world.musicOverridePath = this.valMusicPath.value;
         this.editor.world.soundOverridePath = this.valsoundPath.value;
         this.editor.world.assets = this.valAssetsPath.value || "assets.json";
@@ -6795,6 +6866,7 @@ App.prototype.init = function() {
 App.prototype.load = function(data) {
     this.menu.editorMenu();
     this.editor = new Editor(data);
+    this.editor.setTool("world");
     this.menu.list.generate();
 };
 App.prototype.save = function() {

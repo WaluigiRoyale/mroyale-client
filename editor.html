@@ -34,9 +34,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="HandheldFriendly" content="true">
 
-    <link rel="canonical" href="https://marioroyale.nightc.at/" />
-    <meta name="og:url" content="https://marioroyale.nightc.at/" />
-    <meta property="og:url" content="https://marioroyale.nightc.at/" />
+    <link rel="canonical" href="https://marioroyale.tk/" />
+    <meta name="og:url" content="https://marioroyale.tk/" />
+    <meta property="og:url" content="https://marioroyale.tk/" />
 
     <meta name="og:site_name" content="Mario Royale" />
     <meta property="og:site_name" content="Mario Royale" />
@@ -57,6 +57,17 @@
       <!-- Error -->
       <div id='error' class='container-center' style='display:none'>
         <div id ='error-message' class='error'></div>
+      </div>
+
+      <!-- Settings -->
+      <div id='settings' class='container-privLobby' style='display:none'>
+        <span style="float:right;" id="settingsExit">[X]</span>
+        <br>
+        <h2 style="margin-top: 0;margin-left: 5px;margin-bottom: 15px;">Theme</h2>
+        &nbsp;<input type="radio" id="light" name="theme">
+        <label for="light">Light</label><br>
+        &nbsp;<input type="radio" id="dark" name="theme">
+        <label for="dark">Dark</label><br>
       </div>
       
       <!-- File -->
@@ -119,10 +130,6 @@
               <input id='editor-tool-world-shortname' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
-              <div class='tool-var'>Mode</div>
-              <input id='editor-tool-world-mode' type='text' class='tool-val'/>
-            </div>
-            <div class='tool-box'>
               <div class='tool-var'>Music Path</div><div class='tool-type'>string path</div>
               <input id='editor-tool-world-musicPath' type='text' class='tool-val'/>
             </div>
@@ -136,10 +143,18 @@
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div id='editor-tool-world-apply' class="tool-button">Apply</div>
+              <div id='editor-tool-world-new' class="tool-button">New Level</div>
             </div>
             <div class='tool-box'>
-              <div id='editor-tool-world-new' class="tool-button">New</div>
+              <div id='editor-tool-world-apply' class="tool-button">Apply</div>
+            </div>
+            <br>
+            <div class='tool-box' style='font-size: 80%'>
+              <div>Initial Level is the level the player first starts on, this should always be 0.</div>
+              <div>Short Name is used for the worlds that appear in the level selector.</div>
+              <div>Music Path is the music directory used, use the <a href="https://raw.githubusercontent.com/mroyale/assets">GitHub</a> for reference. For example, to use the Pastel music, use pastel/music, for sound effects do pastel/sfx.</div>
+              <div>Like Music Path, Sound Path is the sound effect directory. Same rules apply.</div>
+              <div>Assets Path is used for tile animations. You can paste a link to a JSON that follows the schema, or use the GitHub and use the filename of the assets file.</div>
             </div>
           </div>
           
@@ -159,10 +174,16 @@
             </div>
             <div class='tool-div'></div>
             <div class='tool-box'>
-              <div id='editor-tool-level-apply' class="tool-button">Apply</div>
+              <div id='editor-tool-level-new' class="tool-button">New Zone</div>
             </div>
             <div class='tool-box'>
-              <div id='editor-tool-level-new' class="tool-button">New</div>
+              <div id='editor-tool-level-apply' class="tool-button">Apply</div>
+            </div>
+            <br>
+            <div class='tool-box' style='font-size: 80%'>
+              <div>ID is the level's ID. Make sure that no more than 1 level has the same ID.</div>
+              <div>Name is the name of the level. You can see this when entering the level.</div>
+              <div>Initial Zone is the zone the player starts in, this should always be 0.</div>
             </div>
           </div>
           
@@ -181,7 +202,7 @@
               <input id='editor-tool-zone-initial-y' type='text' class="tool-val"/>
             </div>
             <div class='tool-box'>
-              <div class='tool-var'>Level End Move Distance</div><div class='tool-type'>int (opt)</div>
+              <div class='tool-var'>Level End Move Distance</div><div class='tool-type'>int</div>
               <input id='editor-tool-zone-level-offset' type='text' class="tool-val"/>
             </div>
             <div class='tool-div'></div>
@@ -418,7 +439,8 @@
       </div>
       
       <!-- Libs -->
-      <script src='js/lib/jquery/jquery-3.1.1.min.js?v=3.9.0'></script>
+      <script src='js/lib/jquery/jquery-3.6.0.min.js?v=3.9.0'></script>
+      <script src='js/lib/cookie/js.cookie.min.js?v=4.4.0'></script>
       
       <!-- Core -->
       <script src='js/editor.js?v=4.3.0'></script>
