@@ -259,9 +259,16 @@ var VERSION = (function() {
     return Date.now();
 })();
 
-var jsons = [ASSETS_URL + "assets/assets.json"]
-var scripts = [ /* DEFAULT SCRIPTS -> */ "js/server.js", "js/game.js", /* ENEMY SCRIPTS -> */ "js/scripts/plant.js", "js/scripts/firebar.js", "js/scripts/fireball.js", "js/scripts/spiny.js", "js/scripts/beetle.js"]
+var scripts = {
+    "jsons": [ASSETS_URL + "assets/assets.json"],
+    "app": ["js/server.js", "js/url.js", "js/game.js"],
+    "objects": ["js/scripts/plant.js", "js/scripts/firebar.js", "js/scripts/fireball.js", "js/scripts/spiny.js", "js/scripts/beetle.js"]
+}
+
 var resources = {}
+var jsons = scripts["jsons"];
+var gamescripts = scripts["app"];
+var objects = scripts["objects"];
 
 function loadNext() {
     if (jsons.length) {
@@ -278,17 +285,35 @@ function loadNext() {
         });
         return;
     }
-    if (scripts.length == 0) return;
-    var next = scripts.shift();
-    $.ajax({
-        type: "GET",
-        url: next + '?v=' + VERSION, 
-        success: function() {
-            loadNext();
-        },
-        dataType: "script",
-        cache: true
-    });
+    if (gamescripts.length > 0) {
+        var next = gamescripts.shift();
+        $.ajax({
+            type: "GET",
+            url: next + '?v=' + VERSION, 
+            success: function() {
+                loadNext();
+            },
+            dataType: "script",
+            cache: true
+        });
+    }
+
+    /* Ensure objects are being loaded once the game files are loaded */
+    /* Done so that objects can't cause an error since they loaded before the game files */
+    if (objects.length > 0 && gamescripts.length === 0) {
+        var nextobj = objects.shift();
+        $.ajax({
+            type: "GET",
+            url: nextobj + '?v=' + VERSION,
+            success: function() {
+                loadNext();
+            },
+            dataType: "script",
+            cache: true
+        });
+    }
+
+    if (gamescripts.length > 0 || objects.length > 0) loadNext();
 };
 
 function load() {
