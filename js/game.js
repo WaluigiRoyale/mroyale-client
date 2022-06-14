@@ -1726,6 +1726,7 @@ DisclaimScreen.prototype.hide = function () {
 
 function MainScreen() {
     this.element = document.getElementById("main");
+    this.titleElement = document.getElementById("main-title");
     this.linkElement = document.getElementById("link");
     this.winElement = document.getElementById("win");
     this.leaderElement = document.getElementById("link-leaderboard");
@@ -1737,6 +1738,8 @@ function MainScreen() {
     this.maintenance = document.getElementById("main-maintenance");
     this.padLoop = undefined;
     var mainscreen = this;
+    var generated = Math.floor(Math.random() * 101);
+    if (generated === 1) that.titleElement.innerText = "Engineer Gaming";
     this.launchbtn.onclick = function () {
         document.getElementById('leaderboard').style.display = 'none';
         mainscreen.launch();
@@ -1837,6 +1840,7 @@ MainScreen.prototype.updateStatsBar = function () {
 
 function MainAsMemberScreen() {
     this.element = document.getElementById("mainAsMember");
+    this.titleElement = document.getElementById("mainAsMember-title");
     this.linkElement = document.getElementById("link");
     this.charMusicToggle = document.getElementById("mainAsMember-char-music-toggle");
     this.launchbtn = document.getElementById("mainAsMember-launch");
@@ -1851,6 +1855,8 @@ function MainAsMemberScreen() {
     this.isPrivate = false;
     this.gameMode = 0;
     var that = this;
+    var generated = Math.floor(Math.random() * 101);
+    if (generated === 1) that.titleElement.innerText = "Engineer Gaming";
     this.launchbtn.onclick = function () {
         document.getElementById('leaderboard').style.display = 'none';
         that.launch();
@@ -2423,7 +2429,7 @@ function ShopScreen() {
     this.backbtn = document.getElementById("shop-return");
     this.skinName = document.getElementById("shop-name");
     this.shopResult = document.getElementById("shopResult");
-    this.coins = 0;
+    this.coins = null;
     var that = this;
     this.buybtn.onclick = function () {
         that.purchase(skinSelected);
@@ -2484,7 +2490,7 @@ ShopScreen.prototype.show = function () {
 ShopScreen.prototype.purchase = function (skin) {
     const formatted = this.order();
     const skins = app.menu.mainAsMember.skins;
-    this.coins = app.menu.mainAsMember.coins;
+    if (this.coins === null) this.coins = app.menu.mainAsMember.coins;
 
     if (skins.includes(skin)) return this.purchased(`You already have this skin.`);
     if (this.coins < formatted[skin]['coins']) return this.error('You do not have enough coins.');
@@ -7990,7 +7996,9 @@ Display.prototype.drawMap = function (data, depth) {
                 var t = 0x0,
                     high = Math.max(0x0, tile.bump - 0x7);
                 0x0 < high && (t = 0.22 * Math.sin((0x1 - (high - 0x2) / 0x8) * Math.PI));
-                context.drawImage(mapTexture, sprite[0x0], sprite[0x1], Display.TEXRES_32X, Display.TEXRES_32X, Display.TEXRES * j, Display.TEXRES * (i - t), Display.TEXRES, Display.TEXRES);
+                if (!(sprite[0x0] === 480 && sprite[0x1] === 0)) {
+                    context.drawImage(mapTexture, sprite[0x0], sprite[0x1], Display.TEXRES_32X, Display.TEXRES_32X, Display.TEXRES * j, Display.TEXRES * (i - t), Display.TEXRES, Display.TEXRES);
+                }
             }
         }
     }

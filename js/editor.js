@@ -72,7 +72,7 @@ var objDefs = {
     86:  {'name': 'POISON MUSHROOM', 'description': '- No params.\n- Damages the player'},
     97:  {'name': 'COIN', 'description': '- No params.'},
     100: {'name': 'GOLD FLOWER', 'description': '- No params.'},
-    145: {'name': 'PLATFORM', 'description': '- [length] Integer which decides how many tiles the platform should be.\n- [offX] Float integer, how far to move on X axis\n- [offY] Float integer, how far to move on Y axis\n- [speed] Float, moving speed of the platform\n- [loop] 0 or 1. If it’s 1, the platform will immediately return to its starting position once done.\n- [delay] Positive int, inital delay on platform. Used to offset 2 platforms moving on same path\n- [direction] 0 or 1, starts at end point', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}, {'name': 'loop'}, {'name': 'delay'}, {'name': 'direction'}]},
+    145: {'name': 'PLATFORM', 'description': '- [length] Integer which decides how many tiles the platform should be.\n- [offX] Float integer, how far to move on X axis\n- [offY] Float integer, how far to move on Y axis\n- [speed] Float, moving speed of the platform\n- [loop] 0 or 1. If itâ€™s 1, the platform will immediately return to its starting position once done.\n- [delay] Positive int, inital delay on platform. Used to offset 2 platforms moving on same path\n- [direction] 0 or 1, starts at end point', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}, {'name': 'loop'}, {'name': 'delay'}, {'name': 'direction'}]},
     146: {'name': 'BUS PLATFORM', 'description': '- [length] Integer which decides how many tiles the platform should be.\n- [offX] Float, how far to move on X axis\n- [offY] Float, how far to move on Y axis\n- [speed] Float, moving speed of the moving platform.\n- These are mostly indentical to PLATFORM but they only start once someone lands on them. Then they stop at the end.', 'paramDefs': [{'name': 'length'}, {'name': 'offX'}, {'name': 'offY'}, {'name': 'speed'}]},
     149: {'name': 'SPRING', 'description': '- No params.'},
     161: {'name': 'FIREBALL PROJECTILE', 'description': '- This object will not work properly.', 'paramDefs': [{'name': 'dir'},{'name': 'owner'},{'name': 'skin'}]},
@@ -6167,7 +6167,9 @@ Display.prototype.drawMap = function(data, depth) {
                     high = Math.max(0x0, tile.bump - 0x7);
                 if (0x0 < high)
                     t = 0.22 * Math.sin((0x1 - (high - 0x2) / 0x8) * Math.PI);
-                context.drawImage(mapTexture, sprite[0x0], sprite[0x1], Display.TEXRES, Display.TEXRES, Display.TEXRES * j, Display.TEXRES * (i - t), Display.TEXRES, Display.TEXRES);
+                if (!(sprite[0x0] === 480 && sprite[0x1] === 0)) {
+                    context.drawImage(mapTexture, sprite[0x0], sprite[0x1], Display.TEXRES, Display.TEXRES, Display.TEXRES * j, Display.TEXRES * (i - t), Display.TEXRES, Display.TEXRES);
+                }
             }
         }
     }
