@@ -296,11 +296,7 @@ function loadNext() {
             dataType: "script",
             cache: true
         });
-    }
-
-    /* Ensure objects are being loaded once the game files are loaded */
-    /* Done so that objects can't cause an error since they loaded before the game files */
-    if (objects.length > 0 && gamescripts.length === 0) {
+    } else if (objects.length > 0) {
         var nextobj = objects.shift();
         $.ajax({
             type: "GET",
