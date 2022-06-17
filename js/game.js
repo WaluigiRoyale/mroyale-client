@@ -5,8 +5,6 @@ let levelSelectors = [];    //received from server
 let TILE_ANIMATION_FILTERED = {};
 let OBJ_ANIMATION_FILTERED = {};
 let loopPodium = false;
-let minZoom = 0x8;
-let maxZoom = 0x1;
 let ghostname = null;
 
 var util = {},
@@ -1277,7 +1275,7 @@ NETX.decode = function (/* Uint8Array */ data) {
 var NET001 = {}; // ASSIGN_PID [0x1] // As Uint8Array
 /* ======================================================================================== */
 NET001.DESIGNATION = 0x02;
-NET001.BYTES = 6;
+NET001.BYTES = 7;
 
 /* Server->Client */
 NET001.decode = function (/* NET001_SERV */ a) {
@@ -1285,14 +1283,15 @@ NET001.decode = function (/* NET001_SERV */ a) {
         designation: NET001.DESIGNATION,
         pid: (a[1] & 0x00FF) | ((a[0] << 8) & 0xFF00),
         skin: (a[3] & 0x00FF) | ((a[2] << 8) & 0xFF00),
-        isDev: a[4]
+        isDev: a[4],
+        isJunior: a[5]
     };
 };
 
 var NET010 = {}; // CREATE_PLAYER_OBJECT [0x10] // As Uint8Array
 /* ======================================================================================== */
 NET010.DESIGNATION = 0x10;
-NET010.BYTES = 12;
+NET010.BYTES = 13;
 
 /* Client->Server */
 NET010.encode = function (/* byte */ levelID, /* byte */ zoneID, /* shor2 */ pos) {
@@ -1308,7 +1307,8 @@ NET010.decode = function (/* NET010_SERV */ a) {
         zone: a[3],
         pos: (a[7] & 0xFF) | ((a[6] << 8) & 0xFF00) | ((a[5] << 16) & 0xFF0000) | ((a[4] << 24) & 0xFF0000),
         skin: (a[9] & 0xFF) | (a[8] << 8),
-        isDev: a[10]
+        isDev: a[10],
+        isJunior: a[11]
     };
 };
 
@@ -3304,12 +3304,13 @@ GameObject.OBJECT = function (classId) {
 };
 "use strict";
 
-function PlayerObject(game, level, zone, pos, pid, skin, isDev) {
+function PlayerObject(game, level, zone, pos, pid, skin, isDev, isJunior) {
     GameObject.call(this, game, level, zone, pos);
     this.pid = pid;
     this.skin = skin;
     game.display.ensureSkin(skin);
     this.isDev = isDev;
+    this.isJunior = isJunior;
     this.isGuest = false;
     this.anim = 0x0;
     this.reverse = false;
@@ -3401,6 +3402,7 @@ PlayerObject.TEAM_OFFSET = vec2.make(0x0, 0x0);
 PlayerObject.TEAM_SIZE = 0.3;
 PlayerObject.TEAM_COLOR = "rgba(255,255,255,0.75)";
 PlayerObject.DEV_TEAM_COLOR = "rgba(255,255,0,1)";
+PlayerObject.JUNIOR_TEAM_COLOR = "rgba(0,255,255,1)";
 PlayerObject.SPRITE = {};
 PlayerObject.SPRITE_LIST = [{
     'NAME': "S_STAND",
@@ -4454,7 +4456,7 @@ PlayerObject.prototype.write = function (_0x239cf4) {
     }) : this.name && _0x239cf4.push({
         'pos': vec2.add(vec2.add(this.pos, vec2.make(0x0, this.sprite.INDEX instanceof Array ? 0x2 : 0x1)), PlayerObject.TEAM_OFFSET),
         'size': PlayerObject.TEAM_SIZE,
-        'color': this.isDev ? PlayerObject.DEV_TEAM_COLOR : PlayerObject.TEAM_COLOR,
+        'color': this.isDev ? PlayerObject.DEV_TEAM_COLOR : this.isJunior ? PlayerObject.JUNIOR_TEAM_COLOR : PlayerObject.TEAM_COLOR,
         'text': this.name
     });
 };
@@ -8390,6 +8392,8 @@ function World(game, data) {
     this.game = game;
     this.initial = data.initial;
     this.levels = [];
+    this.minZoom = 0x8;
+    this.maxZoom = 0x1;
     for (var i = 0x0; i < data.world.length; i++) this.levels.push(new Level(game, data.world[i]));
 }
 World.prototype.step = function () {
@@ -8758,12 +8762,12 @@ Game.prototype.load = function (data) {
         else loopPodium = true;
     }
     if (data.minZoom) {
-        try { minZoom = data.minZoom; }
-        catch { minZoom = 0x8; app.menu.warn.show("Cannot set min zoom, fallback initialized"); }
+        try { this.world.minZoom = data.minZoom; }
+        catch { this.world.minZoom = 0x8; app.menu.warn.show("Cannot set min zoom, fallback initialized"); }
     }
     if (data.maxZoom) {
-        try { maxZoom = data.maxZoom; }
-        catch { minZoom = 0x8; app.menu.warn.show("Cannot set max zoom, fallback initialized"); }
+        try { this.world.maxZoom = data.maxZoom; }
+        catch { this.world.maxZoom = 0x1; app.menu.warn.show("Cannot set max zoom, fallback initialized"); }
     }
 
     this.lifeage(true);
@@ -8961,6 +8965,7 @@ Game.prototype.doNET002 = function (n) {
     this.pid = n.pid;
     this.skin = n.skin;
     this.isDev = n.isDev;
+    this.isJunior = n.isJunior;
     this.ready = true;
     app.menu.game.show();
 };
@@ -8970,14 +8975,14 @@ Game.prototype.doNET010 = function(n) {
     if(n.pid === this.pid) { return; }
     if (this.getGhost(n.pid))
         return;
-    var obj = this.createObject(PlayerObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid, n.skin, n.isDev]);
+    var obj = this.createObject(PlayerObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid, n.skin, n.isDev, n.isJunior]);
     obj.setState(PlayerObject.SNAME.GHOST);
-    if(n.isDev) obj.name = app.getPlayerInfo(n.pid).name;
+    obj.name = app.getPlayerInfo(n.pid).name;
     var playerInfo = app.getPlayerInfo(n.pid);
-    if (playerInfo && playerInfo.id !== this.pid) {
-        var ghost = this.getGhost(playerInfo.id);
-        if (ghost) ghost.name = playerInfo.displayName;
-    }
+    //if (playerInfo && playerInfo.id !== this.pid) {
+    //    var ghost = this.getGhost(playerInfo.id);
+    //    if (ghost) ghost.name = playerInfo.displayName;
+    //}
 };
 
 Game.prototype.doNET011 = function (n) {
@@ -9340,7 +9345,7 @@ Game.prototype.doSpawn = function () {
     if (!this.getPlayer()) {
         var zone = this.getZone(),
             initial = zone.initial;
-        var obj = this.createObject(PlayerObject.ID, zone.level, zone.id, shor2.decode(initial), [this.pid, this.skin, this.isDev]);
+        var obj = this.createObject(PlayerObject.ID, zone.level, zone.id, shor2.decode(initial), [this.pid, this.skin, this.isDev, this.isJunior]);
         this.out.push(NET010.encode(zone.level, zone, initial));
         if (app.net.gameMode === 1 && !(this instanceof LobbyGame) && !(this instanceof JailGame)) {
             obj.tfm(0x2);
