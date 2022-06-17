@@ -308,8 +308,6 @@ function loadNext() {
             cache: true
         });
     }
-
-    if (gamescripts.length > 0 || objects.length > 0) loadNext();
 };
 
 function load() {
