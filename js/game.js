@@ -7578,8 +7578,8 @@ function Camera(_0x450620) {
 }
 Camera.MOVE_MULT = 0.075;
 Camera.ZOOM_MULT = 0.075;
-Camera.ZOOM_MAX = maxZoom;
-Camera.ZOOM_MIN = minZoom;
+Camera.ZOOM_MAX = 0x1;
+Camera.ZOOM_MIN = 0x8;
 Camera.prototype.move = function (_0x1c8341) {
     this.pos = vec2.add(this.pos, vec2.scale(_0x1c8341, 0x1 / this.scale * Camera.MOVE_MULT));
 };
