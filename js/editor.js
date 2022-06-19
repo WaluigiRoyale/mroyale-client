@@ -1249,7 +1249,7 @@ function _0x3f2a38() {
         app.save();
     };
     this.btnAbout.onclick = function() {
-        alert("Mario Royale Editor v4.4.0\n\nMade by InfernoPlus\nUpdated by Cyuubi, Eliza, gyorokpeter, terminalarch, and Nightcat\n\n(No, I will not be making a whole new editor. This is only here because people kept coping about rickroll.)");
+        alert("Mario Royale Editor v4.4.0\n\nCreated by: InfernoPlus\nUpdated by Cyuubi, Eliza, gyorokpeter, terminalarch and Nightcat\n\nLast updated: 2022-06-19 (YYYY-MM-DD)");
         /* window.open("https://www.youtube.com/watch?v=oHg5SJYRHA0", "_blank"); */ /* Commented in memorial */
     };
 }

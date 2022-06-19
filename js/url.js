@@ -1,4 +1,7 @@
-let LOBBY_MUSIC_URL = ASSETS_URL + "audio/music/lobby_smb3.mp3";
+const ASSETS_URL = "https://raw.githubusercontent.com/mroyale/assets/master/";
+const ASSETS_SKIN_URL = "https://raw.githubusercontent.com/mroyale/assets/master/img/skins/smb_skin";
+
+let LOBBY_MUSIC_URL = ASSETS_URL + "audio/music/lobby.mp3";
 let MENU_MUSIC_URL = ASSETS_URL + "audio/music/menu.mp3";
 
 let SKIN_MUSIC_URL = {};
@@ -10,6 +13,9 @@ let BLOCK_DATA = {};
 
 let SKINCOUNT = 1
 let assetData = resources[`${ASSETS_URL}assets/assets.json`];
+
+let WEBSOCKET_SERVER = `${ window.location.protocol == "https:" ? "wss" : "ws" }://${ document.domain }:9000/royale/ws`;
+let DISCLAIMER_SCREEN_TIMEOUT = 5000;
 
 (function () {
     if (assetData.skins.count != undefined)
