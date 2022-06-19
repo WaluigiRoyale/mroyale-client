@@ -2033,7 +2033,7 @@ function genAddSkinButton(screen, guest) {
         var elem = document.createElement("div");
         elem.setAttribute("class", "skin-select-button");
         elem.setAttribute("id", screen.skinButtonPrefix + "-" + i);
-        elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/skins/smb_skin" + i + ".png')";
+        elem.style["background-image"] = `url('${ASSETS_SKIN_URL + i + ".png"}')`;
         elem.addEventListener("click", (function (a) { return function () { genSelectSkin(screen, a); }; })(i));
         document.getElementById(screen.skinButtonPrefix).appendChild(elem);
     }
@@ -2371,7 +2371,7 @@ ProfileScreen.prototype.show = function (data) {
         var elem = document.createElement("div");
         elem.setAttribute("class", "skin-select-button");
         elem.setAttribute("id", 'profile-skin-select-' + skins[i]);
-        elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/skins/smb_skin" + skins[i] + ".png')";
+        elem.style["background-image"] = `url('${ASSETS_SKIN_URL + skins[i] + ".png"}')`;
         elem.addEventListener("click", (function (a) { return function () { ProfileScreen.prototype.select(a); }; })(skins[i]));
         document.getElementById('profile-skin-select').appendChild(elem);
     }
@@ -2477,7 +2477,7 @@ ShopScreen.prototype.show = function () {
             var elem = document.createElement("div");
             elem.setAttribute("class", "skin-select-button");
             elem.setAttribute("id", 'shop-' + skin.id);
-            elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/skins/smb_skin" + skin.id + ".png')";
+            elem.style["background-image"] = `url('${ASSETS_SKIN_URL + skin.id + ".png"}')`;
             elem.addEventListener("click", (function (a) { return function () { ShopScreen.prototype.select(a); }; })(skin.id));
             document.getElementById('shop-select').appendChild(elem);
         }
@@ -3638,8 +3638,8 @@ PlayerObject.SNAME.HIDE = "HIDE";
 PlayerObject.SNAME.GHOST = "GHOST";
 PlayerObject.SNAME.DEADGHOST = "DEADGHOST";
 PlayerObject.HideSprite = 0x70;
-var DIM0 = vec2.make(0.9, 0.95), // small
-    DIM1 = vec2.make(0.9, 1.9), // big
+var DIM0 = vec2.make(0.7, 0.95), // small
+    DIM1 = vec2.make(0.7, 1.9), // big
     DIM2 = vec2.make(0.9, 0.8); // crouch jump
 PlayerObject.STATE = [{
     'NAME': PlayerObject.SNAME.STAND,
@@ -4033,8 +4033,8 @@ PlayerObject.prototype.control = function() {
             }
         } else {
             if (DIM0.x || DIM1.x !== 1) {
-                DIM0.x = 0.9; // reset small hitbox
-                DIM1.x = 0.9; // reset big hitbox
+                DIM0.x = 0.7; // reset small hitbox
+                DIM1.x = 0.7; // reset big hitbox
             }
         }
 
@@ -6183,7 +6183,7 @@ BillBlasterObject.prototype.draw = function (_0x281060) { };
 BillBlasterObject.prototype.play = GameObject.prototype.play;
 GameObject.REGISTER_OBJECT(BillBlasterObject);
 
-function BulletBillObject(game, level, zone, pos, oid, direction) {
+function BulletBillObject(game, level, zone, pos, oid, direction, speed) {
     GameObject.call(this, game, level, zone, pos);
     this.oid = oid;
     this.setState(BulletBillObject.STATE.IDLE);
@@ -6191,6 +6191,7 @@ function BulletBillObject(game, level, zone, pos, oid, direction) {
     this.dim = vec2.make(0.8, 0.8);
     this.fallSpeed = this.moveSpeed = 0x0;
     this.direction = isNaN(parseInt(direction)) ? 0 : parseInt(direction);
+    this.speed = parseFloat(speed) || BulletBillObject.SPEED;
 }
 BulletBillObject.ASYNC = true;
 BulletBillObject.ID = 0x24;
@@ -6230,7 +6231,7 @@ BulletBillObject.prototype.step = function () {
     this.state === BulletBillObject.STATE.BONK ? this.bonkTimer++ > BulletBillObject.BONK_TIME || 0x0 > this.pos.y + this.dim.y ? this.destroy() : (this.pos = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed)), this.moveSpeed *= BulletBillObject.BONK_DECEL, this.fallSpeed = Math.max(this.fallSpeed - BulletBillObject.BONK_FALL_ACCEL, -BulletBillObject.BONK_FALL_SPEED)) : (this.anim++, this.sprite = this.state.SPRITE[parseInt(this.anim / BulletBillObject.ANIMATION_RATE) % this.state.SPRITE.length], this.physics(), this.sound());
 };
 BulletBillObject.prototype.physics = function () {
-    0x0 < this.pos.x ? (this.direction === 0 ? (this.pos.x -= BulletBillObject.SPEED) : (this.pos.x += BulletBillObject.SPEED)) : this.destroy();
+    0x0 < this.pos.x ? (this.direction === 0 ? (this.pos.x -= this.speed) : (this.pos.x += this.speed)) : this.destroy();
 };
 BulletBillObject.prototype.sound = GameObject.prototype.sound;
 BulletBillObject.prototype.disable = function () {

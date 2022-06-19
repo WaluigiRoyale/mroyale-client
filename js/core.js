@@ -1,5 +1,3 @@
-const ASSETS_URL = "https://raw.githubusercontent.com/mroyale/assets/master/";
-
 (function($) {
     var pagify = {
         items: {},
@@ -260,8 +258,8 @@ var VERSION = (function() {
 })();
 
 var scripts = {
-    "jsons": [ASSETS_URL + "assets/assets.json"],
-    "app": ["js/server.js", "js/url.js", "js/game.js"],
+    "jsons": ["https://raw.githubusercontent.com/mroyale/assets/master/assets/assets.json"],
+    "app": ["js/url.js", "js/game.js"],
     "objects": ["js/scripts/plant.js", "js/scripts/firebar.js", "js/scripts/fireball.js", "js/scripts/spiny.js", "js/scripts/beetle.js"]
 }
 

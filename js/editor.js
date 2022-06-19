@@ -60,8 +60,8 @@ var objDefs = {
     25:  {'name': 'BOWSER', 'description': '- [attackType] Should be set to 0, 1 or 2. 0 is only fire breathing, 1 is only hammer throwing, 2 is both.', 'paramDefs': [{'name': 'attackType','type':'int'}]},
     33:  {'name': 'FIRE BAR', 'description': '- [phase] Should be only 0 or 1, only offsets it a bit.\n - [length] Positive integer for how many fire balls should spawn\n- [rate] Rate of spinning. Default is 23. Lower is faster, negative is to go in reverse.', 'paramDefs': [{'name': 'phase','type':'bool'}, {'name': 'length','type':'int'}, {'name': 'rate','type':'int'}]},
     34:  {'name': 'LAVA BUBBLE', 'description': '- [delay] Positive integer in seconds for how long it takes for it to shoot\n- [impulse] Indicates how much force it should shoot with.', 'paramDefs': [{'name': 'delay', 'type':'int'}, {'name': 'impulse','type':'float'}]},
-    35:  {'name': 'BILL BLASTER', 'description': '- [delay] Positive integer in seconds for how long it takes for it to shoot.\n- [direction] Indicates which way to go. 0 is left, 1 is right.', 'paramDefs': [{'name': 'delay'}, {'name': 'direction'}]},
-    36:  {'name': 'BULLET', 'description': '- No params.\n- It is better to use the BILL BLASTER object.', 'paramDefs': [{'name': 'direction'}]},
+    35:  {'name': 'BILL BLASTER', 'description': '- [delay] Positive integer in seconds for how long it takes for it to shoot.\n- [direction] Indicates which way to go. 0 is left, 1 is right.\n- [speed] Speed of the bullet. Default is 0.215.', 'paramDefs': [{'name': 'delay', 'type': 'unsigned int'}, {'name': 'direction', 'type': '1-bit int'}, {'name': 'speed', 'type': 'float'}]},
+    36:  {'name': 'BULLET', 'description': '\n- [direction] Direction of the bullet. 0 is left, 1 is right.\n- [speed] Speed of the bullet, default is 0.215.\n- It is better to use the BILL BLASTER object.', 'paramDefs': [{'name': 'direction'}, {'name': 'speed'}]},
     37:  {'name': 'OBJECT SPAWNER', 'description': '- [objectType] Object ID to spawn.\n- [delay] Positive integer for how long the object takes to spawn\n- [direction] Indicates which way to go. Should be 0 or 1.', 'paramDefs': [{'name': 'objectType'}, {'name': 'delay'}, {'name': 'direction'}]},
     49:  {'name': 'HAMMER BRO', 'description': '- [phase] Should be 0 or 1, indicates which way to go.', 'paramDefs': [{'name': 'phase'}]},
     81:  {'name': 'MUSHROOM', 'description': '- No params.'},
@@ -1249,7 +1249,7 @@ function _0x3f2a38() {
         app.save();
     };
     this.btnAbout.onclick = function() {
-        alert("Mario Royale Editor v4.4.0\n\nMade by InfernoPlus\nUpdated by Cyuubi, Eliza, gyorokpeter, terminalarch, and Nightcat\n\n(No, I will not be making a whole new editor. This is only here because people kept coping about rickroll.)");
+        alert("Mario Royale Editor v4.4.0\n\nCreated by: InfernoPlus\nUpdated by Cyuubi, Eliza, gyorokpeter, terminalarch and Nightcat\n\nLast updated: 2022-06-19 (YYYY-MM-DD)");
         /* window.open("https://www.youtube.com/watch?v=oHg5SJYRHA0", "_blank"); */ /* Commented in memorial */
     };
 }
