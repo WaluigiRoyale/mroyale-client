@@ -9269,9 +9269,12 @@ Game.prototype.doStep = function () {
     this.cullSS = player ? vec2.copy(player.pos) : undefined;
     this.fillSS = player ? player.fallSpeed : undefined;
     var zone = this.getZone();
-    if (player && player.pid !== this.spectatorID && this.getGhost(this.spectatorID) !== undefined && !player.dead && this.lives == -1) {
+    if (player && player.pid !== this.spectatorID && this.getGhost(this.spectatorID) !== undefined && !player.dead && this.lives === -1) {
         let ghost = this.getGhost(this.spectatorID);
         if (ghost) {
+            /* Possible solution for sometimes spectating other spectators */
+            if (player.pos.y === -1 || player.spectator) { this.specNext(); }
+
             player.pos.x = ghost.pos.x; player.pos.y = -1;
             if (player.level !== ghost.level) { player.level = ghost.level; player.pos = vec2.copy(ghost.pos); };
             if (player.zone !== ghost.zone) { player.zone = ghost.zone; player.pos = vec2.copy(ghost.pos); };
