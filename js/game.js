@@ -9592,7 +9592,7 @@ LobbyGame.prototype.specNext = Game.prototype.specNext;
 LobbyGame.prototype.doInput = Game.prototype.doInput;
 LobbyGame.prototype.doTouch = Game.prototype.doTouch;
 LobbyGame.prototype.doStep = function () {
-    this.doSpawn();
+    if (app.net.mode === 1) this.doSpawn();
     Game.prototype.doStep.call(this);
 };
 LobbyGame.prototype.doSpawn = Game.prototype.doSpawn;
