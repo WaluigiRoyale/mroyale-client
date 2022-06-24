@@ -8309,9 +8309,12 @@ Display.prototype.drawUI = function () {
             context.fillText(txt, (canvasWIDTH / 2) - (txtWIDTH / 2), 0x20);
             //players remaining
             txt = this.game.remain + (this.game.touchMode || app.compactMode ? '' : " PLAYERS REMAIN");
-            if (this.game.remain == "1" && app.net.gameMode == 1) {
-                this.game.stopGameTimer(this.game.touchMode);
-                this.game.out.push(NET018.encode());
+            if (this.game.remain == "1" && app.net.gameMode === 1) {
+                ++this.game.pvpVictoryTimeout;
+                if (this.game.pvpVictoryTimeout >= Game.PVP_VICTORY_TIMEOUT) {
+                    this.game.stopGameTimer(this.game.touchMode);
+                    this.game.out.push(NET018.encode());
+                }
             }
             txtWIDTH = context.measureText(txt).width;
             context.fillText(txt, canvasWIDTH - txtWIDTH - 0x8, 0x20);
@@ -8672,6 +8675,7 @@ function Game(data) {
     this.spectatorID = undefined;
     this.spectateTimeout = 0;
     this.spectateOrder = 0;
+    this.pvpVictoryTimeout = 0;
     var that = this;
     this.frameReq = requestAnimFrameFunc.call(window, function () {
         that.draw();
@@ -8685,9 +8689,11 @@ Game.TICK_RATE = 28;
 Game.FDLC_TARGET = 0x3;
 Game.FDLC_MAX = Game.FDLC_TARGET + 0x2;
 
+/* Frames to wait before executing code */
 Game.LEVEL_WARP_TIME = 100;
 Game.GAME_OVER_TIME = 150;
 Game.SPEC_TIMEOUT_TIME = 50;
+Game.PVP_VICTORY_TIMEOUT = 50;
 
 Game.COINS_TO_LIFE = 0x1e;
 
