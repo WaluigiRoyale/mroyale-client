@@ -5536,7 +5536,7 @@ HammerBroObject.prototype.play = GameObject.prototype.play;
 GameObject.REGISTER_OBJECT(HammerBroObject);
 "use strict";
 
-function BowserObject(game, level, zone, pos, oid, attackType) {
+function BowserObject(game, level, zone, pos, oid, attackType, fireDirection) {
     GameObject.call(this, game, level, zone, pos);
     switch (parseInt(attackType)) {
         case 1:
@@ -5552,6 +5552,7 @@ function BowserObject(game, level, zone, pos, oid, attackType) {
             this.hammer = false;
             break;
     }
+    this.fireDirection = isNaN(parseInt(fireDirection)) ? 0 : parseInt(fireDirection);
     this.oid = oid;
     this.state = BowserObject.STATE.RUN;
     this.sprite = this.state.SPRITE[0x0];
@@ -5690,7 +5691,7 @@ BowserObject.prototype.sound = GameObject.prototype.sound;
 BowserObject.prototype.attack = function () {
     this.attackAnimTimer = BowserObject.ATTACK_ANIM_LENGTH;
     this.attackTimer = 0x0;
-    this.game.createObject(FireBreathObject.ID, this.level, this.zone, vec2.add(this.pos, BowserObject.PROJ_OFFSET), []);
+    this.game.createObject(FireBreathObject.ID, this.level, this.zone, vec2.add(this.pos, BowserObject.PROJ_OFFSET), [undefined, this.fireDirection]);
     this.play("breath.mp3", 1.5, 0.04);
 };
 BowserObject.prototype.hammerAttack = function () {
@@ -6320,7 +6321,7 @@ GameObject.REGISTER_OBJECT(SpawnerObject);
 
 "use strict";
 
-function FireBreathObject(game, level, zone, pos) {
+function FireBreathObject(game, level, zone, pos, direction) {
     GameObject.call(this, game, level, zone, pos);
     this.state = FireBreathObject.STATE.IDLE;
     this.sprite = this.state.SPRITE[0x0];
@@ -6328,6 +6329,7 @@ function FireBreathObject(game, level, zone, pos) {
     this.life = FireBreathObject.LIFE_MAX;
     this.deadTimer = 0x0;
     this.dim = vec2.make(0x1, 0.5);
+    this.direction = isNaN(parseInt(direction)) ? 0 : parseInt(direction);
 }
 FireBreathObject.ASYNC = true;
 FireBreathObject.ID = 0xa2;
@@ -6381,7 +6383,7 @@ FireBreathObject.prototype.step = function () {
 };
 FireBreathObject.prototype.control = function () { };
 FireBreathObject.prototype.physics = function () {
-    this.pos = vec2.add(this.pos, vec2.make(-FireBreathObject.SPEED, 0x0));
+    this.direction === 0 ? this.pos.x -= FireBreathObject.SPEED : this.pos.x += FireBreathObject.SPEED;
 };
 FireBreathObject.prototype.interaction = function () {
     for (var _0x554db7 = 0x0; _0x554db7 < this.game.objects.length; _0x554db7++) {
@@ -6415,7 +6417,7 @@ FireBreathObject.prototype.draw = function (_0x215d5f) {
             });
     else _0x215d5f.push({
         'pos': vec2.add(this.pos, FireBreathObject.SOFFSET),
-        'reverse': false,
+        'reverse': this.direction !== 0,
         'index': this.sprite.INDEX,
         'mode': 0x0
     });
