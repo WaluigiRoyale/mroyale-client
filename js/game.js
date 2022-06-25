@@ -4404,7 +4404,7 @@ PlayerObject.prototype.draw = function (spriteList) {
         var mode;
         if(this.starTimer > 0) { mode = 0x02; }
         else if(this.isState(PlayerObject.SNAME.GHOST) || this.isState(PlayerObject.SNAME.DEADGHOST)) { this.pid === this.game.spectatorID ? mode = 0x00 : mode = 0x01; }
-        else if(this.isState(PlayerObject.SNAME.POLE) && !this.spectator) { mode = 0x00; }
+        else if((this.isState(PlayerObject.SNAME.POLE) || this.isState(PlayerObject.SNAME.CLIMB) || this.isState(PlayerObject.SNAME.TRANSFORM) || this.isState(PlayerObject.SNAME.DEAD)) && !this.spectator) { mode = 0x00; }
         else { mode = 0x00; }
         if (this.sprite.INDEX instanceof Array)
             for (var _0x5814e0 = this.sprite.INDEX, _0x3f6b38 = 0x0; _0x3f6b38 < _0x5814e0.length; _0x3f6b38++)
