@@ -5140,28 +5140,6 @@ Koopa2Object.prototype.physics = function () {
     this.pos = vec2.make(movx.x, movy.y);
     if (changeDir) { this.dir = !this.dir; }
 };
-/*function() {
-    if (this.state === Koopa2Object.STATE.FLY) this.rev ? (this.fallSpeed = Math.min(Koopa2Object.FLY_SPEED_MAX, this.fallSpeed + Koopa2Object.FLY_ACCEL), this.pos.y += this.fallSpeed, this.pos.y >= this.loc[0x0] && (this.rev = false)) : (this.fallSpeed = Math.max(-Koopa2Object.FLY_SPEED_MAX, this.fallSpeed - Koopa2Object.FLY_ACCEL), this.pos.y += this.fallSpeed, this.pos.y <= this.loc[0x1] && (this.rev = true));
-    else {
-        this.grounded && (this.fallSpeed = 0x0);
-        this.fallSpeed = Math.max(this.fallSpeed - KoopaObject.FALL_SPEED_ACCEL, -KoopaObject.FALL_SPEED_MAX);
-        var _0x487bc8 = vec2.add(this.pos, vec2.make(this.moveSpeed, 0x0)),
-            _0x41141f = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed)),
-            _0x26638d = vec2.make(0x0 <= this.moveSpeed ? this.pos.x : this.pos.x + this.moveSpeed, 0x0 >= this.fallSpeed ? this.pos.y : this.pos.y + this.fallSpeed),
-            _0x2160ce = vec2.make(this.dim.y + Math.abs(this.moveSpeed), this.dim.y + Math.abs(this.fallSpeed)),
-            _0x26638d = this.game.world.getZone(this.level, this.zone).getTiles(_0x26638d, _0x2160ce),
-            _0x2160ce = vec2.make(0x1, 0x1),
-            _0x58fc4d = false;
-        this.grounded = false;
-        for (var _0x36c036 = 0x0; _0x36c036 < _0x26638d.length; _0x36c036++) {
-            var _0x46e9db = _0x26638d[_0x36c036];
-            _0x46e9db.definition.COLLIDE && squar.intersection(_0x46e9db.pos, _0x2160ce, _0x487bc8, this.dim) && (this.pos.x + this.dim.x <= _0x46e9db.pos.x && _0x487bc8.x + this.dim.x > _0x46e9db.pos.x ? (_0x487bc8.x = _0x46e9db.pos.x - this.dim.x, _0x41141f.x = _0x487bc8.x, this.moveSpeed = 0x0, _0x58fc4d = true) : this.pos.x >= _0x46e9db.pos.x + _0x2160ce.x && _0x487bc8.x < _0x46e9db.pos.x + _0x2160ce.x && (_0x487bc8.x = _0x46e9db.pos.x + _0x2160ce.x, _0x41141f.x = _0x487bc8.x, this.moveSpeed = 0x0, _0x58fc4d = true));
-        }
-        for (_0x36c036 = 0x0; _0x36c036 < _0x26638d.length; _0x36c036++) _0x46e9db = _0x26638d[_0x36c036], _0x46e9db.definition.COLLIDE && squar.intersection(_0x46e9db.pos, _0x2160ce, _0x41141f, this.dim) && (this.pos.y >= _0x46e9db.pos.y + _0x2160ce.y && _0x41141f.y < _0x46e9db.pos.y + _0x2160ce.y ? (_0x41141f.y = _0x46e9db.pos.y + _0x2160ce.y, this.fallSpeed = 0x0, this.grounded = true) : this.pos.y + this.dim.y <= _0x46e9db.pos.y && _0x41141f.y + this.dim.y > _0x46e9db.pos.y && (_0x41141f.y = _0x46e9db.pos.y - this.dim.y, this.fallSpeed = 0x0));
-        this.pos = vec2.make(_0x487bc8.x, _0x41141f.y);
-        _0x58fc4d && (this.dir = !this.dir);
-    }
-};*/
 Koopa2Object.prototype.interaction = function () {
     if (this.state === Koopa2Object.STATE.SPIN)
         for (var _0x55c0e3 = 0x0; _0x55c0e3 < this.game.objects.length; _0x55c0e3++) {
