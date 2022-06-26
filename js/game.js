@@ -4404,7 +4404,7 @@ PlayerObject.prototype.draw = function (spriteList) {
         var mode;
         if(this.starTimer > 0) { mode = 0x02; }
         else if(this.isState(PlayerObject.SNAME.GHOST) || this.isState(PlayerObject.SNAME.DEADGHOST)) { this.pid === this.game.spectatorID ? mode = 0x00 : mode = 0x01; }
-        else if(this.isState(PlayerObject.SNAME.POLE) && !this.spectator) { mode = 0x00; }
+        else if((this.isState(PlayerObject.SNAME.POLE) || this.isState(PlayerObject.SNAME.CLIMB) || this.isState(PlayerObject.SNAME.TRANSFORM) || this.isState(PlayerObject.SNAME.DEAD)) && !this.spectator) { mode = 0x00; }
         else { mode = 0x00; }
         if (this.sprite.INDEX instanceof Array)
             for (var _0x5814e0 = this.sprite.INDEX, _0x3f6b38 = 0x0; _0x3f6b38 < _0x5814e0.length; _0x3f6b38++)
@@ -5140,28 +5140,6 @@ Koopa2Object.prototype.physics = function () {
     this.pos = vec2.make(movx.x, movy.y);
     if (changeDir) { this.dir = !this.dir; }
 };
-/*function() {
-    if (this.state === Koopa2Object.STATE.FLY) this.rev ? (this.fallSpeed = Math.min(Koopa2Object.FLY_SPEED_MAX, this.fallSpeed + Koopa2Object.FLY_ACCEL), this.pos.y += this.fallSpeed, this.pos.y >= this.loc[0x0] && (this.rev = false)) : (this.fallSpeed = Math.max(-Koopa2Object.FLY_SPEED_MAX, this.fallSpeed - Koopa2Object.FLY_ACCEL), this.pos.y += this.fallSpeed, this.pos.y <= this.loc[0x1] && (this.rev = true));
-    else {
-        this.grounded && (this.fallSpeed = 0x0);
-        this.fallSpeed = Math.max(this.fallSpeed - KoopaObject.FALL_SPEED_ACCEL, -KoopaObject.FALL_SPEED_MAX);
-        var _0x487bc8 = vec2.add(this.pos, vec2.make(this.moveSpeed, 0x0)),
-            _0x41141f = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed)),
-            _0x26638d = vec2.make(0x0 <= this.moveSpeed ? this.pos.x : this.pos.x + this.moveSpeed, 0x0 >= this.fallSpeed ? this.pos.y : this.pos.y + this.fallSpeed),
-            _0x2160ce = vec2.make(this.dim.y + Math.abs(this.moveSpeed), this.dim.y + Math.abs(this.fallSpeed)),
-            _0x26638d = this.game.world.getZone(this.level, this.zone).getTiles(_0x26638d, _0x2160ce),
-            _0x2160ce = vec2.make(0x1, 0x1),
-            _0x58fc4d = false;
-        this.grounded = false;
-        for (var _0x36c036 = 0x0; _0x36c036 < _0x26638d.length; _0x36c036++) {
-            var _0x46e9db = _0x26638d[_0x36c036];
-            _0x46e9db.definition.COLLIDE && squar.intersection(_0x46e9db.pos, _0x2160ce, _0x487bc8, this.dim) && (this.pos.x + this.dim.x <= _0x46e9db.pos.x && _0x487bc8.x + this.dim.x > _0x46e9db.pos.x ? (_0x487bc8.x = _0x46e9db.pos.x - this.dim.x, _0x41141f.x = _0x487bc8.x, this.moveSpeed = 0x0, _0x58fc4d = true) : this.pos.x >= _0x46e9db.pos.x + _0x2160ce.x && _0x487bc8.x < _0x46e9db.pos.x + _0x2160ce.x && (_0x487bc8.x = _0x46e9db.pos.x + _0x2160ce.x, _0x41141f.x = _0x487bc8.x, this.moveSpeed = 0x0, _0x58fc4d = true));
-        }
-        for (_0x36c036 = 0x0; _0x36c036 < _0x26638d.length; _0x36c036++) _0x46e9db = _0x26638d[_0x36c036], _0x46e9db.definition.COLLIDE && squar.intersection(_0x46e9db.pos, _0x2160ce, _0x41141f, this.dim) && (this.pos.y >= _0x46e9db.pos.y + _0x2160ce.y && _0x41141f.y < _0x46e9db.pos.y + _0x2160ce.y ? (_0x41141f.y = _0x46e9db.pos.y + _0x2160ce.y, this.fallSpeed = 0x0, this.grounded = true) : this.pos.y + this.dim.y <= _0x46e9db.pos.y && _0x41141f.y + this.dim.y > _0x46e9db.pos.y && (_0x41141f.y = _0x46e9db.pos.y - this.dim.y, this.fallSpeed = 0x0));
-        this.pos = vec2.make(_0x487bc8.x, _0x41141f.y);
-        _0x58fc4d && (this.dir = !this.dir);
-    }
-};*/
 Koopa2Object.prototype.interaction = function () {
     if (this.state === Koopa2Object.STATE.SPIN)
         for (var _0x55c0e3 = 0x0; _0x55c0e3 < this.game.objects.length; _0x55c0e3++) {
@@ -5536,7 +5514,7 @@ HammerBroObject.prototype.play = GameObject.prototype.play;
 GameObject.REGISTER_OBJECT(HammerBroObject);
 "use strict";
 
-function BowserObject(game, level, zone, pos, oid, attackType) {
+function BowserObject(game, level, zone, pos, oid, attackType, fireDirection) {
     GameObject.call(this, game, level, zone, pos);
     switch (parseInt(attackType)) {
         case 1:
@@ -5552,6 +5530,7 @@ function BowserObject(game, level, zone, pos, oid, attackType) {
             this.hammer = false;
             break;
     }
+    this.fireDirection = isNaN(parseInt(fireDirection)) ? 0 : parseInt(fireDirection);
     this.oid = oid;
     this.state = BowserObject.STATE.RUN;
     this.sprite = this.state.SPRITE[0x0];
@@ -5690,7 +5669,7 @@ BowserObject.prototype.sound = GameObject.prototype.sound;
 BowserObject.prototype.attack = function () {
     this.attackAnimTimer = BowserObject.ATTACK_ANIM_LENGTH;
     this.attackTimer = 0x0;
-    this.game.createObject(FireBreathObject.ID, this.level, this.zone, vec2.add(this.pos, BowserObject.PROJ_OFFSET), []);
+    this.game.createObject(FireBreathObject.ID, this.level, this.zone, vec2.add(this.pos, BowserObject.PROJ_OFFSET), [undefined, this.fireDirection]);
     this.play("breath.mp3", 1.5, 0.04);
 };
 BowserObject.prototype.hammerAttack = function () {
@@ -6320,7 +6299,7 @@ GameObject.REGISTER_OBJECT(SpawnerObject);
 
 "use strict";
 
-function FireBreathObject(game, level, zone, pos) {
+function FireBreathObject(game, level, zone, pos, direction) {
     GameObject.call(this, game, level, zone, pos);
     this.state = FireBreathObject.STATE.IDLE;
     this.sprite = this.state.SPRITE[0x0];
@@ -6328,6 +6307,7 @@ function FireBreathObject(game, level, zone, pos) {
     this.life = FireBreathObject.LIFE_MAX;
     this.deadTimer = 0x0;
     this.dim = vec2.make(0x1, 0.5);
+    this.direction = isNaN(parseInt(direction)) ? 0 : parseInt(direction);
 }
 FireBreathObject.ASYNC = true;
 FireBreathObject.ID = 0xa2;
@@ -6381,7 +6361,7 @@ FireBreathObject.prototype.step = function () {
 };
 FireBreathObject.prototype.control = function () { };
 FireBreathObject.prototype.physics = function () {
-    this.pos = vec2.add(this.pos, vec2.make(-FireBreathObject.SPEED, 0x0));
+    this.direction === 0 ? this.pos.x -= FireBreathObject.SPEED : this.pos.x += FireBreathObject.SPEED;
 };
 FireBreathObject.prototype.interaction = function () {
     for (var _0x554db7 = 0x0; _0x554db7 < this.game.objects.length; _0x554db7++) {
@@ -6415,7 +6395,7 @@ FireBreathObject.prototype.draw = function (_0x215d5f) {
             });
     else _0x215d5f.push({
         'pos': vec2.add(this.pos, FireBreathObject.SOFFSET),
-        'reverse': false,
+        'reverse': this.direction !== 0,
         'index': this.sprite.INDEX,
         'mode': 0x0
     });
@@ -8309,9 +8289,12 @@ Display.prototype.drawUI = function () {
             context.fillText(txt, (canvasWIDTH / 2) - (txtWIDTH / 2), 0x20);
             //players remaining
             txt = this.game.remain + (this.game.touchMode || app.compactMode ? '' : " PLAYERS REMAIN");
-            if (this.game.remain == "1" && app.net.gameMode == 1) {
-                this.game.stopGameTimer(this.game.touchMode);
-                this.game.out.push(NET018.encode());
+            if (this.game.remain == "1" && app.net.gameMode === 1) {
+                ++this.game.pvpVictoryTimeout;
+                if (this.game.pvpVictoryTimeout >= Game.PVP_VICTORY_TIMEOUT) {
+                    this.game.stopGameTimer(this.game.touchMode);
+                    this.game.out.push(NET018.encode());
+                }
             }
             txtWIDTH = context.measureText(txt).width;
             context.fillText(txt, canvasWIDTH - txtWIDTH - 0x8, 0x20);
@@ -8672,6 +8655,7 @@ function Game(data) {
     this.spectatorID = undefined;
     this.spectateTimeout = 0;
     this.spectateOrder = 0;
+    this.pvpVictoryTimeout = 0;
     var that = this;
     this.frameReq = requestAnimFrameFunc.call(window, function () {
         that.draw();
@@ -8685,9 +8669,11 @@ Game.TICK_RATE = 28;
 Game.FDLC_TARGET = 0x3;
 Game.FDLC_MAX = Game.FDLC_TARGET + 0x2;
 
+/* Frames to wait before executing code */
 Game.LEVEL_WARP_TIME = 100;
 Game.GAME_OVER_TIME = 150;
 Game.SPEC_TIMEOUT_TIME = 50;
+Game.PVP_VICTORY_TIMEOUT = 50;
 
 Game.COINS_TO_LIFE = 0x1e;
 
@@ -9263,9 +9249,12 @@ Game.prototype.doStep = function () {
     this.cullSS = player ? vec2.copy(player.pos) : undefined;
     this.fillSS = player ? player.fallSpeed : undefined;
     var zone = this.getZone();
-    if (player && player.pid !== this.spectatorID && this.getGhost(this.spectatorID) !== undefined && !player.dead && this.lives == -1) {
+    if (player && player.pid !== this.spectatorID && this.getGhost(this.spectatorID) !== undefined && !player.dead && this.lives === -1) {
         let ghost = this.getGhost(this.spectatorID);
         if (ghost) {
+            /* Possible solution for sometimes spectating other spectators */
+            if (player.pos.y === -1 || player.spectator) { this.specNext(); }
+
             player.pos.x = ghost.pos.x; player.pos.y = -1;
             if (player.level !== ghost.level) { player.level = ghost.level; player.pos = vec2.copy(ghost.pos); };
             if (player.zone !== ghost.zone) { player.zone = ghost.zone; player.pos = vec2.copy(ghost.pos); };
@@ -9583,7 +9572,7 @@ LobbyGame.prototype.specNext = Game.prototype.specNext;
 LobbyGame.prototype.doInput = Game.prototype.doInput;
 LobbyGame.prototype.doTouch = Game.prototype.doTouch;
 LobbyGame.prototype.doStep = function () {
-    //this.doSpawn();
+    if (app.net.mode === 1) this.doSpawn();
     Game.prototype.doStep.call(this);
 };
 LobbyGame.prototype.doSpawn = Game.prototype.doSpawn;
