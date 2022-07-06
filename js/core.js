@@ -198,6 +198,7 @@ function refreshLeaderBoard() {
             type: "GET",
             url: "leaderboard.json", 
             success: function(result) {
+                $("loading").hide();
                 leaderBoard = result;
                 var updateLeaderBoard = function (type, values) {
                     var elem2 = document.getElementById("leaderboard-content-"+type);
@@ -240,6 +241,9 @@ function refreshLeaderBoard() {
                 updateLeaderBoard("coins", result.coinLeaderBoard);
                 updateLeaderBoard("wins", result.winsLeaderBoard);
                 updateLeaderBoard("kills", result.killsLeaderBoard);
+            },
+            error: function() {
+                $(".loading").text("Failed to load content...")
             },
             dataType: "json",
             cache: false
