@@ -3341,6 +3341,7 @@ function PlayerObject(game, level, zone, pos, pid, skin, isDev, isJunior) {
     this.btnBde = this.btnBg = this.btnB = this.btnA = false;
     this.crouchJump = false;
     this.btnAHot = false;
+    this.swimspr = 0;
     this.setState(PlayerObject.SNAME.STAND);
 }
 PlayerObject.ASYNC = false;
@@ -3433,13 +3434,25 @@ PlayerObject.SPRITE_LIST = [{
     'ID': 0x5,
     'INDEX': 0x8
 }, {
-    'NAME': "S_SWIMFALL0",
+    'NAME': "S_SWIM0",
     'ID': 0x9,
     'INDEX': 95
 }, {
-    'NAME': "S_SWIMFALL1",
+    'NAME': "S_SWIM1",
     'ID': 0xa,
     'INDEX': 94
+}, {
+    'NAME': "S_SWIM2",
+    'ID': 0xb,
+    'INDEX': 93
+}, {
+    'NAME': "S_SWIM3",
+    'ID': 0xc,
+    'INDEX': 92
+}, {
+    'NAME': "S_SWIM4",
+    'ID': 0xd,
+    'INDEX': 91
 }, {
     'NAME': "S_CLIMB0",
     'ID': 0x6,
@@ -3503,6 +3516,48 @@ PlayerObject.SPRITE_LIST = [{
     'INDEX': [
         [0x27],
         [0x17]
+    ]
+}, {
+    'NAME': "B_SWIM0",
+    'ID': 0x2B,
+    'INDEX': [
+        [127],
+        [111]
+    ]
+}, {
+    'NAME': "B_SWIM1",
+    'ID': 0x2C,
+    'INDEX': [
+        [126],
+        [110]
+    ]
+}, {
+    'NAME': "B_SWIM2",
+    'ID': 0x2D,
+    'INDEX': [
+        [125],
+        [109]
+    ]
+}, {
+    'NAME': "B_SWIM3",
+    'ID': 0x2F,
+    'INDEX': [
+        [124],
+        [108]
+    ]
+}, {
+    'NAME': "B_SWIM4",
+    'ID': 0x30,
+    'INDEX': [
+        [123],
+        [107]
+    ]
+}, {
+    'NAME': "B_SWIM5",
+    'ID': 0x31,
+    'INDEX': [
+        [122],
+        [106]
     ]
 }, {
     'NAME': "B_CLIMB0",
@@ -3580,6 +3635,48 @@ PlayerObject.SPRITE_LIST = [{
     'INDEX': [
         [0x41, 0x40],
         [0x31, 0x30]
+    ]
+}, {
+    'NAME': "F_SWIM0",
+    'ID': 0x52,
+    'INDEX': [
+        [159, 158],
+        [143, 142]
+    ]
+}, {
+    'NAME': "F_SWIM1",
+    'ID': 0x53,
+    'INDEX': [
+        [157, 158],
+        [141, 142]
+    ]
+}, {
+    'NAME': "F_SWIM2",
+    'ID': 0x54,
+    'INDEX': [
+        [155, 158],
+        [139, 142]
+    ]
+}, {
+    'NAME': "F_SWIM3",
+    'ID': 0x55,
+    'INDEX': [
+        [153, 158],
+        [137, 142]
+    ]
+}, {
+    'NAME': "F_SWIM4",
+    'ID': 0x56,
+    'INDEX': [
+        [151, 158],
+        [135, 142]
+    ]
+},  {
+    'NAME': "F_SWIM5",
+    'ID': 0x57,
+    'INDEX': [
+        [149, 158],
+        [133, 142]
     ]
 }, {
     'NAME': "F_CLIMB0",
@@ -3954,6 +4051,16 @@ PlayerObject.prototype.step = function () {
                 this.pipeDelay = this.pipeDelayLength;
             }
         } else this.lastPos = this.pos, 0x0 < this.damageTimer && this.damageTimer--, this.attackCharge < PlayerObject.MAX_CHARGE && this.attackCharge++, 0x0 < this.attackTimer && this.attackTimer--, this.autoTarget && this.autoMove(), this.control(), this.physics(), this.interaction(), this.arrow(), this.sound(), 0x0 > this.pos.y && this.kill();
+        if (this.underWater === 1 && !this.grounded) {
+            if (!this.power) { if (this.swimspr + 1 > 4) this.swimspr = 0; } else { if (this.swimspr + 1 > 5) this.swimspr = 0; }
+            if (this.game.frame % 3 === 2) this.swimspr += 1;
+
+            var spr = this.swimspr;
+            var pref = () => {if (this.power === 0) return "S_"; else if (this.power === 1) return "B_"; else if (this.power === 2) return "F_"}
+            if (PlayerObject.SPRITE[pref()+"SWIM"+spr]) {
+                this.sprite = PlayerObject.SPRITE[pref() + "SWIM" + spr];
+            }
+        }
 };
 PlayerObject.prototype.input = function (abtnD, abtnA, abtnB, abtnTA, abtnU) {
     this.btnD = abtnD;
@@ -4314,6 +4421,10 @@ PlayerObject.prototype.tfm = function (_0x538c99) {
 PlayerObject.prototype.warp = function (warpId) {
     var warp = this.game.world.getLevel(this.level).getWarp(warpId);
     if (warp) {
+        if ((this.level !== warp.level) || (this.zone !== warp.zone)) {
+            this.game.pauseCamera = false;
+        }
+
         this.level = warp.level;
         this.zone = warp.zone;
         this.pos = warp.pos;
