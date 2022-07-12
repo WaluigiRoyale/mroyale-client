@@ -4051,7 +4051,7 @@ PlayerObject.prototype.step = function () {
                 this.pipeDelay = this.pipeDelayLength;
             }
         } else this.lastPos = this.pos, 0x0 < this.damageTimer && this.damageTimer--, this.attackCharge < PlayerObject.MAX_CHARGE && this.attackCharge++, 0x0 < this.attackTimer && this.attackTimer--, this.autoTarget && this.autoMove(), this.control(), this.physics(), this.interaction(), this.arrow(), this.sound(), 0x0 > this.pos.y && this.kill();
-        if (this.underWater === 1 && !this.grounded) {
+        if (this.underWater === 1 && !this.grounded && this.isState(PlayerObject.SNAME.FALL)) {
             if (!this.power) { if (this.swimspr + 1 > 4) this.swimspr = 0; } else { if (this.swimspr + 1 > 5) this.swimspr = 0; }
             if (this.game.frame % 3 === 2) this.swimspr += 1;
 
@@ -9364,7 +9364,7 @@ Game.prototype.doStep = function () {
         let ghost = this.getGhost(this.spectatorID);
         if (ghost) {
             /* Possible solution for sometimes spectating other spectators */
-            if (player.pos.y === -1 || player.spectator) { this.specNext(); }
+            if (ghost.pos.y === -1 || ghost.spectator) { this.specNext(); }
 
             player.pos.x = ghost.pos.x; player.pos.y = -1;
             if (player.level !== ghost.level) { player.level = ghost.level; player.pos = vec2.copy(ghost.pos); };

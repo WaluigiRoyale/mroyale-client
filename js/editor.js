@@ -1215,6 +1215,7 @@ function _0x3f2a38() {
     this.btnCopy = document.getElementById("editor-top-copy");
     this.btnRep = document.getElementById("editor-top-rep");
     this.btnRef = document.getElementById("editor-top-ref");
+    this.btnGuide = document.getElementById("editor-top-guide");
     this.btnAbout = document.getElementById("editor-top-about");
     this.btnSave = document.getElementById("editor-top-save");
     this.btnWorld.onclick = function() {
@@ -1243,6 +1244,9 @@ function _0x3f2a38() {
     };
     this.btnRef.onclick = function() {
         app.menu.tool.set("ref");
+    };
+    this.btnGuide.onclick = function() {
+        window.open("https://docs.google.com/document/d/1FwwGWZko1dAyzr7_KPxvbsKSWZa-FhuTFtfxbsZH62k/edit", "_blank");
     };
     this.btnSave.onclick = function() {
         if (app.editor.tool) app.editor.tool.save();

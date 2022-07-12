@@ -5,8 +5,16 @@ function checkSpeed(speed) {
     else { return 0.05 }
 }
 
-function PiranhaPlantObject(game, level, zone, pos, oid, variant, direction, movement) {
-    GameObject.call(this, game, level, zone, vec2.add(pos, vec2.make(0.6, 0x0)));
+function PiranhaPlantObject(game, level, zone, pos, oid, variant, direction, movement, noOffset) {
+    switch(parseInt(noOffset)) {
+        case 1 :
+            this.noOffset = true;
+            break;
+        default:
+            this.noOffset = false;
+            break;
+    }
+    GameObject.call(this, game, level, zone, vec2.add(pos, vec2.make(this.noOffset ? 0.1 : 0.6, 0x0)));
     this.speed = 0.05;
     switch(parseInt(movement)) {
         case 1 : 
