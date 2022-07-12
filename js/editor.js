@@ -1293,6 +1293,7 @@ ListPanel.prototype.generate = function() {
         container.appendChild(layerList);
         this.element.appendChild(container);
         for (var i = 0x0; i < world.levels.length; i++) {
+            console.log(app.editor.currentZone.id)
             var level = world.levels[i];
             for (var j = 0x0; j < level.zones.length; j++) {
                 var zone = level.zones[j],
@@ -1304,6 +1305,8 @@ ListPanel.prototype.generate = function() {
                 item.onclick = function() {
                     that.select(this.lid, this.zid);
                 }
+                console.log(app.editor.currentZone.id, app.editor.currentZone.level)
+                app.editor.setZoneTag(app.editor.currentZone.level, app.editor.currentZone.id);
             }
         }
         if (app.editor.currentZone) this.updateLayerList();
@@ -1329,7 +1332,7 @@ ListPanel.prototype.updateLayerList = function() {
 }
 ListPanel.prototype.select = function(levelId, zoneId) {
     var zone = app.editor.world.getZone(levelId, zoneId);
-    app.editor && app.editor.setZone(zone);
+    app.editor && app.editor.setZone(zone, levelId, zoneId);
 };
 ListPanel.prototype.show = function() {
     this.element.style.display = "block";
@@ -6405,7 +6408,7 @@ EditorDisplay.prototype.drawPallete = function() {
     }
 };
 EditorDisplay.prototype.drawObjectTool = function() {
-    if (this.game.tool && void 0x0 !== this.game.tool.obj) {
+    if (this.game.tool && (void 0x0 !== this.game.tool.obj || this.game.previewMode)) {
         var context = this.context;
         var objTexture = this.resource.getTexture("obj");
         var zone = this.game.getZone()
@@ -6414,7 +6417,8 @@ EditorDisplay.prototype.drawObjectTool = function() {
             var obj = zone.obj[i],
                 objType = GameObject.OBJECT(obj.type),
                 pos = shor2.decode(obj.pos);
-            context.fillStyle = obj === this.game.tool.selected ? "rgba(0,255,0,0.5)" : "rgba(255,0,0,0.5)";
+            if (this.game.tool.obj) { context.fillStyle = obj === this.game.tool.selected ? "rgba(0,255,0,0.5)" : "rgba(255,0,0,0.5)"; }
+            else { context.fillStyle = "rgba(255,255,0,0.5)"; }
             context.fillRect(pos.x * Display.TEXRES, (height - pos.y - 0x1) * Display.TEXRES, Display.TEXRES, Display.TEXRES);
             if (objType && objType.SPRITE && objType.SPRITE[0x0]) {
                 var sprite = util.sprite.getSprite(objTexture, objType.SPRITE[0x0].INDEX);
@@ -6424,14 +6428,15 @@ EditorDisplay.prototype.drawObjectTool = function() {
     }
 };
 EditorDisplay.prototype.drawWarp = function() {
-    if (this.game.tool && void 0x0 !== this.game.tool.vore) {
+    if (this.game.tool && (void 0x0 !== this.game.tool.vore || this.game.previewMode)) {
         var context = this.context;
         var zone = this.game.getZone();
         for (var i = 0x0; i < zone.warp.length; i++) {
             var warp = zone.warp[i],
                 pos = shor2.decode(warp.pos),
                 id = zone.warp[i].id.toString();
-            context.fillStyle = warp === this.game.tool.selected ? "rgba(0,0,255,0.5)" : "rgba(255,0,0,0.5)";
+            if (this.game.tool.vore) { context.fillStyle = warp === this.game.tool.selected ? "rgba(0,0,255,0.5)" : "rgba(255,0,0,0.5)"; }
+            else { if (this.game.previewMode) context.fillStyle = "rgba(255,255,0,0.5)"; }
             context.fillRect(pos.x * Display.TEXRES, (zone.height() - pos.y - 0x1) * Display.TEXRES, Display.TEXRES, Display.TEXRES);
             context.fillStyle = 'white';
             context.font = '8px Arial';
@@ -6440,12 +6445,16 @@ EditorDisplay.prototype.drawWarp = function() {
     }
 };
 EditorDisplay.prototype.drawLevelStart = function() {
-    if (!(this.game.tool && this.game.tool.showLevelStart)) return;
+    if (!(this.game.tool && (this.game.tool.showLevelStart || this.game.previewMode))) return;
     var context = this.context;
+    var objTexture = this.resource.getTexture("obj");
     var zone = this.game.getZone();
     var pos = shor2.decode(zone.initial);
-    context.fillStyle = "rgba(255,0,0,0.5)";
+    if (this.game.tool.showLevelStart) context.fillStyle = "rgba(255,0,0,0.5)";
+    else if (this.game.previewMode) context.fillStyle = "rgba(0,255,0,0.5)";
     context.fillRect(pos.x * Display.TEXRES, (zone.height() - pos.y - 0x1) * Display.TEXRES, Display.TEXRES, Display.TEXRES);
+    var sprite = util.sprite.getSprite(objTexture, GameObject.OBJECT(_0x5e070a.ID).SPRITE[0x0].INDEX)
+    context.drawImage(objTexture, sprite[0x0], sprite[0x1], Display.TEXRES, Display.TEXRES, pos.x * Display.TEXRES, (zone.height() - pos.y - 0x1) * Display.TEXRES, Display.TEXRES, Display.TEXRES);
 };
 EditorDisplay.prototype.drawLoad = Display.prototype.drawLoad;
 "use strict";
@@ -6682,6 +6691,7 @@ function Editor(data) {
     this.delta = util.time.now();
     this.dataRaw = data;
     this.showRef = false;
+    this.previewMode = false;
     this.offsetRef = vec2.make(0x0, 0x0);
     this.refOpacity = 1;
     this.reference = void 0x0;
@@ -6818,10 +6828,15 @@ Editor.prototype.doInput = function() {
         this.showRef = !this.showRef;
         this.inx71 = true;
     }
+    if (keys[0x50] && !this.inx80) {
+        this.previewMode = !this.previewMode;
+        this.inx80 = true;
+    }
     this.inx71 = keys[0x47];
+    this.inx80 = keys[0x50];
 };
 Editor.prototype.doStep = function() {};
-Editor.prototype.setZone = function(zone) {
+Editor.prototype.setZone = function(zone, lid, zid) {
     this.currentZone = zone;
     this.updWarpOptions();
     this.tool && this.tool.reload();
@@ -6829,6 +6844,7 @@ Editor.prototype.setZone = function(zone) {
     this.display.camera.position(vec2.scale(dims, 0.5));
     app.menu.list.updateLayerList();
     this.setLayer(zone.getLayer(0));
+    this.setZoneTag(lid, zid);
 };
 Editor.prototype.setLayer = function(layer) {
     this.currentLayer = layer;
@@ -6837,8 +6853,20 @@ Editor.prototype.setLayer = function(layer) {
         item.setAttribute("class", item.layer.z == layer.z ? "list-zone-current" : "list-zone");
     }
 };
+Editor.prototype.setZoneTag = function(lid, zid) {
+    var list = document.getElementById("editor-list");
+    for (var item of list.children) {
+        var klass = item.className;
+        var id = item.id;
+        var listid = "list-gen-"+lid+"-"+zid;
+        if (klass === "list-zone") {
+            item.setAttribute("class", listid == id ? "list-zone-current" : "list-zone");
+        }
+    }
+};
 Editor.prototype.getZone = function() {
-    this.currentZone || this.setZone(this.world.getInitialZone());
+    var info = this.world.getLevel(this.world.initial);
+    this.currentZone || this.setZone(this.world.getInitialZone(), info.id, info.initial);
     return this.currentZone;
 };
 Editor.prototype.draw = function() {
