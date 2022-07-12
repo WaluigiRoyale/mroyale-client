@@ -1253,7 +1253,7 @@ function _0x3f2a38() {
         app.save();
     };
     this.btnAbout.onclick = function() {
-        alert("Mario Royale Editor v4.4.0\n\nCreated by: InfernoPlus\nUpdated by Cyuubi, Eliza, gyorokpeter, terminalarch and Nightcat\n\nLast updated: 2022-06-19 (YYYY-MM-DD)");
+        alert("Mario Royale Editor v4.4.3\n\nCreated by: InfernoPlus\nUpdated by Cyuubi, Eliza, gyorokpeter, terminalarch and Nightcat\n\nLast updated: 2022-07-12 (YYYY-MM-DD)");
         /* window.open("https://www.youtube.com/watch?v=oHg5SJYRHA0", "_blank"); */ /* Commented in memorial */
     };
 }
@@ -1293,7 +1293,6 @@ ListPanel.prototype.generate = function() {
         container.appendChild(layerList);
         this.element.appendChild(container);
         for (var i = 0x0; i < world.levels.length; i++) {
-            console.log(app.editor.currentZone.id)
             var level = world.levels[i];
             for (var j = 0x0; j < level.zones.length; j++) {
                 var zone = level.zones[j],
@@ -1305,11 +1304,9 @@ ListPanel.prototype.generate = function() {
                 item.onclick = function() {
                     that.select(this.lid, this.zid);
                 }
-                console.log(app.editor.currentZone.id, app.editor.currentZone.level)
-                app.editor.setZoneTag(app.editor.currentZone.level, app.editor.currentZone.id);
             }
         }
-        if (app.editor.currentZone) this.updateLayerList();
+        if (app.editor.currentZone) { app.editor.setZoneTag(app.editor.currentZone.level, app.editor.currentZone.id); this.updateLayerList(); }
     }
 };
 ListPanel.prototype.updateLayerList = function() {
@@ -6420,9 +6417,17 @@ EditorDisplay.prototype.drawObjectTool = function() {
             if (this.game.tool.obj) { context.fillStyle = obj === this.game.tool.selected ? "rgba(0,255,0,0.5)" : "rgba(255,0,0,0.5)"; }
             else { context.fillStyle = "rgba(255,255,0,0.5)"; }
             context.fillRect(pos.x * Display.TEXRES, (height - pos.y - 0x1) * Display.TEXRES, Display.TEXRES, Display.TEXRES);
-            if (objType && objType.SPRITE && objType.SPRITE[0x0]) {
-                var sprite = util.sprite.getSprite(objTexture, objType.SPRITE[0x0].INDEX);
-                context.drawImage(objTexture, sprite[0x0], sprite[0x1], Display.TEXRES, Display.TEXRES, pos.x * Display.TEXRES, (height - pos.y - 0x1) * Display.TEXRES, Display.TEXRES, Display.TEXRES);
+            if (obj.type === 0x25) {
+                let newObjType = GameObject.OBJECT(parseInt(obj.param[0]));
+                if (newObjType && newObjType.SPRITE && newObjType.SPRITE[0x0]) {
+                    var sprite = util.sprite.getSprite(objTexture, newObjType.SPRITE[0x0].INDEX);
+                    context.drawImage(objTexture, sprite[0x0], sprite[0x1], Display.TEXRES, Display.TEXRES, pos.x * Display.TEXRES, (height - pos.y - 0x1) * Display.TEXRES, Display.TEXRES, Display.TEXRES);
+                }
+            } else {
+                if (objType && objType.SPRITE && objType.SPRITE[0x0]) {
+                    var sprite = util.sprite.getSprite(objTexture, objType.SPRITE[0x0].INDEX);
+                    context.drawImage(objTexture, sprite[0x0], sprite[0x1], Display.TEXRES, Display.TEXRES, pos.x * Display.TEXRES, (height - pos.y - 0x1) * Display.TEXRES, Display.TEXRES, Display.TEXRES);
+                }
             }
         }
     }
@@ -6835,7 +6840,7 @@ Editor.prototype.doInput = function() {
     this.inx71 = keys[0x47];
     this.inx80 = keys[0x50];
 };
-Editor.prototype.doStep = function() {};
+Editor.prototype.doStep = function() { };
 Editor.prototype.setZone = function(zone, lid, zid) {
     this.currentZone = zone;
     this.updWarpOptions();
@@ -6859,7 +6864,7 @@ Editor.prototype.setZoneTag = function(lid, zid) {
         var klass = item.className;
         var id = item.id;
         var listid = "list-gen-"+lid+"-"+zid;
-        if (klass === "list-zone") {
+        if (klass === "list-zone" || klass === "list-zone-current") {
             item.setAttribute("class", listid == id ? "list-zone-current" : "list-zone");
         }
     }
