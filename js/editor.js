@@ -42,6 +42,8 @@ var tileDefs = {
     88: {'name': 'WARP PIPE SINGLE FAST', 'extraDataName': 'Target Warp ID'},
     89: {'name': 'WARP PIPE LEFT SLOW', 'extraDataName': 'Target Warp ID'},
     90: {'name': 'WARP PIPE LEFT FAST', 'extraDataName': 'Target Warp ID'},
+    91: {'name': 'WARP PIPE UP SLOW', 'extraDataName': 'Target Warp ID'},
+    92: {'name': 'WARP PIPE UP FAST', 'extraDataName': 'Target Warp ID'},
     160:{'name': 'FLAGPOLE', 'extraDataName': 'Award (0=None/1=Coins/2=1UP)'},
     165:{'name': 'VINE'},
     240:{'name': 'VOTE BLOCK'},
@@ -370,6 +372,12 @@ var shor2 = {},
 td32.encode = function(_0x1bea2b, _0x40d6c6, _0x781c14, _0x2a1dcf, _0x112ed4) {
     return 0x0 | parseInt(_0x1bea2b) & 0x7ff | parseInt(_0x40d6c6) << 0xb & 0x7800 | (_0x781c14 ? 0x1 : 0x0) << 0xf & 0x8000 | parseInt(_0x2a1dcf) << 0x10 & 0xff0000 | parseInt(_0x112ed4) << 0x18 & 0xff000000;
 };
+td32.decode8 = function(a) {
+    return {
+        definition: a >> 0x10 & 0xff,
+        data: a >> 0x18 & 0xff
+    };
+}
 td32.decode16 = function(_0xc5d058) {
     return {
         index: _0xc5d058 & 0x7ff,
@@ -1206,6 +1214,7 @@ _0x4f2076.prototype.hide = function() {
 
 function _0x3f2a38() {
     this.element = document.getElementById("editor-top");
+    this.btnBackground = document.getElementById("editor-top-background");
     this.btnWorld = document.getElementById("editor-top-world");
     this.btnLevel = document.getElementById("editor-top-level");
     this.btnZone = document.getElementById("editor-top-zone");
@@ -1218,6 +1227,9 @@ function _0x3f2a38() {
     this.btnGuide = document.getElementById("editor-top-guide");
     this.btnAbout = document.getElementById("editor-top-about");
     this.btnSave = document.getElementById("editor-top-save");
+    this.btnBackground.onclick = function() {
+        app.menu.tool.set("background");
+    };
     this.btnWorld.onclick = function() {
         app.menu.tool.set("world");
     };
@@ -1351,6 +1363,111 @@ ToolPanel.prototype.show = function() {
 ToolPanel.prototype.hide = function() {
     this.element.style.display = "none";
 };
+"use strict";
+
+function BackgroundTool(editor) {
+    this.editor = editor;
+    this.element = document.getElementById("editor-tool-background");
+    this.valSprite = document.getElementById("editor-tool-background-initial");
+    this.valColumn = document.getElementById("editor-tool-background-columns");
+    this.valRow = document.getElementById("editor-tool-background-rows");
+    this.valLayer = document.getElementById("editor-tool-background-layer");
+    this.valXOff = document.getElementById("editor-tool-background-xoff");
+    this.valYOff = document.getElementById("editor-tool-background-yoff");
+    this.generateElem = document.getElementById("editor-tool-background-generate");
+
+    this.offsetX = 0;
+    this.offsetY = 0;
+
+    var that = this;
+    this.valSprite.onchange = function() {
+        that.update();
+    };
+    this.valColumn.onchange = function() {
+        that.update();
+    };
+    this.valRow.onchange = function() {
+        that.update();
+    };
+    this.valLayer.onchange = function() {
+        that.update();
+    };
+    this.valXOff.onchange = function() {
+        that.update();
+    };
+    this.valYOff.onchange = function() {
+        that.update();
+    };
+    this.generateElem.onclick = function() {
+        that.apply();
+    };
+}
+
+BackgroundTool.prototype.reload = function() {
+    this.save();
+    this.load();
+};
+
+BackgroundTool.prototype.load = function() {
+    this.element.style.display = "block";
+};
+
+BackgroundTool.prototype.save = function() {};
+
+BackgroundTool.prototype.update = function() {
+    try {
+        this.valSprite.value = Math.max(0, Math.min(0x7ff, parseInt(this.valSprite.value || 0)));
+        this.valColumn.value = Math.max(0, Math.min(65535, parseInt(this.valColumn.value || 0)));
+        this.valRow.value = Math.max(0, Math.min(65535, parseInt(this.valRow.value || 0)));
+        this.valLayer.value = isNaN(parseInt(this.valLayer.value)) ? '0' : parseInt(this.valLayer.value);
+        this.offsetX = Math.max(0, Math.min(65535, parseInt(this.valXOff.value || 0)));
+        this.offsetY = Math.max(0, Math.min(65535, parseInt(this.valYOff.value || 0)));
+
+        this.valXOff.value = this.offsetX;
+        this.valYOff.value = this.offsetY;
+    } catch (e) {
+        app.menu.warn.show("There was a problem."+e);
+    }
+};
+
+BackgroundTool.prototype.apply = function() {
+    if (isNaN(this.valSprite.value) || isNaN(this.valColumn.value) || isNaN(this.valRow.value) || isNaN(this.offsetX) || isNaN(this.offsetY)) { return app.menu.warn.show("Generation failed. Invalid values"); }
+    else {
+        var zoneData = this.editor.currentLayer.data;
+        for (var i = 0; i < this.editor.currentZone.layers.length; i++) {
+            var layer = this.editor.currentZone.layers[i];
+            var lid = layer.z;
+            lid === parseInt(this.valLayer.value) ? zoneData = layer.data : zoneData = zoneData;
+        }
+
+        for (var i = 0; i < zoneData.length; i++) {
+            for (var j = 0; j < zoneData[i].length; j++) {
+                var lenX = Math.min(this.valColumn.value, j);           
+                var lenY = Math.min(this.valRow.value, i);
+                var mapWidth = this.editor.display.resource.texture.cache.map.width;
+                var index = this.valSprite.value;
+                var newSprite = parseInt(this.valSprite.value) + j
+                console.log(lenY)
+                zoneData[lenY + this.offsetY][lenX + this.offsetX] = newSprite;
+            }
+        }
+
+        dirty = true;
+    }
+};
+
+BackgroundTool.prototype.destroy = function() {
+    this.element.style.display = "none";
+    this.valColumn.value = 0x0;
+    this.valRow.value = 0x0;
+    this.valSprite.value = 0x0;
+    this.valXOff.value = 0x0;
+    this.valYOff.value = 0x0;
+    this.valLayer.value = 0x0;
+    this.offsetX = 0;
+    this.offsetY = 0;
+};
+
 "use strict";
 
 function WorldTool(editor) {
@@ -1752,7 +1869,7 @@ function TileTool(editor) {
     this.brush = emptyTile;
 }
 TileTool.prototype.input = function(lastInput, mouse, keys) {
-    if (mouse.lmb || mouse.mmb) {
+    if (mouse.lmb || mouse.mmb || mouse.rmb) {
         var mapTexture = this.editor.display.resource.getTexture("map");
         var screenWidth = Display.TEXRES * parseInt(this.editor.canvas.width / Display.TEXRES);
         var screenHeight = this.editor.canvas.height;
@@ -1771,11 +1888,11 @@ TileTool.prototype.input = function(lastInput, mouse, keys) {
             targetTile = vec2.chop(this.editor.display.camera.unproject(mouse.pos));
             if (0x0 > targetTile.x || targetTile.x > dims.x - 0x1 || 0x0 > targetTile.y || targetTile.y > dims.y - 0x1) {
             } else {
-                if (mouse.lmb) {
+                if (mouse.lmb && !(mouse.mmb || mouse.rmb)) {
                     this.brushChangeWarning.style.display="none";
                     dirty = true;
                     zoneData[targetTile.y][targetTile.x] = this.brush;
-                } else if (mouse.mmb) {
+                } else if ((mouse.lmb && mouse.rmb) || mouse.mmb) {
                     this.brushChangeWarning.style.display="none";
                     dirty = true;
                     this.setBrush(zoneData[targetTile.y][targetTile.x]);
@@ -6165,13 +6282,16 @@ Display.prototype.drawMap = function(data, depth) {
         var tileRow = data[i];
         for (var j = screenLeft; j < screenRight; j++) {
             var tile = td32.decode16(tileRow[j]);
+            var tile8 = td32.decode8(tileRow[j]);
+            var warps = [0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0xa1, 87, 88, 89, 90, 91, 92];
             if (drawAll || tile.depth === depth) {
                 var sprite = util.sprite.getSprite(mapTexture, tile.index),
                     t = 0x0,
                     high = Math.max(0x0, tile.bump - 0x7);
                 if (0x0 < high)
                     t = 0.22 * Math.sin((0x1 - (high - 0x2) / 0x8) * Math.PI);
-                if (!(sprite[0x0] === 480 && sprite[0x1] === 0)) {
+                if (!(sprite[0x0] === 480 && sprite[0x1] === 0) || this.game.previewMode) {
+                    if(this.game.previewMode) context.fillStyle = "rgba(255,255,255,1)"
                     context.drawImage(mapTexture, sprite[0x0], sprite[0x1], Display.TEXRES, Display.TEXRES, Display.TEXRES * j, Display.TEXRES * (i - t), Display.TEXRES, Display.TEXRES);
                 }
             }
@@ -6782,6 +6902,10 @@ Editor.prototype.setTool = function(toolType) {
     this.tool && this.tool.destroy();
     var showLayers = true;
     switch (toolType) {
+        case "background" :
+            this.tool = new BackgroundTool(this);
+            this.tool.load();
+            break;
         case "world":
             this.tool = new WorldTool(this);
             this.tool.load();
@@ -6833,7 +6957,7 @@ Editor.prototype.doInput = function() {
         this.showRef = !this.showRef;
         this.inx71 = true;
     }
-    if (keys[0x50] && !this.inx80) {
+    if (keys[0x50] && !this.inx80 && document.activeElement === document.body) {
         this.previewMode = !this.previewMode;
         this.inx80 = true;
     }

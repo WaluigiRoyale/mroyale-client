@@ -273,7 +273,7 @@ util.intersection.lineNearestPoint = function (_0x5a6af6, _0x4deaa7) {
 util.time.now = function () {
     return Date.now();
 };
-util.sprite.getSprite = function (spriteMap, index, x32=false) {
+util.sprite.getSprite = function (spriteMap, index, x32 = false) {
     var WIDTH = spriteMap.width;
     var height = spriteMap.height;
     index *= (x32 ? Display.TEXRES : Display.TEXRES);
@@ -561,8 +561,8 @@ td32.TILE_PROPERTIES = {
 
                 /* Small Bump */
                 /* Big Bump */
-                case 0x10 :
-                case 0x11 : {
+                case 0x10:
+                case 0x11: {
                     if (game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x, y), type)); }
                     td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
                     break;
@@ -579,8 +579,8 @@ td32.TILE_PROPERTIES = {
             switch (type) {
                 /* Stand */
                 /* Shell */
-                case 0x05 :
-                case 0x04 : {
+                case 0x05:
+                case 0x04: {
                     if (game.pid === pid) { game.getPlayer().bounce(); game.out.push(NET030.encode(level, zone, shor2.encode(x, y), type)); }
 
                     var rep = td32.encode(td.index, 0, td.depth, 0xb, 0); // Replacement td32 data for tile.
@@ -604,7 +604,7 @@ td32.TILE_PROPERTIES = {
                     if (game.pid === pid) { game.out.push(NET030.encode(level, zone, shor2.encode(x, y), type)); }
                     var rep = td32.encode(td.index, 0, td.depth, 0xb, 0); // Replacement td32 data for tile.
                     game.world.getZone(level, zone).replace(x, y, rep);
-                    game.createObject(td.data, level, zone, vec2.make(x, y), [shor2.encode(x,y), static=false, note=false]);
+                    game.createObject(td.data, level, zone, vec2.make(x, y), [shor2.encode(x, y), static = false, note = false]);
 
                     td32.GEN_FUNC.BUMP(game, pid, td, level, zone, x, y, type);
                     game.world.getZone(level, zone).play(x, y, "item.mp3", 1., 0.04);
@@ -694,7 +694,7 @@ td32.TILE_PROPERTIES = {
         HIDDEN: false,
         PLATFORM: "ICE",
         ASYNC: false,
-        TRIGGER: function (game, pid, td, level, zone, x, y, type) {}
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) { }
     },
 
     /* Item Block Standard */
@@ -845,7 +845,7 @@ td32.TILE_PROPERTIES = {
         COLLIDE: true,
         HIDDEN: true,
         ASYNC: false,
-        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
             switch (type) {
                 /* Small bump */
                 /* Big bump */
@@ -875,11 +875,13 @@ td32.TILE_PROPERTIES = {
         COLLIDE: false,
         HIDDEN: false,
         ASYNC: false,
-        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
-            switch (type) {
-                /* Touch */
-                case 0x00 : {
-                    game.pauseCamera = true;
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
+            if (game.pid === pid) {
+                switch (type) {
+                    /* Touch */
+                    case 0x00: {
+                        game.pauseCamera = true;
+                    }
                 }
             }
         }
@@ -889,11 +891,13 @@ td32.TILE_PROPERTIES = {
         COLLIDE: false,
         HIDDEN: false,
         ASYNC: false,
-        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
-            switch (type) {
-                /* Touch */
-                case 0x00 : {
-                    game.pauseCamera = false;
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
+            if (game.pid === pid) {
+                switch (type) {
+                    /* Touch */
+                    case 0x00: {
+                        game.pauseCamera = false;
+                    }
                 }
             }
         }
@@ -1148,7 +1152,7 @@ td32.TILE_PROPERTIES = {
         TRIGGER: function (game, pid, td, level, zone, x, y, type) {
             switch (type) {
                 /* Push */
-                case 0x02 : {
+                case 0x02: {
                     if (game.pid === pid) {
                         game.getPlayer().pipe(3, td.data, 50);
                     }
@@ -1164,10 +1168,66 @@ td32.TILE_PROPERTIES = {
         TRIGGER: function (game, pid, td, level, zone, x, y, type) {
             switch (type) {
                 /* Push */
-                case 0x02 : {
+                case 0x02: {
                     if (game.pid === pid) {
                         game.getPlayer().pipe(3, td.data, 0);
                     }
+                }
+            }
+        }
+    },
+    /* Warp Pipe Up Slow */
+    91: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: true,
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
+            switch (type) {
+                /* Small+Big Bump */
+                case 0x10:
+                case 0x11: {
+                    if (game.pid === pid) {
+                        var ply = game.getPlayer();
+                        var l = game.world.getZone(level, zone).getTile(vec2.make(x - 1, y));
+                        var r = game.world.getZone(level, zone).getTile(vec2.make(x + 1, y));
+
+                        var cx;
+                        if (l.definition === this) { cx = x; }
+                        else if (r.definition === this) { cx = x + 1; }
+                        else { return; }
+
+                        if (Math.abs((ply.pos.x + (ply.dim.x * .5)) - cx) <= 0.45 && ply.btnU) { ply.pipe(1, td.data, 50); }
+                    }
+
+                    break;
+                }
+            }
+        }
+    },
+    /* Warp Pipe Up Fast */
+    92: {
+        COLLIDE: true,
+        HIDDEN: false,
+        ASYNC: true,
+        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
+            switch (type) {
+                /* Small+Big Bump */
+                case 0x10:
+                case 0x11: {
+                    if (game.pid === pid) {
+                        var ply = game.getPlayer();
+                        var l = game.world.getZone(level, zone).getTile(vec2.make(x - 1, y));
+                        var r = game.world.getZone(level, zone).getTile(vec2.make(x + 1, y));
+
+                        var cx;
+                        if (l.definition === this) { cx = x; }
+                        else if (r.definition === this) { cx = x + 1; }
+                        else { return; }
+
+                        if (Math.abs((ply.pos.x + (ply.dim.x * .5)) - cx) <= 0.45 && ply.btnU) { ply.pipe(1, td.data, 0); }
+                    }
+
+                    break;
                 }
             }
         }
@@ -1660,7 +1720,7 @@ function WarnScreen() {
     this.hide();
     this.timeout = undefined;
 }
-WarnScreen.prototype.show = function (msg, showImg=true, log=false) {
+WarnScreen.prototype.show = function (msg, showImg = true, log = false) {
     showImg == false ? this.element.innerHTML = msg : this.element.innerHTML = "<img src='" + ASSETS_URL + "img/home/warn.png'" + "class='warn-ico'/> " + msg;
     if (log !== false) console.warn("##WARN## " + msg);
     this.timeout && clearTimeout(this.timeout);
@@ -1954,7 +2014,7 @@ MainAsMemberScreen.prototype.launch = function () {
     var priv = app.inviteCode && app.inviteMode ? true : this.isPrivate;
     var skin = this.skin;
     var gm = app.inviteCode && app.inviteMode ? parseInt(app.inviteMode) || 0 : this.gameMode
-    
+
     app.join(nickname, squad, priv, skin, gm);
 };
 
@@ -2074,6 +2134,7 @@ function NameScreen() {
     elem.addEventListener("click", (function () { return function (event) { that.gfxTestMapRemove(event); }; })());
     elem = document.getElementById("gfxTestObjRemove");
     elem.addEventListener("click", (function () { return function (event) { that.gfxTestObjRemove(event); }; })());
+
     this.autoMovebtn.addEventListener("click", (function () { return function (event) { that.setAutoMove(!app.autoMove); }; })());
     this.compactModebtn.addEventListener("click", (function () { return function (event) { that.setCompactMode(!app.compactMode); }; })());
 
@@ -2274,6 +2335,7 @@ NameScreen.prototype.setTestObjImg = function (data) {
     app.overrideObjImg = img;
     app.game.display.resource.texture.cache["obj"] = img;
 };
+
 NameScreen.prototype.setAutoMove = function (val) {
     app.autoMove = val;
     Cookies.set("autoMove", val, { 'expires': 0x1e });
@@ -2348,7 +2410,8 @@ function ProfileScreen() {
     this.skinButtonPrefix = "profile-skin-select";
     var that = this;
     this.shopbtn.onclick = function () {
-        ShopScreen.prototype.show();
+        app.menu.shop.ownedSkins = app.menu.mainAsMember.skins;
+        app.menu.shop.show();
     }
     this.savebtn.onclick = function () {
         that.save();
@@ -2450,13 +2513,35 @@ ShopScreen.prototype.order = function () {
 };
 
 ShopScreen.prototype.select = function (skinid) {
+    this.ownedSkins = app.menu.mainAsMember.skins;
+    this.coins = app.menu.mainAsMember.coins;
     if (skinSelected !== null || undefined) {
-        document.getElementById(`shop-${skinSelected}`).style["border-color"] = '#3c3c3c';
+        let elem = document.getElementById(`shop-${skinSelected}`);
+        var formatted = this.order();
+        elem.style["border-color"] = this.ownedSkins.includes(skinSelected) ? "#00C800" : this.coins < formatted[skinSelected].coins ? "#9f0000" : "#3c3c3c";
     }
     skinSelected = skinid;
     this.setInfo(skinid);
     let skn = document.getElementById('shop-' + skinSelected);
     skn.style["border-color"] = 'white';
+};
+
+ShopScreen.prototype.updateBorder = function () {
+    this.ownedSkins = app.menu.mainAsMember.skins;
+    this.coins = app.menu.mainAsMember.coins;
+    var that = this;
+    $('#shop-select').find('div').each(function(){
+        var innerDivId = $(this).attr('id');
+        var elem = document.getElementById(innerDivId);
+        var format = that.order();
+        var skin = format[innerDivId.replace("shop-","")];
+        var skinid = skin.id;
+        var coins = skin.coins;
+
+        console.log(elem, coins);
+        elem.style["border-color"] = that.ownedSkins.includes(skinid) ? "00C800" : that.coins < coins ? "#9f0000" : "#3c3c3c";
+        that.select(skinSelected);
+    });
 };
 
 ShopScreen.prototype.setInfo = function (skin) {
@@ -2469,15 +2554,20 @@ ShopScreen.prototype.setInfo = function (skin) {
 
 ShopScreen.prototype.show = function () {
     let element = document.getElementById("shop");
+    app.menu.navigation("main", "shop");
     app.menu.partHide();
     app.menu.background('a');
     element.style.display = 'block';
+    this.coins = app.menu.mainAsMember.coins;
+    this.ownedSkins = app.menu.mainAsMember.skins;
+    document.getElementById('shop-select').children.length = 0;
     if (document.getElementById('shop-select').children.length === 0) {
         for (var skin of skins) {
             var elem = document.createElement("div");
             elem.setAttribute("class", "skin-select-button");
             elem.setAttribute("id", 'shop-' + skin.id);
             elem.style["background-image"] = `url('${ASSETS_SKIN_URL + skin.id + ".png"}')`;
+            elem.style["border-color"] = this.ownedSkins.includes(skin.id) ? "#00C800" : this.coins < skin.coins ? "#9f0000" : "#3c3c3c";
             elem.addEventListener("click", (function (a) { return function () { ShopScreen.prototype.select(a); }; })(skin.id));
             document.getElementById('shop-select').appendChild(elem);
         }
@@ -2489,14 +2579,17 @@ ShopScreen.prototype.show = function () {
 
 ShopScreen.prototype.purchase = function (skin) {
     const formatted = this.order();
-    const skins = app.menu.mainAsMember.skins;
+    let skins = app.menu.mainAsMember.skins;
     if (this.coins === null) this.coins = app.menu.mainAsMember.coins;
+    this.coins = parseInt(document.getElementById("winCoins"));
 
     if (skins.includes(skin)) return this.purchased(`You already have this skin.`);
     if (this.coins < formatted[skin]['coins']) return this.error('You do not have enough coins.');
 
     app.net.send({ 'type': 'prc', 'skin': skin, 'coins': formatted[skin]['coins'] });
     this.success(`Purchased ${formatted[skin]['name']} successfully`);
+    app.menu.mainAsMember.skins.push(skin.id);
+    this.updateBorder();
 };
 
 ShopScreen.prototype.error = function (msg) {
@@ -2525,6 +2618,7 @@ ShopScreen.prototype.handleCoins = function (data) {
 };
 
 ShopScreen.prototype.return = function () {
+    app.menu.navigation("shop", "main");
     app.menu.mainAsMember.show();
 };
 
@@ -3062,7 +3156,7 @@ InputState.prototype.handleUpdProfileResult = function (data) {
 };
 InputState.prototype.handleSkinResult = function (data) {
     ShopScreen.prototype.handleCoins(data.coins);
-    app.menu.mainAsMember.skins = data.skins;
+    //app.menu.mainAsMember.skins = data.skins;
 };
 InputState.prototype.handleLoginResult = function (data) {
     if (data.status) {
@@ -3348,7 +3442,7 @@ PlayerObject.ASYNC = false;
 PlayerObject.ID = 0x1;
 PlayerObject.NAME = "PLAYER";
 PlayerObject.ANIMATION_RATE = 0x3;
-PlayerObject.DIM_OFFSET = vec2.make(-0.05, 0x0);
+PlayerObject.DIM_OFFSET = vec2.make(-0.16, 0x0);
 PlayerObject.DEAD_FREEZE_TIME = 0x7;
 PlayerObject.DEAD_TIME = 0x46;
 PlayerObject.DEAD_UP_FORCE = 0.65;
@@ -3671,7 +3765,7 @@ PlayerObject.SPRITE_LIST = [{
         [151, 158],
         [135, 142]
     ]
-},  {
+}, {
     'NAME': "F_SWIM5",
     'ID': 0x57,
     'INDEX': [
@@ -4051,16 +4145,16 @@ PlayerObject.prototype.step = function () {
                 this.pipeDelay = this.pipeDelayLength;
             }
         } else this.lastPos = this.pos, 0x0 < this.damageTimer && this.damageTimer--, this.attackCharge < PlayerObject.MAX_CHARGE && this.attackCharge++, 0x0 < this.attackTimer && this.attackTimer--, this.autoTarget && this.autoMove(), this.control(), this.physics(), this.interaction(), this.arrow(), this.sound(), 0x0 > this.pos.y && this.kill();
-        if (this.underWater === 1 && !this.grounded && this.isState(PlayerObject.SNAME.FALL)) {
-            if (!this.power) { if (this.swimspr + 1 > 4) this.swimspr = 0; } else { if (this.swimspr + 1 > 5) this.swimspr = 0; }
-            if (this.game.frame % 3 === 2) this.swimspr += 1;
+    if (this.underWater === 1 && !this.grounded && this.isState(PlayerObject.SNAME.FALL)) {
+        if (!this.power) { if (this.swimspr + 1 > 4) this.swimspr = 0; } else { if (this.swimspr + 1 > 5) this.swimspr = 0; }
+        if (this.game.frame % 3 === 2) this.swimspr += 1;
 
-            var spr = this.swimspr;
-            var pref = () => {if (this.power === 0) return "S_"; else if (this.power === 1) return "B_"; else if (this.power === 2) return "F_"}
-            if (PlayerObject.SPRITE[pref()+"SWIM"+spr]) {
-                this.sprite = PlayerObject.SPRITE[pref() + "SWIM" + spr];
-            }
+        var spr = this.swimspr;
+        var pref = () => { if (this.power === 0) return "S_"; else if (this.power === 1) return "B_"; else if (this.power === 2) return "F_" }
+        if (PlayerObject.SPRITE[pref() + "SWIM" + spr]) {
+            this.sprite = PlayerObject.SPRITE[pref() + "SWIM" + spr];
         }
+    }
 };
 PlayerObject.prototype.input = function (abtnD, abtnA, abtnB, abtnTA, abtnU) {
     this.btnD = abtnD;
@@ -4079,7 +4173,7 @@ PlayerObject.prototype.autoMove = function () {
     0.1 <= Math.abs(this.pos.x - this.autoTarget.x) ? this.btnD = [0x0 >= this.pos.x - this.autoTarget.x ? 0x1 : -0x1, 0x0] : 0.01 > Math.abs(this.moveSpeed) && (this.btnA = -0.5 > this.pos.y - this.autoTarget.y);
 };
 
-PlayerObject.prototype.control = function() {
+PlayerObject.prototype.control = function () {
     if (this.isState(PlayerObject.SNAME.HIDE) || this.spectator) return;
     if (this.grounded) this.btnBg = this.btnB;
     if (this.isState(PlayerObject.SNAME.DOWN) && this.collisionTest(this.pos, this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.power).DIM)) {
@@ -4114,7 +4208,7 @@ PlayerObject.prototype.control = function() {
                 if (-0x1 === this.btnD[0x1]) this.setState(PlayerObject.SNAME.DOWN);
             }
         }
-        var a = this.isSpring ? 0xe : this.underWater==1 ? 0.1 : 0x7;
+        var a = this.isSpring ? 0xe : this.underWater == 1 ? 0.1 : 0x7;
         var b = this.isSpring ? PlayerObject.SPRING_LENGTH_MIN : this.isBounce ? PlayerObject.BOUNCE_LENGTH_MIN : PlayerObject.JUMP_LENGTH_MIN;
         for (i = 0x0; i < PlayerObject.JUMP_SPEED_INC_THRESHOLD.length && Math.abs(this.moveSpeed) >= PlayerObject.JUMP_SPEED_INC_THRESHOLD[i]; i++) a++;
         if (this.btnA) {
@@ -4134,7 +4228,7 @@ PlayerObject.prototype.control = function() {
         }
 
         if (this.moveSpeed > 0.300 || this.moveSpeed < -0.300) {
-            if (DIM0.x || DIM1.x == 1)  {
+            if (DIM0.x || DIM1.x == 1) {
                 DIM0.x = 1; // increase small hitbox
                 DIM1.x = 1; // increase big hitbox
             }
@@ -4264,7 +4358,7 @@ PlayerObject.prototype.physics = function () {
     _0x3f505e && _0x3f505e.riding(this);
     for (var i = 0x0; i < tiles.length; i++) {
         var obj = tiles[i];
-        if(squar.intersection(obj.pos, oneByOne, newPos, this.dim)) {
+        if (squar.intersection(obj.pos, oneByOne, newPos, this.dim)) {
             if (obj.definition.ICE === undefined) {
                 PlayerObject.ANIMATION_RATE = 3
                 PlayerObject.MOVE_SPEED_ACCEL = 0.0125
@@ -4312,7 +4406,7 @@ PlayerObject.prototype.interaction = function () {
                 if (this.dead) this.game.out.push(NET017.encode(obj.pid));
             }
             if (this.lastPos.y > obj.pos.y + 0.66 * obj.dim.y - Math.max(0x0, obj.fallSpeed)) {
-                if (obj.playerStomp) 
+                if (obj.playerStomp)
                     if (!this.spectator)
                         obj.playerStomp(this);
             } else {
@@ -4320,7 +4414,7 @@ PlayerObject.prototype.interaction = function () {
                     if (obj.playerBump) obj.playerBump(this)
                 } else {
                     if (obj.playerCollide)
-                        if(!this.spectator)
+                        if (!this.spectator)
                             obj.playerCollide(this);
                 }
             }
@@ -4413,7 +4507,7 @@ PlayerObject.prototype.star = function () {
 PlayerObject.prototype.tfm = function (_0x538c99) {
     if (this.spectator) return;
 
-    this.power < _0x538c99 ? this.play("powerup.mp3", 0x1, 0.04) : this.play("powerdown.mp3", 0x1, 0.04);
+    if (!this.isState(PlayerObject.SNAME.TRANSFORM)) this.power < _0x538c99 ? this.play("powerup.mp3", 0x1, 0.04) : this.play("powerdown.mp3", 0x1, 0.04);
     this.tfmTarget = _0x538c99;
     this.tfmTimer = PlayerObject.TRANSFORM_TIME;
     this.setState(PlayerObject.SNAME.TRANSFORM);
@@ -4513,9 +4607,9 @@ PlayerObject.prototype.isState = function (stName) {
 PlayerObject.prototype.draw = function (spriteList) {
     if (!(this.isState(PlayerObject.SNAME.HIDE) || 0x0 < this.pipeDelay || 0x0 < this.damageTimer && 0x1 < this.damageTimer % 0x3 && !this.isState(PlayerObject.SNAME.POLE))) {
         var mode;
-        if(this.starTimer > 0) { mode = 0x02; }
-        else if(this.isState(PlayerObject.SNAME.GHOST) || this.isState(PlayerObject.SNAME.DEADGHOST)) { this.pid === this.game.spectatorID ? mode = 0x00 : mode = 0x01; }
-        else if((this.isState(PlayerObject.SNAME.POLE) || this.isState(PlayerObject.SNAME.CLIMB) || this.isState(PlayerObject.SNAME.TRANSFORM) || this.isState(PlayerObject.SNAME.DEAD)) && !this.spectator) { mode = 0x00; }
+        if (this.starTimer > 0) { mode = 0x02; }
+        else if (this.isState(PlayerObject.SNAME.GHOST) || this.isState(PlayerObject.SNAME.DEADGHOST)) { this.pid === this.game.spectatorID ? mode = 0x00 : mode = 0x01; }
+        else if ((this.isState(PlayerObject.SNAME.POLE) || this.isState(PlayerObject.SNAME.CLIMB) || this.isState(PlayerObject.SNAME.TRANSFORM) || this.isState(PlayerObject.SNAME.DEAD)) && !this.spectator) { mode = 0x00; }
         else { mode = 0x00; }
         if (this.sprite.INDEX instanceof Array)
             for (var _0x5814e0 = this.sprite.INDEX, _0x3f6b38 = 0x0; _0x3f6b38 < _0x5814e0.length; _0x3f6b38++)
@@ -6401,7 +6495,10 @@ SpawnerObject.prototype.fire = function () {
     this.fireTimer = 0;
     var obj = this.game.createObject(this.objectType, this.level, this.zone, vec2.copy(this.pos), [this.game.world.getZone(this.level, this.zone).maxOid += 1]);
     obj.enable && obj.enable();
-    if (this.shootDirection) obj.dir = !obj.dir;
+    if (this.shootDirection) {
+        if (obj.dir) obj.dir = this.shootDirection;
+        if (obj.direction) obj.direction = this.shootDirection;
+    };
     this.disable();
     this.proxHit = false;
 };
@@ -6410,7 +6507,7 @@ GameObject.REGISTER_OBJECT(SpawnerObject);
 
 "use strict";
 
-function FireBreathObject(game, level, zone, pos, direction) {
+function FireBreathObject(game, level, zone, pos, oid, direction) {
     GameObject.call(this, game, level, zone, pos);
     this.state = FireBreathObject.STATE.IDLE;
     this.sprite = this.state.SPRITE[0x0];
@@ -6418,7 +6515,7 @@ function FireBreathObject(game, level, zone, pos, direction) {
     this.life = FireBreathObject.LIFE_MAX;
     this.deadTimer = 0x0;
     this.dim = vec2.make(0x1, 0.5);
-    this.direction = isNaN(parseInt(direction)) ? 0 : parseInt(direction);
+    this.direction = 0; //isNaN(parseInt(direction)) ? 0 : parseInt(direction);
 }
 FireBreathObject.ASYNC = true;
 FireBreathObject.ID = 0xa2;
@@ -6612,7 +6709,7 @@ HammerObject.prototype.draw = function (_0x4db511) {
 GameObject.REGISTER_OBJECT(HammerObject);
 "use strict";
 
-function PowerUpObject(game, level, zone, pos, oid, note=false) {
+function PowerUpObject(game, level, zone, pos, oid, note = false) {
     GameObject.call(this, game, level, zone, pos);
     this.oid = oid;
     this.note = note;
@@ -6769,7 +6866,7 @@ PowerUpObject.prototype.draw = function (_0x2ea1b4) {
 };
 "use strict";
 
-function MushroomObject(game, level, zone, pos, oid, note=false) {
+function MushroomObject(game, level, zone, pos, oid, note = false) {
     PowerUpObject.call(this, game, level, zone, pos, oid, note);
     this.state = MushroomObject.STATE.IDLE;
     this.sprite = this.state.SPRITE[0x0];
@@ -6810,7 +6907,7 @@ MushroomObject.prototype.draw = PowerUpObject.prototype.draw;
 GameObject.REGISTER_OBJECT(MushroomObject);
 "use strict";
 
-function FlowerObject(game, level, zone, pos, oid, note=false) {
+function FlowerObject(game, level, zone, pos, oid, note = false) {
     PowerUpObject.call(this, game, level, zone, pos, oid);
     this.state = FlowerObject.STATE.IDLE;
     this.note = note;
@@ -6860,7 +6957,7 @@ FlowerObject.prototype.draw = PowerUpObject.prototype.draw;
 GameObject.REGISTER_OBJECT(FlowerObject);
 "use strict";
 
-function GoldFlowerObject(game, level, zone, pos, oid, note=false) {
+function GoldFlowerObject(game, level, zone, pos, oid, note = false) {
     PowerUpObject.call(this, game, level, zone, pos, oid);
     this.state = GoldFlowerObject.STATE.IDLE;
     this.note = note;
@@ -6916,7 +7013,7 @@ GoldFlowerObject.prototype.draw = PowerUpObject.prototype.draw;
 GameObject.REGISTER_OBJECT(GoldFlowerObject);
 "use strict";
 
-function StarObject(game, level, zone, pos, oid, static=0, note=false) {
+function StarObject(game, level, zone, pos, oid, static = 0, note = false) {
     PowerUpObject.call(this, game, level, zone, pos, oid);
     this.state = StarObject.STATE.IDLE;
     this.sprite = this.state.SPRITE[0x0];
@@ -6959,7 +7056,7 @@ for (_0x1bec55 = 0x0; _0x1bec55 < StarObject.STATE_LIST.length; _0x1bec55++) Sta
 StarObject.prototype.update = PowerUpObject.prototype.update;
 StarObject.prototype.step = PowerUpObject.prototype.step;
 StarObject.prototype.control = function () {
-    this.moveSpeed = this.dir ? (!this.static ? -StarObject.MOVE_SPEED_MAX : 0) : (!this.static ? StarObject.MOVE_SPEED_MAX: 0);
+    this.moveSpeed = this.dir ? (!this.static ? -StarObject.MOVE_SPEED_MAX : 0) : (!this.static ? StarObject.MOVE_SPEED_MAX : 0);
     if (!this.static) this.grounded && ++this.groundTimer >= StarObject.JUMP_DELAY ? this.jump = 0x0 : this.jump > StarObject.JUMP_LENGTH && (this.jump = -0x1, this.groundTimer = 0x0);
 };
 StarObject.prototype.physics = PowerUpObject.prototype.physics;
@@ -7146,7 +7243,7 @@ CoinObject.SPRITE_LIST = [{
 }, {
     'NAME': "IDLE3",
     'ID': 0x3,
-    'INDEX': 0xf1
+    'INDEX': 0xf3
 }];
 for (_0x1bec55 = 0x0; _0x1bec55 < CoinObject.SPRITE_LIST.length; _0x1bec55++) CoinObject.SPRITE[CoinObject.SPRITE_LIST[_0x1bec55].NAME] = CoinObject.SPRITE_LIST[_0x1bec55], CoinObject.SPRITE[CoinObject.SPRITE_LIST[_0x1bec55].ID] = CoinObject.SPRITE_LIST[_0x1bec55];
 CoinObject.STATE = {};
@@ -8029,7 +8126,7 @@ Display.prototype.ensureSkin = function (skin) {
         this.resource.addTexture({ id: "skin" + skin, src: ASSETS_URL + "img/skins/smb_skin" + skin + ".png", isSkin: true });
     }
 }
-Display.prototype.clear = function() {
+Display.prototype.clear = function () {
     var _0x4d4eee = this.context;
     if (this.container.clientWidth !== this.canvas.width || this.container.clientHeight !== this.canvas.height) this.canvas.width = this.container.clientWidth, this.canvas.height = this.container.clientHeight;
     _0x4d4eee.clearRect(0x0, 0x0, this.canvas.width, this.canvas.height);
@@ -8091,7 +8188,7 @@ Display.prototype.drawMap = function (data, depth) {
                     high = Math.max(0x0, tile.bump - 0x7);
                 0x0 < high && (t = 0.22 * Math.sin((0x1 - (high - 0x2) / 0x8) * Math.PI));
                 if (!(sprite[0x0] === 480 && sprite[0x1] === 0)) {
-                    context.drawImage(mapTexture, sprite[0x0], sprite[0x1], Display.TEXRES_32X, Display.TEXRES_32X, Display.TEXRES * j, Display.TEXRES * (i - t), Display.TEXRES, Display.TEXRES);
+                    context.drawImage(mapTexture, sprite[0x0], sprite[0x1], Display.TEXRES, Display.TEXRES, Display.TEXRES * j, Display.TEXRES * (i - t), Display.TEXRES, Display.TEXRES);
                 }
             }
         }
@@ -8115,7 +8212,7 @@ Display.prototype.drawObject = function () {
             obj.pos.x >= leftEdge &&
             obj.pos.x <= rightEdge &&
             (obj.write && !app.settings.disableText && obj.write(textList),
-            obj.draw && obj.draw(spriteList));
+                obj.draw && obj.draw(spriteList));
     }
     var player = this.game.getPlayer();
     if (player && player.level === zone.level && player.zone === zone.id) {
@@ -8352,12 +8449,12 @@ Display.prototype.drawUI = function () {
 
         specLW = Math.min(spectateLeft.width, canvasWIDTH);
         specLH = parseInt(specLW * 1);
-        specLX = (canvasWIDTH / 2) - ( ((spectateW * 0.5) - (specLW / 100) + specLW ) + (specLW * 0.5) * 0.3 ); /* What the fuck */ //0.35 * canvasWIDTH - specLW * 0.5;
+        specLX = (canvasWIDTH / 2) - (((spectateW * 0.5) - (specLW / 100) + specLW) + (specLW * 0.5) * 0.3); /* What the fuck */ //0.35 * canvasWIDTH - specLW * 0.5;
         specLY = 0.8 * canvasHeight + 24;
-        
+
         specRW = Math.min(spectateRight.width, canvasWIDTH);
         specRH = parseInt(specRW * 1);
-        specRX = (canvasWIDTH / 2) + (((spectateW * 0.5) - (specRW / 100) + specRW ) + ((specRW / 4 - specRW) - (specRW / 10))); /* What the fuck part 2 */ //0.65 * canvasWIDTH - specRW * 0.5;
+        specRX = (canvasWIDTH / 2) + (((spectateW * 0.5) - (specRW / 100) + specRW) + ((specRW / 4 - specRW) - (specRW / 10))); /* What the fuck part 2 */ //0.65 * canvasWIDTH - specRW * 0.5;
         specRY = 0.8 * canvasHeight + 24;
 
         specLXS = specRX + spectateRight.width;
@@ -8391,7 +8488,7 @@ Display.prototype.drawUI = function () {
         sprite = util.sprite.getSprite(skinTexture, 0xd);
         txtWIDTH = context.measureText(txt).width + 0x1e;
         context.drawImage(skinTexture, sprite[0x0], sprite[0x1], Display.TEXRES, Display.TEXRES, 0x4 + txtWIDTH + 0x10, 0x28, 0x18, 0x18);
-        
+
         context.fillText((app.compactMode ? '' : 'x') + (0x9 >= this.game.lives ? '0' + this.game.lives : this.game.lives), 0x4 + txtWIDTH + 0x10 + 0x1a, 0x40);
         if (this.game instanceof Game) {
             //timer
@@ -8406,6 +8503,8 @@ Display.prototype.drawUI = function () {
                     this.game.stopGameTimer(this.game.touchMode);
                     this.game.out.push(NET018.encode());
                 }
+            } else {
+                this.game.pvpVictoryTimeout = 0;
             }
             txtWIDTH = context.measureText(txt).width;
             context.fillText(txt, canvasWIDTH - txtWIDTH - 0x8, 0x20);
@@ -8486,6 +8585,7 @@ Display.prototype.destroy = function () { };
 function World(game, data) {
     this.game = game;
     this.initial = data.initial;
+    this.assets = data.assets;
     this.levels = [];
     this.minZoom = 0x8;
     this.maxZoom = 0x1;
@@ -8784,9 +8884,36 @@ Game.FDLC_MAX = Game.FDLC_TARGET + 0x2;
 Game.LEVEL_WARP_TIME = 100;
 Game.GAME_OVER_TIME = 150;
 Game.SPEC_TIMEOUT_TIME = 50;
-Game.PVP_VICTORY_TIMEOUT = 50;
+Game.PVP_VICTORY_TIMEOUT = 160;
 
 Game.COINS_TO_LIFE = 0x1e;
+
+function genAssets(data) {
+    if (data.tileAnim) {
+        TILE_ANIMATION = {}
+        TILE_ANIMATION_FILTERED = {}
+        for (var anim of data.tileAnim) {
+            var obj = {};
+            obj.tiles = anim.tiles;
+            obj.delay = anim.delay;
+            obj.tilesets = anim.tilesets || [];
+            TILE_ANIMATION[anim.startTile] = obj;
+            TILE_ANIMATION_FILTERED[anim.startTile] = obj;
+        }
+    }
+    
+    if (data.tileData) {
+        BLOCK_DATA = {};
+        for (var td of data.tileData) {
+            var obj = {}
+            obj.id = td.id;
+            obj.name = td.name
+            obj.tileData = td.tileData;
+            obj.flipData = td.flipData;
+            BLOCK_DATA[obj.id] = obj;
+        }
+    }
+}
 
 Game.prototype.load = function (data) {
     app.menu.main.winElement.style.display = "none";
@@ -8809,7 +8936,7 @@ Game.prototype.load = function (data) {
         app.audio.setCustomMusicPrefix(data.musicOverridePath);
         reloadAudio = true;
     }
-    if (data.assets) {
+    if (data.assets && !app.overrideAssetsJson) {
         let link = isLink(data.assets);
         $.getJSON(link ? data.assets : ASSETS_URL + "assets/" + data.assets, function (data) {
             TILE_ANIMATION = {}
@@ -8928,7 +9055,7 @@ Game.prototype.getAlivePlayers = function () {
     var queue = [];
     var players = app.players;
 
-    for (var i=0; i<players.length; i++) {
+    for (var i = 0; i < players.length; i++) {
         var player = players[i];
 
         var ghost = this.getGhost(player.id);
@@ -8997,7 +9124,7 @@ Game.prototype.resumeGameTimer = function () {
     this.poleTimes += util.time.now() - this.gameTimerStopTime;
 }
 
-Game.prototype.stopGameTimer = function (touchMode=false) {
+Game.prototype.stopGameTimer = function (touchMode = false) {
     if (this.gameTimerStopped !== null) return;
     this.gameTimerStopped = this.getGameTimer(app.compactMode ? app.compactMode : touchMode);
     this.gameTimerStopTime = util.time.now();
@@ -9069,8 +9196,8 @@ Game.prototype.doNET002 = function (n) {
 };
 
 /* CREATE_PLAYER_OBJECT [0x10] */
-Game.prototype.doNET010 = function(n) {
-    if(n.pid === this.pid) { return; }
+Game.prototype.doNET010 = function (n) {
+    if (n.pid === this.pid) { return; }
     if (this.getGhost(n.pid))
         return;
     var obj = this.createObject(PlayerObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid, n.skin, n.isDev, n.isJunior]);
@@ -9244,24 +9371,24 @@ Game.prototype.doTouch = function (lastInput) {
 
         for (i = 0x0; i < triggers.length; i++)
             var off = 0;
-            for (var icon of ingameGuiButtons) {
-                off += HudButtonOffset;
-                if (icon.click && squar.inside(input, vec2.make(canvasWIDTH - (off), 0x28), vec2.make(0x18, 0x18))) {
-                    inp = true;
-                    icon.click && icon.click();
-                    break;
-                }
+        for (var icon of ingameGuiButtons) {
+            off += HudButtonOffset;
+            if (icon.click && squar.inside(input, vec2.make(canvasWIDTH - (off), 0x28), vec2.make(0x18, 0x18))) {
+                inp = true;
+                icon.click && icon.click();
+                break;
             }
+        }
 
-            let deadzone = canvasWIDTH / 2;
-            if (input.x > deadzone) inp = true;
+        let deadzone = canvasWIDTH / 2;
+        if (input.x > deadzone) inp = true;
 
-            for (_0x174be8 = 0x0; _0x174be8 < triggers.length; _0x174be8++)
-                if (_0x287903 = triggers[_0x174be8], squar.inside(input, _0x287903.pos, _0x287903.dim)) {
-                    //inp = true;
-                    _0x287903.click && _0x287903.click();
-                    break;
-                } _0x3308c9 || inp || (_0x3308c9 = input, this.thumbId = input.id, this.thumbPos = this.thumbOrigin = input);
+        for (_0x174be8 = 0x0; _0x174be8 < triggers.length; _0x174be8++)
+            if (_0x287903 = triggers[_0x174be8], squar.inside(input, _0x287903.pos, _0x287903.dim)) {
+                //inp = true;
+                _0x287903.click && _0x287903.click();
+                break;
+            } _0x3308c9 || inp || (_0x3308c9 = input, this.thumbId = input.id, this.thumbPos = this.thumbOrigin = input);
     }
     var lim;
     if (_0x3308c9 && game.startTimer == -1) {
@@ -9271,19 +9398,19 @@ Game.prototype.doTouch = function (lastInput) {
         this.thumbPos = vec2.add(this.thumbOrigin, vec2.scale(direction, dist));
     } else this.thumbPos = this.thumbOrigin = this.thumbId = undefined;
 
-    if(player && direction) {
-        var mov = [0,0];
+    if (player && direction) {
+        var mov = [0, 0];
         var taunt = false;
 
-        if(lim.x > 0.33) { mov[0]++; }
-        if(lim.x < -0.33) { mov[0]--; }
-        if(lim.y > 0.33) { mov[1]--; }
-        if(lim.y != 0) { taunt = true; }
-        if(lim.y < -0.33) { mov[1]++; }
-    
-        player.input(mov, touchAPressed, game.touchRun?!touchBPressed:touchBPressed, false, taunt);
-      }
-    else if(player) { player.input([0,0], touchAPressed, game.touchRun?!touchBPressed:touchBPressed, false, false); }
+        if (lim.x > 0.33) { mov[0]++; }
+        if (lim.x < -0.33) { mov[0]--; }
+        if (lim.y > 0.33) { mov[1]--; }
+        if (lim.y != 0) { taunt = true; }
+        if (lim.y < -0.33) { mov[1]++; }
+
+        player.input(mov, touchAPressed, game.touchRun ? !touchBPressed : touchBPressed, false, taunt);
+    }
+    else if (player) { player.input([0, 0], touchAPressed, game.touchRun ? !touchBPressed : touchBPressed, false, false); }
 
     /* player && direction ? (direction = [0x0, 0x0], 0.33 < lim.x && direction[0x0]++, -0.33 > lim.x && direction[0x0]--, 0.33 < lim.y && direction[0x1]--, -0.33 > lim.y && direction[0x1]++, player.input(direction, touchAPressed, this.touchRun ? !touchBPressed : touchBPressed)) : player && player.input([0x0, 0x0], touchAPressed, this.touchRun ? !touchBPressed : touchBPressed); */
 };
@@ -9348,7 +9475,7 @@ Game.prototype.doStep = function () {
         this.levelWarpId = undefined;
         this.pauseCamera = false;
         this.overrideCameraPos = false;
-        if (!(this.game instanceof LobbyGame))this.resumeGameTimer();
+        if (!(this.game instanceof LobbyGame)) this.resumeGameTimer();
     }
     player && this.cullSS && !vec2.equals(player.pos, this.cullSS) && this.out.push(NET015.encode());
     player && this.fillSS && this.fillSS !== player.fallSpeed && this.out.push(NET015.encode());
@@ -9417,7 +9544,7 @@ Game.prototype.doStep = function () {
                     this.gameOver = false;
                     this.gameOverTimer = 0x0;
                     this.lives = -1; // Activate spectate mode
-                    
+
                     this.doSpawn();
                     this.getPlayer().spectate();
                 }
@@ -9637,7 +9764,7 @@ Game.prototype.draw = function () {
     });
 };
 
-Game.prototype.destroy = function() {
+Game.prototype.destroy = function () {
     _0x2a6b41.call(window, this.frameReq);
     clearTimeout(this.loopReq);
     this.input.destroy();
@@ -9773,7 +9900,7 @@ function App() {
     this.goToLobby = Cookies.get("go_to_lobby") === "1";
     if (this.goToLobby)
         Cookies.remove("go_to_lobby");
-    
+
     var params = new URLSearchParams(window.location.search);
 
     this.inviteCode = params.get("code");
@@ -9868,7 +9995,7 @@ App.prototype.login = function (username, pw) {
 App.prototype.logout = function (username, pw) {
     this.net.send({ 'type': "llo" });
 };
-App.prototype.getLeaderboards = function() {
+App.prototype.getLeaderboards = function () {
     this.net.send({ 'type': "llb" });
 };
 App.prototype.requestCaptcha = function () {

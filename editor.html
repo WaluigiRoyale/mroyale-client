@@ -78,12 +78,12 @@
         <div class="file-error" id="file-error">...</div>
           You can download and open any of these existing worlds by clicking on the hyperlinks:
           <ul>
-            <li><a href="game/world-1.json" download="world-1.json">world-1.json</a></li>
-            <li><a href="game/world-l1.json" download="world-l1.json">world-l1.json</a></li>
-            <li><a href="game/world-p.json" download="world-p.json">world-p.json</a></li>
-            <li><a href="game/world-special.json" download="world-special.json">world-special.json</a></li>
+            <li><a href="https://raw.githubusercontent.com/mroyale/assets/master/worlds/royale/world-1.json" download>world-1.json</a></li>
+            <li><a href="https://raw.githubusercontent.com/mroyale/assets/master/worlds/royale/world-l1.json" download>world-l1.json</a></li>
+            <li><a href="https://raw.githubusercontent.com/mroyale/assets/master/worlds/royale/world-p.json" download>world-p.json</a></li>
+            <li><a href="https://raw.githubusercontent.com/mroyale/assets/master/worlds/royale/world-special.json" download>world-special.json</a></li>
         </ul>
-          You can also press the “New Empty Level” button to create a new blank level.<br>
+          You can also press the “New Empty Level” button to create a new blank level or check out the <a href="https://github.com/mroyale/assets/tree/master/worlds">GitHub repository</a> with all the worlds.<br>
           This EK is intended for those somewhat knowledgeable of programming/modding.<br>
           All values listed as “byte” or “bit” are in unsigned decimal format.<br>
           Which means a byte is a value from 0 to 255 and so on.<br><br>
@@ -105,6 +105,7 @@
           <span id='editor-top-copy' class="toolbar-button-top left">Clone</span>
           <span id='editor-top-rep' class="toolbar-button-top left">Replace</span>
           <span id='editor-top-ref' class="toolbar-button-top left">Reference</span>
+          <span id='editor-top-background' class="toolbar-button-top left">Background</span>
           <span id='editor-top-guide' class="toolbar-button-top right">Guide</span>
           <span id='editor-top-about' class="toolbar-button-top right">About</span>
           <span id='editor-top-save' class="toolbar-button-top right">Save</span>
@@ -119,6 +120,50 @@
             </div>
         </div>
         <div id='editor-bottom' class="row footer">
+
+          <!-- Background Tool [CONCEPT!!] -->
+          <div id='editor-tool-background' class='tool-container' style='display: none;'>
+            <div class='tool-box'>
+              <div class='tool-var'>Initial Sprite Index</div><div class='tool-type'>11-bit int</div>
+              <input id='editor-tool-background-initial' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Horizontal Length</div><div class='tool-type'>16-bit int</div>
+              <input id='editor-tool-background-columns' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Vertical Length</div><div class='tool-type'>16-bit int</div>
+              <input id='editor-tool-background-rows' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div class='tool-var'>Layer</div><div class='tool-type'>signed int</div>
+              <input id='editor-tool-background-layer' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>X Offset</div><div class='tool-type'>16-bit int</div>
+              <input id='editor-tool-background-xoff' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-box'>
+              <div class='tool-var'>Y Offset</div><div class='tool-type'>16-bit int</div>
+              <input id='editor-tool-background-yoff' type='text' class="tool-val"/>
+            </div>
+            <div class='tool-div'></div>
+            <div class='tool-box'>
+              <div id='editor-tool-background-generate' class="tool-button">Generate</div>
+            </div>
+            <br>
+            <div class='tool-box' style='font-size: 80%'>
+              <div>This is a rudimentary tool developed to help making backgrounds a bit easier.</div>
+              <div>Press P to activate Preview Mode.</div>
+              <div>Initial Sprite Index is the sprite of the first block placed. The sprite increments by one for every block placed horizontally.</div>
+              <div>Horizontal Length is how many blocks are placed horizontally.</div>
+              <div>Vertical Length is how many blocks are placed vertically, starting from the top.</div>
+              <div>Layer, is the layer used to place the blocks on. Defaults to 0.</div>
+              <div>X Offset is the horizontal offset of the blocks placed. 1 is one tile, 2 is two tiles, etc..</div>
+              <div>Y Offset is the vertical offset, same principle. 1 is one tile, etc..</div>
+            </div>
+          </div>
 
           <!-- World Tool -->
           <div id='editor-tool-world' class='tool-container' style='display: none'>
