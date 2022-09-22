@@ -86,7 +86,7 @@ SpinyObject.prototype.control = function () {
     this.moveSpeed = this.dir ? -SpinyObject.MOVE_SPEED_MAX : SpinyObject.MOVE_SPEED_MAX;
     this.grounded ? this.setState(SpinyObject.STATE.RUN) : this.setState(SpinyObject.STATE.FALL);
 };
-SpinyObject.prototype.physics = function () {
+/*SpinyObject.prototype.physics = function () {
     this.grounded && (this.fallSpeed = 0x0);
     this.fallSpeed = Math.max(this.fallSpeed - SpinyObject.FALL_SPEED_ACCEL, -SpinyObject.FALL_SPEED_MAX);
     var _0x482f3b = vec2.add(this.pos, vec2.make(this.moveSpeed, 0x0)),
@@ -104,7 +104,83 @@ SpinyObject.prototype.physics = function () {
     for (_0x3c302a = 0x0; _0x3c302a < _0x44dd07.length; _0x3c302a++) _0x1a430b = _0x44dd07[_0x3c302a], _0x1a430b.definition.COLLIDE && squar.intersection(_0x1a430b.pos, _0x39b88d, _0x443a52, this.dim) && (this.pos.y >= _0x443a52.y && _0x443a52.y < _0x1a430b.pos.y + _0x39b88d.y ? (_0x443a52.y = _0x1a430b.pos.y + _0x39b88d.y, this.fallSpeed = 0x0, this.grounded = true) : this.pos.y <= _0x443a52.y && _0x443a52.y + this.dim.y > _0x1a430b.pos.y && (_0x443a52.y = _0x1a430b.pos.y - this.dim.y, this.fallSpeed = 0x0));
     this.pos = vec2.make(_0x482f3b.x, _0x443a52.y);
     _0x5c888e && (this.dir = !this.dir);
+};*/
+
+SpinyObject.prototype.physics = function() {
+    if(this.grounded) {
+      this.fallSpeed = 0;
+    }
+    this.fallSpeed = Math.max(this.fallSpeed - SpinyObject.FALL_SPEED_ACCEL, -SpinyObject.FALL_SPEED_MAX);
+    
+    var movx = vec2.add(this.pos, vec2.make(this.moveSpeed, 0.));
+    var movy = vec2.add(this.pos, vec2.make(this.moveSpeed, this.fallSpeed));
+    
+    var ext1 = vec2.make(this.moveSpeed>=0?this.pos.x:this.pos.x+this.moveSpeed, this.fallSpeed<=0?this.pos.y:this.pos.y+this.fallSpeed);
+    var ext2 = vec2.make(this.dim.y+Math.abs(this.moveSpeed), this.dim.y+Math.abs(this.fallSpeed));
+    var tiles = this.game.world.getZone(this.level, this.zone).getTiles(ext1, ext2);
+    var tdim = vec2.make(1., 1.);
+    
+    var changeDir = false;
+    this.grounded = false;
+    for(var i=0;i<tiles.length;i++) {
+      var tile = tiles[i];
+      if(!tile.definition.COLLIDE) { if (!tile.definition.WARP) continue; }
+      
+      var hitx = squar.intersection(tile.pos, tdim, movx, this.dim);
+      
+      if(hitx) {
+        if (tile.definition.WARP) { tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, 0x69, this); continue; }
+
+        if(this.pos.x <= movx.x && movx.x + this.dim.x > tile.pos.x) {
+          movx.x = tile.pos.x - this.dim.x;
+          movy.x = movx.x;
+          this.moveSpeed = 0;
+          changeDir = true;
+        }
+        else if(this.pos.x >= movx.x && movx.x < tile.pos.x + tdim.x) {
+          movx.x = tile.pos.x + tdim.x;
+          movy.x = movx.x;
+          this.moveSpeed = 0;
+          changeDir = true;
+        }
+      }
+    }
+      
+    for(var i=0;i<tiles.length;i++) {
+      var tile = tiles[i];
+      if(!tile.definition.COLLIDE) { continue; }
+      
+      var hity = squar.intersection(tile.pos, tdim, movy, this.dim);
+      
+      if(hity) {
+        if(this.pos.y >= movy.y && movy.y < tile.pos.y + tdim.y) {
+          movy.y = tile.pos.y + tdim.y;
+          this.fallSpeed = 0;
+          this.grounded = true;
+        }
+        else if(this.pos.y <= movy.y && movy.y + this.dim.y > tile.pos.y) {
+          movy.y = tile.pos.y - this.dim.y;
+          this.fallSpeed = 0;
+        }
+      }
+    }
+    this.pos = vec2.make(movx.x, movy.y);
+    if(changeDir) { this.dir = !this.dir; }
 };
+
+SpinyObject.prototype.warp = function(warpId) {
+    var warp = this.game.world.getLevel(this.level).getWarp(warpId);
+
+    if (warp) {
+        this.level = warp.level;
+        this.zone = warp.zone;
+        console.log(this.pos, warp.pos)
+        this.pos = warp.pos;
+        console.log(this.pos, warp.pos)
+        this.grounded = false;
+    }
+};
+
 SpinyObject.prototype.sound = GameObject.prototype.sound;
 SpinyObject.prototype.proximity = function () {
     var _0xc67304 = this.game.getPlayer();

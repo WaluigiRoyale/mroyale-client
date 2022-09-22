@@ -3,6 +3,11 @@
   src: url('../font/smbfont.ttf') format("truetype");
 }
 
+@font-face {
+  font-family: SmbChat;
+  src: url('../font/chatfont.ttf') format("truetype");
+}
+
 @keyframes glow {
   to {
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
@@ -72,7 +77,7 @@ body {
 .background-a {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  background-color: #6B8CFF;
+  background-color: #14161d;
   background-image: url(https://raw.githubusercontent.com/mroyale/assets/master/img/home/bkga.png);
   background-repeat: repeat-x;
   background-position: center center;
@@ -477,6 +482,70 @@ hr {
   left: 50%;
   transform: translateX(-50%) translateY(-90%);
   white-space: nowrap;
+}
+
+.container-gameChat {
+  position: absolute;
+  font-family: SmbWeb;
+  width: 50vh;
+  height: 45vh;
+  background-color: #00000080;
+  transform: translateX(5%) translateY(110%);
+
+  top: 0%;
+  left: 0%;
+
+  background-image: none;
+  border-radius: 10px;
+  border: 4px white solid;
+  overflow-x: clip;
+  overflow-y: hidden;
+  color: #FFFFFF;
+}
+
+.container-hideChat {
+  position: absolute;
+  display: block;
+  margin-top: -12%;
+  margin-left: 93%;
+}
+
+.container-hiddenChat {
+  width: 20vh;
+  height: 5vh;
+  transform: translateX(5%) translateY(90vh);
+}
+
+.container-chatTab {
+  display:inline-flex;
+  margin-left: -12%;
+  position: absolute;
+  transform: translateY(-50%);
+}
+
+.container-chatInput {
+  width: 98%;
+  transform: translateX(-12.5%) translateY(28vh);
+  height: 3vh;
+  background-color: rgba(0, 0, 0, 0.565);
+  border-radius: 7px;
+  font-family: SmbChat;
+  color: rgb(255, 255, 255);
+  font-size: 18px;
+}
+
+.container-chatMessages {
+  height: 27vh;
+  font-family: 'SmbChat';
+  margin-top: -5vh;
+  margin-left: .5vh;
+  margin-right: .5vh;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
 }
 
 .container-privLobby {
@@ -1292,7 +1361,7 @@ hr {
 
 .rtfpn {
   position: absolute;
-  bottom: 0px;
+  bottom: 15px;
   right: 0px;
   width: 844px;
   height: 378px;

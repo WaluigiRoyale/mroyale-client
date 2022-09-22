@@ -902,6 +902,21 @@ td32.TILE_PROPERTIES = {
             }
         }
     },
+    /* Checkpoint */
+    40: {
+        COLLIDE: false,
+        HIDDEN: false,
+        ASYNC: true,
+        TRIGGER: function(game, pid, td, level, zone, x, y, type) {
+            switch (type) {
+                /* Touch */
+                case 0x00: {
+                    var world = app.game.world;
+                    world.checkpoint = { 'pos': shor2.encode(x, y), 'level': level, 'zone': zone }
+                }
+            }
+        }
+    },
     /* Vine Block */
     0x18: {
         COLLIDE: true,
@@ -979,13 +994,22 @@ td32.TILE_PROPERTIES = {
         COLLIDE: false,
         HIDDEN: false,
         ASYNC: true,
-        TRIGGER: function (game, pid, td, level, zone, x, y, type) {
+        WARP: true,
+        TRIGGER: function (game, pid, td, level, zone, x, y, type, warper) {
             switch (type) {
                 /* Touch */
                 case 0x00: {
                     if (game.pid === pid) {
                         game.getPlayer().warp(td.data);
                     }
+
+                    break;
+                }
+
+                /* Warping Object */
+                case 0x69: {
+                    warper.warp(td.data);
+                    break;
                 }
             }
         }
@@ -1335,7 +1359,7 @@ NETX.decode = function (/* Uint8Array */ data) {
 var NET001 = {}; // ASSIGN_PID [0x1] // As Uint8Array
 /* ======================================================================================== */
 NET001.DESIGNATION = 0x02;
-NET001.BYTES = 7;
+NET001.BYTES = 8;
 
 /* Server->Client */
 NET001.decode = function (/* NET001_SERV */ a) {
@@ -1344,14 +1368,15 @@ NET001.decode = function (/* NET001_SERV */ a) {
         pid: (a[1] & 0x00FF) | ((a[0] << 8) & 0xFF00),
         skin: (a[3] & 0x00FF) | ((a[2] << 8) & 0xFF00),
         isDev: a[4],
-        isJunior: a[5]
+        isJunior: a[5],
+        isMod: a[6]
     };
 };
 
 var NET010 = {}; // CREATE_PLAYER_OBJECT [0x10] // As Uint8Array
 /* ======================================================================================== */
 NET010.DESIGNATION = 0x10;
-NET010.BYTES = 13;
+NET010.BYTES = 14;
 
 /* Client->Server */
 NET010.encode = function (/* byte */ levelID, /* byte */ zoneID, /* shor2 */ pos) {
@@ -1368,7 +1393,8 @@ NET010.decode = function (/* NET010_SERV */ a) {
         pos: (a[7] & 0xFF) | ((a[6] << 8) & 0xFF00) | ((a[5] << 16) & 0xFF0000) | ((a[4] << 24) & 0xFF0000),
         skin: (a[9] & 0xFF) | (a[8] << 8),
         isDev: a[10],
-        isJunior: a[11]
+        isJunior: a[11],
+        isMod: a[12]
     };
 };
 
@@ -1462,8 +1488,8 @@ NET017.DESIGNATION = 0x17;
 NET017.BYTES = 5;
 
 /* Client->Server */
-NET017.encode = function (/* short */ killer) {
-    return new Uint8Array([NET017.DESIGNATION, killer >> 8 & 0xFF, killer & 0xFF]);
+NET017.encode = function (/* short */ killer, type) {
+    return new Uint8Array([NET017.DESIGNATION, killer >> 8 & 0xFF, killer & 0xFF, type]);
 };
 
 /* Server->Client */
@@ -1471,7 +1497,8 @@ NET017.decode = function (/* NET017_SERV */ a) {
     return {
         designation: NET017.DESIGNATION,
         pid: (a[1] & 0x00FF) | ((a[0] << 8) & 0xFF00),
-        killer: (a[3] & 0x00FF) | ((a[2] << 8) & 0xFF00)
+        killer: (a[3] & 0x00FF) | ((a[2] << 8) & 0xFF00),
+        type: a[4]
     };
 };
 
@@ -1631,6 +1658,9 @@ function Menu() {
         'id': "disclaim",
         'obj': new DisclaimScreen()
     }, {
+        'id': "mobileDisclaim",
+        'obj': new MobileDisclaimScreen()
+    }, {
         'id': "main",
         'obj': new MainScreen()
     }, {
@@ -1720,16 +1750,16 @@ function WarnScreen() {
     this.hide();
     this.timeout = undefined;
 }
-WarnScreen.prototype.show = function (msg, showImg = true, log = false) {
-    showImg == false ? this.element.innerHTML = msg : this.element.innerHTML = "<img src='" + ASSETS_URL + "img/home/warn.png'" + "class='warn-ico'/> " + msg;
-    if (log !== false) console.warn("##WARN## " + msg);
-    this.timeout && clearTimeout(this.timeout);
-    var _0x2893b1 = this.element;
-    this.timeout = setTimeout(function () {
-        _0x2893b1.style.display = "none";
-    }, 0x1388);
+WarnScreen.prototype.show = function(message) {
+    this.element.innerHTML = "<img src='" + ASSETS_URL + "img/home/warn.png' class='warn-ico'/> " + message;
+    console.warn("##WARN## " + message);
+  
+    if(this.timeout) { clearTimeout(this.timeout); }
+    var tmp = this.element;
+    this.timeout = setTimeout(function() { tmp.style.display = "none"; }, 5000);
     this.element.style.display = "block";
-};
+  };
+  
 WarnScreen.prototype.hide = function () {
     this.element.style.display = "none";
 };
@@ -1775,10 +1805,26 @@ function DisclaimScreen() {
 DisclaimScreen.prototype.show = function (_0x2243c7) {
     app.menu.hideAll();
     app.menu.background('c');
-    this.linkElement.style.display = "block";
+    //this.linkElement.style.display = "block";
     this.element.style.display = "block";
 };
 DisclaimScreen.prototype.hide = function () {
+    this.linkElement.style.display = "";
+    this.element.style.display = "none";
+};
+"use strict";
+
+function MobileDisclaimScreen() {
+    this.element = document.getElementById("disclaim-mobile");
+    this.linkElement = document.getElementById("link");
+}
+MobileDisclaimScreen.prototype.show = function (_0x2243c7) {
+    app.menu.hideAll();
+    app.menu.background('c');
+    this.linkElement.style.display = "block";
+    this.element.style.display = "block";
+};
+MobileDisclaimScreen.prototype.hide = function () {
     this.linkElement.style.display = "";
     this.element.style.display = "none";
 };
@@ -1798,8 +1844,6 @@ function MainScreen() {
     this.maintenance = document.getElementById("main-maintenance");
     this.padLoop = undefined;
     var mainscreen = this;
-    var generated = Math.floor(Math.random() * 101);
-    if (generated === 1) that.titleElement.innerText = "Engineer Gaming";
     this.launchbtn.onclick = function () {
         document.getElementById('leaderboard').style.display = 'none';
         mainscreen.launch();
@@ -1915,8 +1959,6 @@ function MainAsMemberScreen() {
     this.isPrivate = false;
     this.gameMode = 0;
     var that = this;
-    var generated = Math.floor(Math.random() * 101);
-    if (generated === 1) that.titleElement.innerText = "Engineer Gaming";
     this.launchbtn.onclick = function () {
         document.getElementById('leaderboard').style.display = 'none';
         that.launch();
@@ -2115,6 +2157,7 @@ function NameScreen() {
     this.launchbtn = document.getElementById("name-launch");
     this.autoMovebtn = document.getElementById("autoMove");
     this.compactModebtn = document.getElementById("compactMode");
+    this.accessibilityModebtn = document.getElementById("accessibilityMode");
     this.settingsClosebtn = document.getElementById("settingsClose");
     this.padLoop = undefined;
     this.skinButtonPrefix = "skin-select";
@@ -2137,6 +2180,7 @@ function NameScreen() {
 
     this.autoMovebtn.addEventListener("click", (function () { return function (event) { that.setAutoMove(!app.autoMove); }; })());
     this.compactModebtn.addEventListener("click", (function () { return function (event) { that.setCompactMode(!app.compactMode); }; })());
+    this.accessibilityModebtn.addEventListener("click", (function () { return function (event) { that.setAccessibilityMode(!app.accessibilityMode); }; })());
 
     this.settingsClosebtn.onclick = function () {
         document.getElementById("settingsPanel").style.display = "none";
@@ -2201,7 +2245,7 @@ NameScreen.prototype.updPrivatebtn = function () {
 
         var elem = document.createElement("span");
         elem.classList.add("tooltiptext");
-        elem.innerText = "You're joining to a private room!"
+        elem.innerText = "You're joining a private room!"
         this.launchbtn.appendChild(elem);
     }
 }
@@ -2345,7 +2389,46 @@ NameScreen.prototype.setCompactMode = function (val) {
     app.compactMode = val;
     Cookies.set("compactMode", val, { 'expires': 0x1e });
     this.compactModebtn.innerText = (val ? "[X]" : "[ ]") + " Compact Mode";
-}
+};
+NameScreen.prototype.setAccessibilityMode = function (val) {
+    app.accessibilityMode = val;
+    Cookies.set("accessibilityMode", val, { 'expires': 0x1e });
+    this.accessibilityModebtn.innerText = (val ? "[X]" : "[ ]") + " Accessibility Mode";
+    try{
+        var resource = app.game.display.resource;
+        var texture = resource.texture;
+        if (val)
+            if (texture.cache.map.src.includes("special_")) {
+                var img = document.createElement('img');
+                img.src = ASSETS_URL + "img/game/smb_map_new.png?v=" + VERSION;
+                texture.cache["map"] = img;
+                app.mapReplaced = true;
+            }
+
+            if (texture.cache.obj.src.includes("special")) {
+                var img = document.createElement('img');
+                img.src = ASSETS_URL + "img/game/smb_obj.png?v=" + VERSION;
+                texture.cache["obj"] = img;
+                app.objReplaced = true;
+            }
+        else {
+            if (app.mapReplaced) {
+                var img = document.createElement('img');
+                img.src = ASSETS_URL + "img/game/special_map_new.png?v=" + VERSION;
+                texture.cache["map"] = img;
+                app.mapReplaced = false;
+            }
+
+            if (app.objReplaced) {
+                var img = document.createElement('img');
+                img.src = ASSETS_URL + "img/game/special2_obj.png?v=" + VERSION;
+                texture.cache["obj"] = img;
+                app.mapReplaced = false;
+            }
+        }
+    } catch(e) {console.log(e)}
+};
+
 NameScreen.prototype.launch = function () {
     Cookies.set("name", this.nameInput.value, {
         'expires': 0x1e
@@ -2411,7 +2494,7 @@ function ProfileScreen() {
     var that = this;
     this.shopbtn.onclick = function () {
         app.menu.shop.ownedSkins = app.menu.mainAsMember.skins;
-        app.menu.shop.show();
+        app.net.send({"type": "lgs"});
     }
     this.savebtn.onclick = function () {
         that.save();
@@ -2458,7 +2541,7 @@ ProfileScreen.prototype.hide = function () {
     this.element.style.display = "none";
 };
 ProfileScreen.prototype.save = function () {
-    if (this.nicknameInput.value.length <= 3) {
+    if (this.nicknameInput.value.length <= 2) {
         return this.reportError("Nickname is too short");
     } else if (this.nicknameInput.value.length > 20) {
         return this.reportError("Nickname is too long");
@@ -2485,40 +2568,38 @@ ProfileScreen.prototype.reportError = function (message) {
 };
 
 "use strict";
-let skinSelected = skins[0]['id'];
+let skinSelected = null;
 function ShopScreen() {
     this.element = document.getElementById("shop");
-    this.buybtn = document.getElementById("shop-buy");
-    this.backbtn = document.getElementById("shop-return");
+    this.buyBtn = document.getElementById("shop-buy");
+    this.backBtn = document.getElementById("shop-return");
     this.skinName = document.getElementById("shop-name");
     this.shopResult = document.getElementById("shopResult");
-    this.coins = null;
     var that = this;
-    this.buybtn.onclick = function () {
+    this.buyBtn.onclick = function() {
         that.purchase(skinSelected);
     };
-    this.backbtn.onclick = function () {
+    this.backBtn.onclick = function() {
         that.return();
     };
 
+    this.successSound = document.getElementById("successSound");
+    this.failSound = document.getElementById("failSound");
+    //this.failSound = new Audio(ASSETS_URL + "audio/shop/fail.mp3");
 };
 
-ShopScreen.prototype.order = function () {
+ShopScreen.prototype.order = function() {
     let arr = {}
-    for (var skin of skins) {
+    for(var skin of app.skinList) {
         let obj = { 'id': skin.id, 'name': skin.name, 'coins': skin.coins };
         arr[skin.id] = obj;
     }
     return arr;
 };
 
-ShopScreen.prototype.select = function (skinid) {
-    this.ownedSkins = app.menu.mainAsMember.skins;
-    this.coins = app.menu.mainAsMember.coins;
-    if (skinSelected !== null || undefined) {
-        let elem = document.getElementById(`shop-${skinSelected}`);
-        var formatted = this.order();
-        elem.style["border-color"] = this.ownedSkins.includes(skinSelected) ? "#00C800" : this.coins < formatted[skinSelected].coins ? "#9f0000" : "#3c3c3c";
+ShopScreen.prototype.select = function(skinid) {
+    if (skinSelected !== null) {
+        document.getElementById(`shop-${skinSelected}`).style["border-color"] = '#3c3c3c';
     }
     skinSelected = skinid;
     this.setInfo(skinid);
@@ -2526,25 +2607,7 @@ ShopScreen.prototype.select = function (skinid) {
     skn.style["border-color"] = 'white';
 };
 
-ShopScreen.prototype.updateBorder = function () {
-    this.ownedSkins = app.menu.mainAsMember.skins;
-    this.coins = app.menu.mainAsMember.coins;
-    var that = this;
-    $('#shop-select').find('div').each(function(){
-        var innerDivId = $(this).attr('id');
-        var elem = document.getElementById(innerDivId);
-        var format = that.order();
-        var skin = format[innerDivId.replace("shop-","")];
-        var skinid = skin.id;
-        var coins = skin.coins;
-
-        console.log(elem, coins);
-        elem.style["border-color"] = that.ownedSkins.includes(skinid) ? "00C800" : that.coins < coins ? "#9f0000" : "#3c3c3c";
-        that.select(skinSelected);
-    });
-};
-
-ShopScreen.prototype.setInfo = function (skin) {
+ShopScreen.prototype.setInfo = function(skin) {
     let skinPrice = document.getElementById("shop-price");
     let skinName = document.getElementById("shop-name");
     let arr = this.order()
@@ -2552,77 +2615,67 @@ ShopScreen.prototype.setInfo = function (skin) {
     skinPrice.innerText = arr[skin]['coins'];
 };
 
-ShopScreen.prototype.show = function () {
+ShopScreen.prototype.show = function() {
     let element = document.getElementById("shop");
-    app.menu.navigation("main", "shop");
     app.menu.partHide();
     app.menu.background('a');
     element.style.display = 'block';
-    this.coins = app.menu.mainAsMember.coins;
-    this.ownedSkins = app.menu.mainAsMember.skins;
-    document.getElementById('shop-select').children.length = 0;
-    if (document.getElementById('shop-select').children.length === 0) {
-        for (var skin of skins) {
+    if (!app.skinList) return this.show();
+    if(document.getElementById('shop-select').children.length === 0) {
+        for(var skin of app.skinList) {
             var elem = document.createElement("div");
             elem.setAttribute("class", "skin-select-button");
             elem.setAttribute("id", 'shop-' + skin.id);
-            elem.style["background-image"] = `url('${ASSETS_SKIN_URL + skin.id + ".png"}')`;
-            elem.style["border-color"] = this.ownedSkins.includes(skin.id) ? "#00C800" : this.coins < skin.coins ? "#9f0000" : "#3c3c3c";
-            elem.addEventListener("click", (function (a) { return function () { ShopScreen.prototype.select(a); }; })(skin.id));
+            elem.style["background-image"] = "url('https://raw.githubusercontent.com/mroyale/assets/master/img/skins/smb_skin" + skin.id +".png')";
+            elem.addEventListener("click", (function(a){return function() { ShopScreen.prototype.select(a); }; } ) (skin.id));
             document.getElementById('shop-select').appendChild(elem);
         }
     }
     $("#" + 'shop-select').pagify(112, ".skin-select-button");
     $("#" + 'shop-pagination').pagify(10, ".page");
-    this.select(skins[0]['id'])
+    this.select(app.skinList[0]['id'])
 };
 
-ShopScreen.prototype.purchase = function (skin) {
-    const formatted = this.order();
-    let skins = app.menu.mainAsMember.skins;
-    if (this.coins === null) this.coins = app.menu.mainAsMember.coins;
-    this.coins = parseInt(document.getElementById("winCoins"));
-
-    if (skins.includes(skin)) return this.purchased(`You already have this skin.`);
-    if (this.coins < formatted[skin]['coins']) return this.error('You do not have enough coins.');
-
-    app.net.send({ 'type': 'prc', 'skin': skin, 'coins': formatted[skin]['coins'] });
-    this.success(`Purchased ${formatted[skin]['name']} successfully`);
-    app.menu.mainAsMember.skins.push(skin.id);
-    this.updateBorder();
+ShopScreen.prototype.purchase = function(skin) {
+    app.net.send({'type': 'lbs', 'skin': skin});
 };
 
-ShopScreen.prototype.error = function (msg) {
+ShopScreen.prototype.getSkin = function() {
+    return this.skinSelected;
+};
+
+ShopScreen.prototype.error = function(msg) {
     let shopResult = document.getElementById('shopResult');
     shopResult.innerText = msg;
     shopResult.style.color = 'rgb(255, 0, 0)';
+    this.failSound.play();
 };
 
-ShopScreen.prototype.success = function (msg) {
+ShopScreen.prototype.success = function(msg, skin) {
     let shopResult = document.getElementById('shopResult');
     shopResult.innerText = msg;
     shopResult.style.color = '#68BC00';
+    this.successSound.play();
 };
 
-ShopScreen.prototype.purchased = function (msg) {
+ShopScreen.prototype.purchased = function(msg) {
     let shopResult = document.getElementById('shopResult');
     shopResult.innerText = msg;
     shopResult.style.color = 'grey';
+    this.failSound().play(); // This actually won't play because of the request handling. Perhaps error ID 2
 };
 
-ShopScreen.prototype.handleCoins = function (data) {
+ShopScreen.prototype.handleCoins = function(data) {
     let winElement = document.getElementById('winCoins');
-
-    winElement.innerText = data
-    this.coins = data;
+    winElement.innerText = data;
 };
 
-ShopScreen.prototype.return = function () {
-    app.menu.navigation("shop", "main");
+ShopScreen.prototype.return = function() {
+    //location.reload();
     app.menu.mainAsMember.show();
 };
 
-ShopScreen.prototype.hide = function () {
+ShopScreen.prototype.hide = function() {
     this.element.style.display = 'none';
 };
 
@@ -3119,8 +3172,16 @@ InputState.prototype.handlePacket = function (data) {
             return this.handleUpdProfileResult(data), true;
         case "llb":
             return this.updateLeaderboard(data), true;
-        case "prc":
-            return this.handleSkinResult(data), true;
+        case "lss":
+            app.menu.mainAsMember.skins = data.skins;
+            return true;
+        case "lgs":
+            app.skinList = data["skins"];
+            app.menu.shop.show();
+            return true;
+        case "lbs":
+            this.handleSkinResult(data);
+            return true;
         default:
             return false;
     }
@@ -3155,8 +3216,10 @@ InputState.prototype.handleUpdProfileResult = function (data) {
     }
 };
 InputState.prototype.handleSkinResult = function (data) {
-    ShopScreen.prototype.handleCoins(data.coins);
-    //app.menu.mainAsMember.skins = data.skins;
+    let shop = app.menu.shop;
+    data.success ? shop.success(data.message) : shop.error(data.message);
+    
+    if (data.success) { shop.handleCoins(data.coins); app.menu.mainAsMember.skins = data.skins; }
 };
 InputState.prototype.handleLoginResult = function (data) {
     if (data.status) {
@@ -3219,6 +3282,8 @@ GameState.prototype.handlePacket = function (data) {
             return app.hurryUp(data), true;
         case "gtk":
             return app.tick(data), true;
+        case "gsm":
+            return this.receiveMessage(data), true;
         default:
             return app.ingame() ? app.game.handlePacket(data) : false;
     }
@@ -3256,8 +3321,57 @@ GameState.prototype.load = function (data) {
         }
     });
 };
-GameState.prototype.globalWarn = function (_0xba301c) {
-    app.menu.warn.show(_0xba301c.message);
+GameState.prototype.receiveMessage = function (data) {
+    function sanitize(string) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;',
+            "/": '&#x2F;',
+        };
+        const reg = /[&<>"'/]/ig;
+        return string.replace(reg, (match)=>(map[match]));
+    }
+
+    /* the jquery scrolling method is a bit convoluted but eh */
+    let color;
+    let usercolor;
+
+    if (data.warn) {
+        switch (data.warn) {
+            case 1 : { color = "#FF6600"; break; }
+            case 2 : { color = "#FF0000"; break; }
+            case 3 : { color = "#00FF00"; break; }
+            case 4 : { color = "#FFFF00"; break; }
+        }
+    }
+
+    if (data.mod) { usercolor = "#00FF00"; }
+    if (data.dev) { usercolor = "#FFFF00"; }
+
+    let message = sanitize(data.message);
+    if (data.global) {
+        let messages = document.getElementById("messagesGlobal");
+
+        data.warn ? messages.innerHTML += `<span style='color:` + color + `'>${message}</span>\n\n` : messages.innerHTML += `<span><span style="color:${usercolor}">${data.name}</span>: ${message}</span>\n\n`;
+
+        jQuery( function(){
+            var pre = jQuery("#messagesGlobal");
+             pre.scrollTop( pre.prop("scrollHeight") );
+        });
+    } else {
+        let messagesq = document.getElementById("messagesSquad");
+        data.warn ? messagesq.innerHTML += `<span style='color:` + color + `'>${message}</span>\n\n` : messagesq.innerHTML += `<span><span style="color:${usercolor}">${data.name}</span>: ${message}</span>\n\n`;
+        jQuery( function(){
+            var pre = jQuery("#messagesSquad");
+             pre.scrollTop( pre.prop("scrollHeight") );
+        });
+    }
+};
+GameState.prototype.globalWarn = function (data) {
+    app.menu.warn.show(data.message);
 };
 GameState.prototype.sendPing = function () {
     var _0x1ac5e9 = util.time.now();
@@ -3398,12 +3512,13 @@ GameObject.OBJECT = function (classId) {
 };
 "use strict";
 
-function PlayerObject(game, level, zone, pos, pid, skin, isDev, isJunior) {
+function PlayerObject(game, level, zone, pos, pid, skin, isDev, isJunior, isMod) {
     GameObject.call(this, game, level, zone, pos);
     this.pid = pid;
     this.skin = skin;
     game.display.ensureSkin(skin);
     this.isDev = isDev;
+    this.isMod = isMod;
     this.isJunior = isJunior;
     this.isGuest = false;
     this.anim = 0x0;
@@ -3498,6 +3613,7 @@ PlayerObject.TEAM_SIZE = 0.3;
 PlayerObject.TEAM_COLOR = "rgba(255,255,255,0.75)";
 PlayerObject.DEV_TEAM_COLOR = "rgba(255,255,0,1)";
 PlayerObject.JUNIOR_TEAM_COLOR = "rgba(0,255,255,1)";
+PlayerObject.MOD_TEAM_COLOR = "rgba(0,255,0,1)";
 PlayerObject.SPRITE = {};
 PlayerObject.SPRITE_LIST = [{
     'NAME': "S_STAND",
@@ -4174,6 +4290,19 @@ PlayerObject.prototype.autoMove = function () {
 };
 
 PlayerObject.prototype.control = function () {
+    if (document.activeElement.tagName === 'INPUT') {
+        if (this.autoTarget) {
+            this.autoMove()
+        } else {
+            this.btnD = [0x0, 0x0];
+            this.btnA = false;
+            this.btnB = false;
+            this.btnBg = false;
+            this.btnBde = false;
+            this.btnU = false;
+        };
+
+    }
     if (this.isState(PlayerObject.SNAME.HIDE) || this.spectator) return;
     if (this.grounded) this.btnBg = this.btnB;
     if (this.isState(PlayerObject.SNAME.DOWN) && this.collisionTest(this.pos, this.getStateByPowerIndex(PlayerObject.SNAME.STAND, this.power).DIM)) {
@@ -4403,7 +4532,7 @@ PlayerObject.prototype.interaction = function () {
             }
             if (obj instanceof PlayerObject && 0x0 < obj.starTimer && !this.autoTarget && this.game instanceof Game) {
                 this.damage(obj);
-                if (this.dead) this.game.out.push(NET017.encode(obj.pid));
+                if (this.dead) this.game.out.push(NET017.encode(obj.pid, 0x1));
             }
             if (this.lastPos.y > obj.pos.y + 0.66 * obj.dim.y - Math.max(0x0, obj.fallSpeed)) {
                 if (obj.playerStomp)
@@ -4446,7 +4575,20 @@ PlayerObject.prototype.bounce = function () {
 };
 PlayerObject.prototype.damage = function (source) {
     if (this.spectator) return;
-    0x0 < this.damageTimer || 0x0 < this.starTimer || this.isState(PlayerObject.SNAME.TRANSFORM) || this.isState(PlayerObject.SNAME.CLIMB) || this.isState(PlayerObject.SNAME.POLE) || this.pipeWarp || 0x0 < this.pipeTimer || 0x0 < this.pipeDelay || this.autoTarget || (0x0 < this.power ? (this.tfm(0x0), this.damageTimer = PlayerObject.DAMAGE_TIME) : this.kill());
+    //0x0 < this.damageTimer || 0x0 < this.starTimer || this.isState(PlayerObject.SNAME.TRANSFORM) || this.isState(PlayerObject.SNAME.CLIMB) || this.isState(PlayerObject.SNAME.POLE) || this.pipeWarp || 0x0 < this.pipeTimer || 0x0 < this.pipeDelay || this.autoTarget || (0x0 < this.power ? (this.tfm(0x0), this.damageTimer = PlayerObject.DAMAGE_TIME) : this.kill());
+    if(
+        this.damageTimer > 0 || this.starTimer > 0 ||
+        this.isState(PlayerObject.SNAME.TRANSFORM) ||
+        this.isState(PlayerObject.SNAME.CLIMB) ||
+        this.isState(PlayerObject.SNAME.POLE) ||
+        this.pipeWarp || this.pipeTimer > 0 || this.pipeDelay > 0 ||
+        this.autoTarget
+    ) { return; }
+    if(this.power > 0) { this.tfm(0); this.damageTimer = PlayerObject.DAMAGE_TIME; }
+    else {
+        //if (source && source.kicker !== -1) { this.game.out.push(NET017.encode(source.kicker, 0x3)); }
+        this.kill();
+    }
 };
 PlayerObject.prototype.invuln = function () {
     this.damageTimer = app.net.gameMode === 1 ? 120 : PlayerObject.DAMAGE_TIME;
@@ -4661,7 +4803,7 @@ PlayerObject.prototype.write = function (_0x239cf4) {
     }) : this.name && _0x239cf4.push({
         'pos': vec2.add(vec2.add(this.pos, vec2.make(0x0, this.sprite.INDEX instanceof Array ? 0x2 : 0x1)), PlayerObject.TEAM_OFFSET),
         'size': PlayerObject.TEAM_SIZE,
-        'color': this.isDev ? PlayerObject.DEV_TEAM_COLOR : this.isJunior ? PlayerObject.JUNIOR_TEAM_COLOR : PlayerObject.TEAM_COLOR,
+        'color': this.isDev ? PlayerObject.DEV_TEAM_COLOR : this.isMod ? PlayerObject.MOD_TEAM_COLOR : this.isJunior ? PlayerObject.JUNIOR_TEAM_COLOR : PlayerObject.TEAM_COLOR,
         'text': this.name
     });
 };
@@ -4862,6 +5004,7 @@ function KoopaObject(game, level, zone, pos, oid, fly, variant) {
     this.proxHit = false;
     this.immuneTimer = 0x0;
     this.dir = true;
+    this.kicker = -1;
     this.disable();
 }
 KoopaObject.ASYNC = false;
@@ -5084,18 +5227,18 @@ KoopaObject.prototype.damage = function (_0x565802) {
 KoopaObject.prototype.bonk = function () {
     this.dead || (this.setState(KoopaObject.STATE.BONK), this.moveSpeed = KoopaObject.BONK_IMP.x, this.fallSpeed = KoopaObject.BONK_IMP.y, this.dead = true, this.play("kick.mp3", 0x1, 0.04));
 };
-KoopaObject.prototype.stomped = function (_0x45b447) {
+KoopaObject.prototype.stomped = function (dir, kicker) {
     if (this.state === KoopaObject.STATE.FLY) this.setState(KoopaObject.STATE.RUN), this.jump = -0x1;
     else if (this.state === KoopaObject.STATE.RUN) this.setState(KoopaObject.STATE.SHELL), this.transformTimer = KoopaObject.TRANSFORM_TIME;
     else if (this.state === KoopaObject.STATE.SPIN) this.setState(KoopaObject.STATE.SHELL), this.transformTimer = KoopaObject.TRANSFORM_TIME;
-    else if (this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) this.setState(KoopaObject.STATE.SPIN), this.dir = _0x45b447;
+    else if (this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) this.setState(KoopaObject.STATE.SPIN), this.dir = dir, this.kicker = kicker;
     this.state === KoopaObject.STATE.SPIN ? this.play("kick.mp3", 0x1, 0.04) : this.play("stomp.mp3", 0x1, 0.04);
 };
 KoopaObject.prototype.playerCollide = function (player) {
     if (!(this.dead || this.garbage)) {
         if (this.state === KoopaObject.STATE.SHELL || this.state === KoopaObject.STATE.TRANSFORM) {
             var dir = 0x0 < player.pos.x - this.pos.x;
-            this.stomped(dir);
+            this.stomped(dir, player.pid);
             this.game.out.push(NET020.encode(this.level, this.zone, this.oid, dir ? 0x10 : 0x11));
             this.immuneTimer = KoopaObject.PLAYER_IMMUNE_TIME;
         } else {
@@ -5173,6 +5316,7 @@ function Koopa2Object(game, level, zone, pos, oid, fly, variant) {
     this.immuneTimer = 0x0;
     this.rev = false;
     this.dir = true;
+    this.kicker = -1;
     this.disable();
 }
 Koopa2Object.ASYNC = false;
@@ -5365,15 +5509,15 @@ Koopa2Object.prototype.damage = KoopaObject.prototype.damage;
 Koopa2Object.prototype.bonk = function () {
     this.dead || (this.setState(Koopa2Object.STATE.BONK), this.moveSpeed = KoopaObject.BONK_IMP.x, this.fallSpeed = KoopaObject.BONK_IMP.y, this.dead = true, this.play("kick.mp3", 0x1, 0.04));
 };
-Koopa2Object.prototype.stomped = function (_0x2f1cbf) {
+Koopa2Object.prototype.stomped = function (dir, kicker) {
     if (this.state === Koopa2Object.STATE.FLY) this.setState(Koopa2Object.STATE.RUN);
     else if (this.state === Koopa2Object.STATE.RUN) this.setState(Koopa2Object.STATE.SHELL), this.transformTimer = KoopaObject.TRANSFORM_TIME;
     else if (this.state === Koopa2Object.STATE.SPIN) this.setState(Koopa2Object.STATE.SHELL), this.transformTimer = KoopaObject.TRANSFORM_TIME;
-    else if (this.state === Koopa2Object.STATE.SHELL || this.state === Koopa2Object.STATE.TRANSFORM) this.setState(Koopa2Object.STATE.SPIN), this.dir = _0x2f1cbf;
+    else if (this.state === Koopa2Object.STATE.SHELL || this.state === Koopa2Object.STATE.TRANSFORM) this.setState(Koopa2Object.STATE.SPIN), this.dir = dir, this.kicker = kicker;
     this.state === Koopa2Object.STATE.SPIN ? this.play("kick.mp3", 0x1, 0.04) : this.play("stomp.mp3", 0x1, 0.04);
 };
 Koopa2Object.prototype.playerCollide = function (_0x2665f3) {
-    this.dead || this.garbage || (this.state === Koopa2Object.STATE.SHELL || this.state === Koopa2Object.STATE.TRANSFORM ? (_0x2665f3 = 0x0 < _0x2665f3.pos.x - this.pos.x, this.stomped(_0x2665f3), this.game.out.push(NET020.encode(this.level, this.zone, this.oid, _0x2665f3 ? 0x10 : 0x11)), this.immuneTimer = KoopaObject.PLAYER_IMMUNE_TIME) : 0x0 >= this.immuneTimer && _0x2665f3.damage(this));
+    this.dead || this.garbage || (this.state === Koopa2Object.STATE.SHELL || this.state === Koopa2Object.STATE.TRANSFORM ? (_0x2665f3 = 0x0 < _0x2665f3.pos.x - this.pos.x, this.stomped(_0x2665f3, _0x2665f3.pid), this.game.out.push(NET020.encode(this.level, this.zone, this.oid, _0x2665f3 ? 0x10 : 0x11)), this.immuneTimer = KoopaObject.PLAYER_IMMUNE_TIME) : 0x0 >= this.immuneTimer && _0x2665f3.damage(this));
 };
 Koopa2Object.prototype.playerStomp = KoopaObject.prototype.playerStomp;
 Koopa2Object.prototype.playerBump = KoopaObject.prototype.playerBump;
@@ -6499,6 +6643,9 @@ SpawnerObject.prototype.fire = function () {
         if (obj.dir) obj.dir = this.shootDirection;
         if (obj.direction) obj.direction = this.shootDirection;
     };
+    if (obj.enable) {
+        obj.enable();
+    }
     this.disable();
     this.proxHit = false;
 };
@@ -7120,6 +7267,7 @@ function AxeObject(game, level, zone, pos, oid) {
     this.sprite = this.state.SPRITE[0x0];
     this.used = false;
     this.dim = vec2.make(0x1, 0x3);
+    this.riseDim = vec2.make(0x1, 0.9);
 }
 AxeObject.ASYNC = true;
 AxeObject.ID = 0x55;
@@ -7728,6 +7876,30 @@ Resource.prototype.loadTexture = function (res) {
     } else if (app.overrideObjImg && res.id == "obj") {
         texture.cache[res.id] = app.overrideObjImg;
         return;
+    } else if (app.accessibilityMode && res.id == "map" && res.src.includes("special_")) {
+        this.pendingTexture.push(res.id);
+        var img = new Image();
+        var that = this;
+        img.onload = function () {
+            texture.cache[res.id] = img;
+            texture.load--
+            that.pendingTexture = that.pendingTexture.filter(x => x != res.id);
+        };
+        img.src = ASSETS_URL + "img/game/smb_map_new.png?v=" + VERSION;
+        texture.load++;
+        return;
+    } else if (app.accessibilityMode && res.id == "obj" && res.src.includes("special")) {
+        this.pendingTexture.push(res.id);
+        var img = new Image();
+        var that = this;
+        img.onload = function () {
+            texture.cache[res.id] = img;
+            texture.load--
+            that.pendingTexture = that.pendingTexture.filter(x => x != res.id);
+        };
+        img.src = ASSETS_URL + "img/game/smb_obj.png?v=" + VERSION;
+        texture.load++;
+        return;
     }
     if (!texture.cache[res.id] && !this.pendingTexture.includes(res.id)) {
         this.pendingTexture.push(res.id);
@@ -7928,6 +8100,8 @@ function Audio(app) {
 }
 Audio.FALLOFF_MIN = 0x1;
 Audio.FALLOFF_MAX = 0x18;
+Audio.MUSIC_VOLUME = 0.5;
+Audio.EFFECT_VOLUME = 0.75;
 
 Audio.prototype.setCustomSoundPrefix = function (val) {
     this.customSoundPrefix = val;
@@ -7962,17 +8136,17 @@ Audio.prototype.initWebAudio = function (app) {
     for (var i = 0x0; i < musicList.length; i++)
         if (!this.createAudio(musicList[i], this.musicPrefix)) return false;
     this.masterVolume = this.context.createGain();
-    this.masterVolume.gain.value = 0x1;
+    this.masterVolume.gain.value = Audio.MUSIC_VOLUME;
     this.masterVolume.connect(this.context.destination);
     this.effectVolume = this.context.createGain();
-    this.effectVolume.gain.value = 0x1;
+    this.effectVolume.gain.value = Audio.EFFECT_VOLUME;
     this.effectVolume.connect(this.masterVolume);
     this.musicVolume = this.context.createGain();
-    this.musicVolume.gain.value = 0x1;
+    this.musicVolume.gain.value = Audio.MUSIC_VOLUME;
     this.musicVolume.connect(this.masterVolume);
-    this.masterVolume.gain.value = 0.5;
-    this.effectVolume.gain.value = app.settings.muteSound ? 0x0 : 0.75;
-    this.musicVolume.gain.value = app.settings.muteMusic ? 0x0 : 0.5;
+    this.masterVolume.gain.value = Audio.MUSIC_VOLUME;
+    this.effectVolume.gain.value = app.settings.muteSound ? 0x0 : Audio.EFFECT_VOLUME;
+    this.musicVolume.gain.value = app.settings.muteMusic ? 0x0 : Audio.MUSIC_VOLUME;
     this.context.listener.setPosition(0x0, 0x0, 0x0);
     this.context.listener.setOrientation(0x1, 0x0, 0x0, 0x0, 0x1, 0x0);
     return true;
@@ -7989,8 +8163,8 @@ Audio.prototype.update = function () {
 };
 Audio.prototype.updateVolume = function () {
     this.masterVolume.gain.value = 0.5;
-    this.effectVolume.gain.value = app.settings.muteSound ? 0x0 : 0.75;
-    this.musicVolume.gain.value = app.settings.muteMusic ? 0x0 : 0.5;
+    this.effectVolume.gain.value = app.settings.muteSound ? 0x0 : Audio.EFFECT_VOLUME;
+    this.musicVolume.gain.value = app.settings.muteMusic ? 0x0 : Audio.MUSIC_VOLUME;
     if (!app.settings.muteSound && !app.settings.muteMusic) {
         for (var _0x1f6806 = app.game.getZone(), _0x1bcd11 = app.game.getPlayer() ? app.game.getPlayer().pos : app.game.display.camera.pos, _0x4531dc = 0x3e7, _0x9aa837 = 0x0; _0x9aa837 < app.game.objects.length; _0x9aa837++) {
             var _0x21a62e = app.game.objects[_0x9aa837];
@@ -7999,7 +8173,7 @@ Audio.prototype.updateVolume = function () {
                 _0x214eed < _0x4531dc && (_0x4531dc = _0x214eed);
             }
         }
-        _0x4531dc < Audio.FALLOFF_MAX && (this.musicVolume.gain.value = 0.5 * Math.max(0x0, Math.min(0x1, Math.pow(_0x214eed / Audio.FALLOFF_MAX, 0x2))));
+        _0x4531dc < Audio.FALLOFF_MAX && (this.musicVolume.gain.value = Audio.MUSIC_VOLUME * Math.max(0x0, Math.min(0x1, Math.pow(_0x214eed / Audio.FALLOFF_MAX, 0x2))));
     }
 };
 Audio.prototype.saveSettings = function () {
@@ -8109,9 +8283,11 @@ function Display(game, container, canvas, resource) {
     this.context = this.canvas.getContext('2d');
     //add default skin
     resource.push({ id: "skin0", src: ASSETS_URL + "img/skins/smb_skin0.png" });
+    //add default map (accessibility mode reasons)
+    resource.push({ id: "map", src: ASSETS_URL + "img/game/smb_map_new.png" });
     //add ui texture
     resource.push({ id: "ui", src: ASSETS_URL + "img/game/smb_ui.png" });
-    // add spectator textures
+    //add spectator textures
     resource.push({ id: "spec_ui", src: ASSETS_URL + "img/game/spec_ui.png" });
     resource.push({ id: "spec_left", src: ASSETS_URL + "img/game/spec_left.png" });
     resource.push({ id: "spec_right", src: ASSETS_URL + "img/game/spec_right.png" });
@@ -8589,6 +8765,7 @@ function World(game, data) {
     this.levels = [];
     this.minZoom = 0x8;
     this.maxZoom = 0x1;
+    this.checkpoint = null;
     for (var i = 0x0; i < data.world.length; i++) this.levels.push(new Level(game, data.world[i]));
 }
 World.prototype.step = function () {
@@ -9065,6 +9242,53 @@ Game.prototype.getAlivePlayers = function () {
     return queue;
 };
 
+Game.prototype.changeTabLobby = function () {
+    let glbtn = document.getElementById("lobbyBtn");
+    let sqbtn = document.getElementById("squadBtn");
+    let glmsg = document.getElementById("messagesGlobal");
+    let sqmsg = document.getElementById("messagesSquad");
+
+    sqbtn.style.border = "";
+    sqmsg.style.display = "none";
+
+    glbtn.style.border = "2px solid white";
+    glmsg.style.display = "";
+    app.global = 1;
+};
+
+Game.prototype.changeTabSquad = function () {
+    let glbtn = document.getElementById("lobbyBtn");
+    let sqbtn = document.getElementById("squadBtn");
+    let glmsg = document.getElementById("messagesGlobal");
+    let sqmsg = document.getElementById("messagesSquad");
+
+    glbtn.style.border = "";
+    glmsg.style.display = "none";
+
+    sqbtn.style.border = "2px solid white";
+    sqmsg.style.display = "";
+    app.global = 0;
+};
+
+Game.prototype.handleKeyPress = function (evt) {
+    var chat = document.getElementById("chat-input");
+    switch (evt.keyCode) {
+        case 0xd : {
+            this.sendMessage(chat.value);
+            break;
+        }
+    }
+};
+
+Game.prototype.sendMessage = function (data) {
+    app.net.send({
+        "type": "gsm",
+        "message": data,
+        "global": app.global //(document.getElementById("lobbyBtn").style["text-decoration"] === 'underline')
+    });
+    document.getElementById("chat-input").value = "";
+};
+
 Game.prototype.specPrevious = function () {
     let players = this.getAlivePlayers();
     let len = players.length;
@@ -9140,7 +9364,8 @@ Game.prototype.gameStartTimer = function (packet) {
 Game.prototype.updateTeam = function () {
     var playerInfo = app.getPlayerInfo(this.pid);
     if (undefined === playerInfo) { return; }
-    if (this.team = playerInfo.team)
+    if (this.team = playerInfo.team) {
+        if (this.team === '') { document.getElementById("squadBtn").style.display = ""; }
         for (var i = 0x0; i < app.players.length; i++) {
             var player = app.players[i];
             if (player.id !== this.pid && (player.team === this.team || player.isDev)) {
@@ -9148,6 +9373,7 @@ Game.prototype.updateTeam = function () {
                 ghost && (ghost.name = player.displayName);
             }
         }
+    }
 };
 
 Game.prototype.handleBinary = function (data) {
@@ -9191,6 +9417,7 @@ Game.prototype.doNET002 = function (n) {
     this.skin = n.skin;
     this.isDev = n.isDev;
     this.isJunior = n.isJunior;
+    this.isMod = n.isMod;
     this.ready = true;
     app.menu.game.show();
 };
@@ -9200,7 +9427,7 @@ Game.prototype.doNET010 = function (n) {
     if (n.pid === this.pid) { return; }
     if (this.getGhost(n.pid))
         return;
-    var obj = this.createObject(PlayerObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid, n.skin, n.isDev, n.isJunior]);
+    var obj = this.createObject(PlayerObject.ID, n.level, n.zone, shor2.decode(n.pos), [n.pid, n.skin, n.isDev, n.isJunior, n.isMod]);
     obj.setState(PlayerObject.SNAME.GHOST);
     obj.name = app.getPlayerInfo(n.pid).name;
     var playerInfo = app.getPlayerInfo(n.pid);
@@ -9572,9 +9799,19 @@ Game.prototype.doStep = function () {
 Game.prototype.doSpawn = function () {
     if (!this.getPlayer()) {
         var zone = this.getZone(),
-            initial = zone.initial;
-        var obj = this.createObject(PlayerObject.ID, zone.level, zone.id, shor2.decode(initial), [this.pid, this.skin, this.isDev, this.isJunior]);
-        this.out.push(NET010.encode(zone.level, zone, initial));
+            initial = zone.initial,
+            checkpoint = this.world.checkpoint;
+        
+        var lev = zone.level;
+        var zon = zone;
+        var pos = initial;
+
+        if (checkpoint) {
+            if (checkpoint.level == zone.level) { lev = checkpoint.level; zon = this.world.getZone(lev, checkpoint.zone); pos = checkpoint.pos; zon.initial = pos; }
+        }
+
+        var obj = this.createObject(PlayerObject.ID, lev, zon.id, shor2.decode(pos), [this.pid, this.skin, this.isDev, this.isJunior, this.isMod]);
+        this.out.push(NET010.encode(lev, zon, pos));
         if (app.net.gameMode === 1 && !(this instanceof LobbyGame) && !(this instanceof JailGame)) {
             obj.tfm(0x2);
             obj.rate = 0x71;
@@ -9709,6 +9946,7 @@ Game.prototype.levelWarp = function (level) {
     this.levelWarpId = level;
     this.levelWarpTimer = Game.LEVEL_WARP_TIME;
     this.getPlayer().hide();
+    this.world.checkpoint = null;
 };
 
 Game.prototype.addCoin = function (jackpot, visual) {
@@ -9805,6 +10043,10 @@ LobbyGame.prototype.doNET030 = Game.prototype.doNET030;
 LobbyGame.prototype.doStart = Game.prototype.doStart;
 LobbyGame.prototype.doDetermine = Game.prototype.doDetermine;
 LobbyGame.prototype.getAlivePlayers = Game.prototype.getAlivePlayers;
+LobbyGame.prototype.changeTabLobby = Game.prototype.changeTabLobby;
+LobbyGame.prototype.changeTabSquad = Game.prototype.changeTabSquad;
+LobbyGame.prototype.handleKeyPress = Game.prototype.handleKeyPress;
+LobbyGame.prototype.sendMessage = Game.prototype.sendMessage;
 LobbyGame.prototype.specPrevious = Game.prototype.specPrevious;
 LobbyGame.prototype.specNext = Game.prototype.specNext;
 LobbyGame.prototype.doInput = Game.prototype.doInput;
@@ -9911,11 +10153,15 @@ function App() {
 
     this.session = Cookies.get("session");
 
+    this.chatHidden = Cookies.get("hide_chat") === "1";
+    this.global = 1;
+
     this.audioElement = document.createElement('audio');
     this.audioElement.setAttribute('src', MENU_MUSIC_URL);
     this.audioElement.load;
     this.audioElement.volume = 0.2;
     this.audioElement.loop = true;
+    this.audioElement = undefined;
 
     this.hurryingUp = false;
     this.hurryUpStart = null;
@@ -9925,6 +10171,7 @@ function App() {
     this.overrideObjImg = "overrideObjImg" in localStorage ? makeImageFromData(localStorage["overrideObjImg"]) : undefined;
     this.autoMove = Cookies.get("autoMove") === "true";
     this.compactMode = Cookies.get("compactMode") === "true";
+    this.accessibilityMode = Cookies.get("accessibilityMode") === "true";
     this.settings = {};
     this.settings.muteMusic = 0x1 === parseInt(Cookies.get("music"));
     this.settings.muteSound = 0x1 === parseInt(Cookies.get("sound"));
@@ -9933,19 +10180,26 @@ function App() {
     this.settings.showSettings = false;
     this.audio = new Audio(this);
     this.players = [];
-    if (0x1 !== parseInt(Cookies.get("music")))
-        this.audioElement.play();
+    //if (0x1 !== parseInt(Cookies.get("music")))
+        //this.audioElement.play();
     this.statusUpdater = null;
     this.charMusic = Cookies.get("char_music") === "1";
 }
+App.prototype.mobileCheck = function () {
+    let check = false;
+    (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||window.opera);
+    return check;
+};
 App.prototype.init = function () {
     document.getElementById("log").style.display = "none";
     document.getElementById("link-patch").style.display = "";
     document.getElementById("main-number").style.display = "";
-    if (!this.goToLobby || this.inviteCode === null)
-        this.menu.disclaim.show();
+    if (!this.goToLobby || this.inviteCode === null) {
+        var check = this.mobileCheck();
+        check ? this.menu.disclaim.show() : this.menu.disclaim.show();
+    }
     var that = this;
-    setTimeout(function () {
+    /*setTimeout(function () {
         that.menu.load.show();
 
         if (that.goToLobby && that.session === undefined) {
@@ -9960,11 +10214,12 @@ App.prototype.init = function () {
         }
 
         that.menu.main.show();
-    }, this.goToLobby || this.inviteCode !== null ? 100 : DISCLAIMER_SCREEN_TIMEOUT);
+    }, this.goToLobby || this.inviteCode !== null ? 100 : DISCLAIMER_SCREEN_TIMEOUT);*/
 };
 App.prototype.load = function (data) {
     app.menu.name.setAutoMove(app.autoMove);
     app.menu.name.setCompactMode(app.compactMode);
+    app.menu.name.setAccessibilityMode(app.accessibilityMode);
     if (this.game instanceof Game) this.menu.error.show("State error. Game already loaded.");
     else switch (this.game instanceof LobbyGame && this.game.destroy(), data.type) {
         case "game":
@@ -9979,6 +10234,41 @@ App.prototype.load = function (data) {
             break;
         default:
             this.menu.error.show("Critical error! Game file missing type!");
+    }
+
+    if (this.game instanceof Game || this.game instanceof LobbyGame) {
+        let chat = document.getElementById("gameChat");
+        let hidechat = document.getElementById("hiddenChat");
+        let sqdbtn = document.getElementById("squadBtn");
+        
+        if (!app.net.username) {
+            let input = document.getElementById("chat-input");
+            input.disabled = true;
+            input.value = "Register to use chat"
+            //input.value = "text communication is not available for this account"
+            input.style.color = "#FFFFFFAA";
+        }
+
+        app.chatHidden ? hidechat.style.display = "" : chat.style.display = "";
+        document.getElementById("chat-input").onkeyup = (evt) => this.game.handleKeyPress(evt);
+
+        document.getElementById("hideChat").onclick = () => {
+            chat.style.display = "none";
+            hidechat.style.display = "";
+            app.chatHidden = true;
+            Cookies.set("hide_chat", "1", { "expires": 0x1e });
+        };
+
+        hidechat.onclick = () => {
+            hidechat.style.display = "none";
+            chat.style.display = "";
+            app.chatHidden = false;
+            Cookies.set("hide_chat", "0", { "expires": 0x1e });
+        };
+        
+        if (this.game.team === '') { sqdBtn.style.display = ""; }
+        document.getElementById("lobbyBtn").onclick = () => this.game.changeTabLobby();
+        document.getElementById("squadBtn").onclick = () => this.game.changeTabSquad();
     }
 };
 App.prototype.ingame = function () {
@@ -10029,7 +10319,7 @@ App.prototype.hurryUp = function (data) {
     }
 };
 function getPlayerDisplayName(player) {
-    return (player.isDev ? "[DEV]" : "") + (player.isGuest ? "[G]" : "") + player.name;
+    return (player.isDev ? "[DEV]" : "") + (player.isGuest ? "[G]" : "") + (player.isMod ? "[MOD]" : "") + player.name;
 }
 function isLink(string) {
     let url;

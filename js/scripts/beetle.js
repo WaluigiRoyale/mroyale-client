@@ -15,6 +15,7 @@ function BeetleObject(game, level, zone, pos, oid) {
     this.immuneTimer = 0x0;
     this.rev = false;
     this.dir = true;
+    this.kicker = -1;
     this.disable();
 }
 BeetleObject.ASYNC = false;
@@ -172,15 +173,15 @@ BeetleObject.prototype.damage = function(obj) {
 BeetleObject.prototype.bonk = function () {
     this.dead || (this.setState(BeetleObject.STATE.BONK), this.moveSpeed = KoopaObject.BONK_IMP.x, this.fallSpeed = KoopaObject.BONK_IMP.y, this.dead = true, this.play("kick.mp3", 0x1, 0.04));
 };
-BeetleObject.prototype.stomped = function (_0x2f1cbf) {
+BeetleObject.prototype.stomped = function (dir, kicker) {
     if (this.state === BeetleObject.STATE.FLY) this.setState(BeetleObject.STATE.RUN);
     else if (this.state === BeetleObject.STATE.RUN) this.setState(BeetleObject.STATE.SHELL), this.transformTimer = KoopaObject.TRANSFORM_TIME;
     else if (this.state === BeetleObject.STATE.SPIN) this.setState(BeetleObject.STATE.SHELL), this.transformTimer = KoopaObject.TRANSFORM_TIME;
-    else if (this.state === BeetleObject.STATE.SHELL || this.state === BeetleObject.STATE.TRANSFORM) this.setState(BeetleObject.STATE.SPIN), this.dir = _0x2f1cbf;
+    else if (this.state === BeetleObject.STATE.SHELL || this.state === BeetleObject.STATE.TRANSFORM) this.setState(BeetleObject.STATE.SPIN), this.dir = dir, this.kicker = kicker;
     this.state === BeetleObject.STATE.SPIN ? this.play("kick.mp3", 0x1, 0.04) : this.play("stomp.mp3", 0x1, 0.04);
 };
 BeetleObject.prototype.playerCollide = function (_0x2665f3) {
-    this.dead || this.garbage || (this.state === BeetleObject.STATE.SHELL || this.state === BeetleObject.STATE.TRANSFORM ? (_0x2665f3 = 0x0 < _0x2665f3.pos.x - this.pos.x, this.stomped(_0x2665f3), this.game.out.push(NET020.encode(this.level, this.zone, this.oid, _0x2665f3 ? 0x10 : 0x11)), this.immuneTimer = KoopaObject.PLAYER_IMMUNE_TIME) : 0x0 >= this.immuneTimer && _0x2665f3.damage(this));
+    this.dead || this.garbage || (this.state === BeetleObject.STATE.SHELL || this.state === BeetleObject.STATE.TRANSFORM ? (_0x2665f3 = 0x0 < _0x2665f3.pos.x - this.pos.x, this.stomped(_0x2665f3, _0x2665f3.pid), this.game.out.push(NET020.encode(this.level, this.zone, this.oid, _0x2665f3 ? 0x10 : 0x11)), this.immuneTimer = KoopaObject.PLAYER_IMMUNE_TIME) : 0x0 >= this.immuneTimer && _0x2665f3.damage(this));
 };
 BeetleObject.prototype.playerStomp = KoopaObject.prototype.playerStomp;
 BeetleObject.prototype.playerBump = KoopaObject.prototype.playerBump;

@@ -97,8 +97,7 @@ FireballObject.prototype.physics = function() {
       var tile = hit[i];
 
       if (tile.definition.ICE) {
-        tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.FIREBALL);
-        this.kill();
+        tile.definition.TRIGGER(this.game, this.pid, tile, this.level, this.zone, tile.pos.x, tile.pos.y, td32.TRIGGER.TYPE.FIREBALL, this);
       }
 
       if(!squar.intersection(tile.pos, tdim, mvx, this.dim) || tile.definition.HIDDEN) { continue; }
@@ -146,7 +145,7 @@ FireballObject.prototype.interaction = function() {
         var _0x1f6129 = this.game.objects[_0x51d7a3];
         if (_0x1f6129 !== this && _0x1f6129.pid !== this.owner && _0x1f6129.isTangible() && (!(_0x1f6129 instanceof PlayerObject) || app.net.gameMode === 1) && _0x1f6129.damage && _0x1f6129.level === this.level && _0x1f6129.zone === this.zone && squar.intersection(_0x1f6129.pos, _0x1f6129.dim, this.pos, this.dim)) {
             (app.net.gameMode !== 1 ? this.owner === this.game.pid : (_0x1f6129 instanceof PlayerObject ? _0x1f6129.pid == this.game.pid : this.owner === this.game.pid)) && _0x1f6129.damage(this);
-            if (app.net.gameMode === 1 && _0x1f6129 instanceof PlayerObject && _0x1f6129.pid == this.game.pid && _0x1f6129.dead) this.game.out.push(NET017.encode(this.owner));
+            if (app.net.gameMode === 1 && _0x1f6129 instanceof PlayerObject && _0x1f6129.pid == this.game.pid && _0x1f6129.dead) this.game.out.push(NET017.encode(this.owner, 0x2));
             this.kill();
             break;
         }

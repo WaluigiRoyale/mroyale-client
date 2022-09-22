@@ -31,6 +31,7 @@ var tileDefs = {
     25: {'name': 'ITEM BLOCK INFINITE', 'extraDataName': 'Content', 'extraDataType': 'objId'},
     30: {'name': 'LOCK X AXIS CAMERA'},
     31: {'name': 'UNLOCK X AXIS CAMERA'},
+    40: {'name': 'CHECKPOINT BETA'},
     81: {'name': 'WARP TILE', 'extraDataName': 'Target Warp ID'},
     82: {'name': 'WARP PIPE SLOW', 'extraDataName': 'Target Warp ID'},
     83: {'name': 'WARP PIPE RIGHT SLOW', 'extraDataName': 'Target Warp ID'},
@@ -46,8 +47,7 @@ var tileDefs = {
     92: {'name': 'WARP PIPE UP FAST', 'extraDataName': 'Target Warp ID'},
     160:{'name': 'FLAGPOLE', 'extraDataName': 'Award (0=None/1=Coins/2=1UP)'},
     165:{'name': 'VINE'},
-    240:{'name': 'VOTE BLOCK'},
-    241:{'name': 'SOUND BLOCK', 'extraDataName': 'SFX Name'}
+    240:{'name': 'VOTE BLOCK'}
 };
 
 var objDefs = {
